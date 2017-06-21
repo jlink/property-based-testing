@@ -1,0 +1,50 @@
+# For Haskell
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+out/
+cabal.config
+
+# Gradle
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Eclipse
+.classpath
+.settings/
+.project
+bin/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+*.uml
+.idea/
+.ideaHaskellLib
+
+# Jqwik
+.jqwik*
+
+# Misc
+*.log
+*.graphml
