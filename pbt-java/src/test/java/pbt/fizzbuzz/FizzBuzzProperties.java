@@ -8,4 +8,5 @@ class FizzBuzzProperties {
 	boolean failForAStart() {
 		return false;
 	}
+
 }
