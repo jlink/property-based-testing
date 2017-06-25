@@ -1,6 +1,7 @@
 module Main where
 
-import ScoreboardApp
+--import ScoreboardApp
 
 main :: IO ()
-main = ScoreboardApp.run
+main = putStrLn "Doing nothing..."
+--main = ScoreboardApp.run
