@@ -39,7 +39,8 @@ junitPlatform {
 		engines {
 			exclude 'junit-jupiter'
 		}
-		// includeClassNamePattern '.*Test'
+		includeClassNamePattern '.*Properties'
+		includeClassNamePatterns '.*Test', '.*Tests'
 	}
 	enableStandardTestTask true
 }
