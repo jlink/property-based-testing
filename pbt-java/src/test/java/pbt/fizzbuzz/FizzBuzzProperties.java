@@ -12,7 +12,7 @@ class FizzBuzzProperties {
 
 	@Generate
 	Arbitrary<Integer> divisibleBy3() {
-		return Generator.integer(1, 100).filter(i -> i % 3 == 0);
+		return Generator.integer(1, 33).map(i -> i * 3);
 	}
 
 	@Property
