@@ -29,7 +29,7 @@ test-suite scoreboard-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  other-modules:       ReverseSpec
+  other-modules:       ReverseSpec, FizzBuzzSpec
   -- other-modules:       IoSampleSpec, QuickCheckSpec
   build-depends:       base
                      , pbt-examples

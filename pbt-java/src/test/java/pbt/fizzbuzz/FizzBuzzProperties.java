@@ -16,13 +16,9 @@ class FizzBuzzProperties {
 	}
 
 	@Property
-	boolean divisibleBy5ContainsBuzz(@ForAll("divisibleBy5") int anInt) {
+	boolean divisibleBy5ContainsBuzz(@ForAll @IntRange(min = 1, max = 100) int anInt) {
+		Assume.that(anInt % 5 == 0);
 		return fizzBuzz(anInt).contains("Buzz");
-	}
-
-	@Generate
-	Arbitrary<Integer> divisibleBy5() {
-		return Generator.integer(1, 100).filter(i -> i % 5 == 0);
 	}
 
 	@Property
