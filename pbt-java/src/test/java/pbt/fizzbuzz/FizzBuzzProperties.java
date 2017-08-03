@@ -22,7 +22,7 @@ class FizzBuzzProperties {
 	}
 
 	@Property
-	boolean undivisiblesReturnThemselves(@ForAll("notDivisible") int anInt) {
+	boolean indivisiblesReturnThemselves(@ForAll("notDivisible") int anInt) {
 		return fizzBuzz(anInt).equals(Integer.toString(anInt));
 	}
 
