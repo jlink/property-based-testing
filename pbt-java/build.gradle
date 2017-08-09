@@ -4,7 +4,7 @@ buildscript {
 		//maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 	}
 	dependencies {
-		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-M4'
+		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-RC2'
 	}
 }
 
@@ -14,9 +14,9 @@ repositories {
 	maven { url "https://jitpack.io" }
 }
 
-ext.junitPlatformVersion = '1.0.0-M4'
-ext.junitJupiterVersion = '5.0.0-M4'
-ext.jqwikVersion = '0.4.3'
+ext.junitPlatformVersion = '1.0.0-RC2'
+ext.junitJupiterVersion = '5.0.0-RC2'
+ext.jqwikVersion = '0.4.4'
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -34,7 +34,7 @@ compileTestJava {
 }
 
 junitPlatform {
-	// platformVersion '1.0.0-M4'
+	// platformVersion '1.0.0-RC2'
 	filters {
 		engines {
 			exclude 'junit-jupiter'
@@ -57,7 +57,7 @@ dependencies {
 	testCompile("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 
 	// Only necessary to enable IntelliJ support
-	testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0-M4")
+	testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0-RC2")
 
 }
 
