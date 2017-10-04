@@ -8,5 +8,5 @@
 
 ## Java
 
-- Run all tests: `gradle test`
+- Run all tests: `./gradlew test`
 - Start app: `java -cp build/classes/main/ ?`
