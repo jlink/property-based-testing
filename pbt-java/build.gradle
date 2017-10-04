@@ -4,7 +4,7 @@ buildscript {
 		//maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 	}
 	dependencies {
-		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-RC2'
+		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.1'
 	}
 }
 
@@ -14,9 +14,9 @@ repositories {
 	maven { url "https://jitpack.io" }
 }
 
-ext.junitPlatformVersion = '1.0.0-RC2'
-ext.junitJupiterVersion = '5.0.0-RC2'
-ext.jqwikVersion = '0.4.4'
+ext.junitPlatformVersion = '1.0.1'
+ext.junitJupiterVersion = '5.0.1'
+ext.jqwikVersion = '0.5.0'
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -34,34 +34,33 @@ compileTestJava {
 }
 
 junitPlatform {
-	// platformVersion '1.0.0-RC2'
 	filters {
 		engines {
 			exclude 'junit-jupiter'
 		}
 		includeClassNamePattern '.*Properties'
-		includeClassNamePatterns '.*Test', '.*Tests'
+		includeClassNamePattern '.*Tests?'
 	}
 	enableStandardTestTask true
 }
 
 dependencies {
-	compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.0.6'
+	compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.4'
 
 	compile("org.junit.platform:junit-platform-engine:${junitPlatformVersion}")
 	compile("org.junit.platform:junit-platform-commons:${junitPlatformVersion}")
 
 	testCompile("org.mockito:mockito-core:2.10.0")
-	testCompile("org.assertj:assertj-core:3.6.2")
+	testCompile("org.assertj:assertj-core:3.8.0")
 	testCompile "com.github.jlink:jqwik:${jqwikVersion}"
 	testCompile("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 
 	// Only necessary to enable IntelliJ support
-	testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0-RC2")
+	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 
 }
 
 task wrapper(type: Wrapper) {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '3.2.1'
+	gradleVersion = '4.2.1'
 }

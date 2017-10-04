@@ -48,3 +48,6 @@ bin/
 # Misc
 *.log
 *.graphml
+
+# Mac
+.DS_Store
