@@ -5,6 +5,7 @@ import net.jqwik.properties.*;
 import org.assertj.core.api.*;
 
 import java.util.*;
+import java.util.stream.*;
 
 class Roman2DecimalProperties {
 
@@ -29,6 +30,45 @@ class Roman2DecimalProperties {
 		}
 	}
 
+	@Group
+	class Additions {
+
+		@Example
+		boolean vi() {
+			return roman2decimal("vi") == 6;
+		}
+
+		@Property
+		boolean addingAnyTwoLettersReturnsSumOfBaseValues(
+				@ForAll("validRomanNumeralLetter") char letter1, //
+				@ForAll("validRomanNumeralLetter") char letter2
+		) {
+			int baseValue1 = roman2decimal(letter1);
+			int baseValue2 = roman2decimal(letter2);
+			Assume.that(baseValue1 >= baseValue2);
+
+			return roman2decimal("" + letter1 + letter2) == baseValue1 + baseValue2;
+		}
+
+		@Property
+		boolean addingAnyDescendingListOfLettersReturnsSumOfBaseValues(
+				@ForAll("validRomanNumeralLetter") List<Character> letters
+		) {
+			Assume.that(letters.size() > 0);
+			String romanNumber = letters.stream() //
+					.sorted(Comparator.comparingInt(c -> -roman2decimal(c)))
+					.map(c -> Character.toString(c))
+					.collect(Collectors.joining(""));
+
+			int expectedSum = letters.stream()
+					.mapToInt(c -> roman2decimal(c))
+					.sum();
+
+			return roman2decimal(romanNumber) == expectedSum;
+		}
+
+	}
+
 
 	@Property(tries = 100)
 	boolean anyValidLetterIsGreaterThanZero(@ForAll("validRomanNumeralLetter") char letter) {
@@ -49,34 +89,6 @@ class Roman2DecimalProperties {
 		Assertions.assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			roman2decimal(letter);
 		});
-	}
-
-	@Example
-	boolean vi() {
-		return roman2decimal("vi") == 6;
-	}
-
-	@Property
-	boolean addingAnyTwoLettersReturnsSumOfBaseValues(
-			@ForAll("validRomanNumeralLetter") char letter1, //
-			@ForAll("validRomanNumeralLetter") char letter2
-	) {
-		int baseValue1 = roman2decimal(letter1);
-		int baseValue2 = roman2decimal(letter2);
-		Assume.that(baseValue1 >= baseValue2);
-
-		return roman2decimal("" + letter1 + letter2) == baseValue1 + baseValue2;
-	}
-
-	@Property
-	boolean addingAnySortedListOfLettersReturnsSumOfBaseValues(
-			@ForAll("validRomanNumeralLetter") List<Character> letters
-	) {
-		Assume.that(letters.size() > 0);
-		// TODO: Not done yet
-		String romanNumber = "xx";
-		//String romanNumber = letters.stream().collect(Collectors.joining(""))
-		return roman2decimal(romanNumber) == 42;
 	}
 
 	@Generate
