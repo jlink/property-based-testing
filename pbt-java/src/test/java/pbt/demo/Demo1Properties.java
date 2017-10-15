@@ -34,6 +34,6 @@ class Demo1Properties {
 		@ForAll int positive2
 	) {
 		int sum = positive1 + positive2;
-		return sum >= positive1 && sum >= positive2;
+		return sum > positive1 && sum > positive2;
 	}
 }
