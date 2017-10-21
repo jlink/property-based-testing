@@ -1,4 +1,4 @@
-package pbt.demo;
+package pbt.demos;
 
 import static java.util.Collections.*;
 

@@ -1,4 +1,4 @@
-package pbt.demo;
+package pbt.demos;
 
 import net.jqwik.api.*;
 import net.jqwik.properties.*;
