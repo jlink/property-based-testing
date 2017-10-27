@@ -40,6 +40,7 @@ junitPlatform {
 		}
 		includeClassNamePattern '.*Properties'
 		includeClassNamePattern '.*Tests?'
+		includeClassNamePattern '.*Examples?'
 	}
 	enableStandardTestTask true
 }
