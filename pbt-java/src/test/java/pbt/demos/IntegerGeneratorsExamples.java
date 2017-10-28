@@ -1,7 +1,7 @@
 package pbt.demos;
 
 import net.jqwik.api.*;
-import net.jqwik.properties.Arbitrary;
+import net.jqwik.api.constraints.IntRange;
 
 class IntegerGeneratorsExamples {
 
@@ -19,9 +19,9 @@ class IntegerGeneratorsExamples {
 		return factorial(anInt) < Integer.MAX_VALUE;
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Integer> upTo10001() {
-		return Generator.integer(0, 10001);
+		return Arbitraries.integer(0, 10001);
 	}
 
 	@Property
@@ -29,14 +29,14 @@ class IntegerGeneratorsExamples {
 		return anInt % 2 == 0;
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Integer> even() {
-		return Generator.integer().filter(i -> i % 2 == 0);
+		return Arbitraries.integer().filter(i -> i % 2 == 0);
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Integer> evenUpTo10000() {
-		return Generator.integer(1, 10000).filter(i -> i % 2 == 0);
+		return Arbitraries.integer(1, 10000).filter(i -> i % 2 == 0);
 	}
 
 }

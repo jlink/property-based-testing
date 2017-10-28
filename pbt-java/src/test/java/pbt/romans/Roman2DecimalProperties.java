@@ -1,15 +1,14 @@
 package pbt.romans;
 
-import net.jqwik.api.*;
-import net.jqwik.properties.*;
-import org.assertj.core.api.*;
-
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Collectors;
+
+import net.jqwik.api.*;
+import org.assertj.core.api.Assertions;
 
 class Roman2DecimalProperties {
 
-	private static final Character[] ROMAN_NUMERAL_LETTERS = new Character[]{'i', 'v','x'};
+	private static final Character[] ROMAN_NUMERAL_LETTERS = new Character[]{'i', 'v', 'x'};
 
 	@Group
 	class BaseValues {
@@ -56,13 +55,9 @@ class Roman2DecimalProperties {
 		) {
 			Assume.that(letters.size() > 0);
 			String romanNumber = letters.stream() //
-					.sorted(Comparator.comparingInt(c -> -roman2decimal(c)))
-					.map(c -> Character.toString(c))
-					.collect(Collectors.joining(""));
+					.sorted(Comparator.comparingInt(c -> -roman2decimal(c))).map(c -> Character.toString(c)).collect(Collectors.joining(""));
 
-			int expectedSum = letters.stream()
-					.mapToInt(c -> roman2decimal(c))
-					.sum();
+			int expectedSum = letters.stream().mapToInt(c -> roman2decimal(c)).sum();
 
 			return roman2decimal(romanNumber) == expectedSum;
 		}
@@ -77,11 +72,10 @@ class Roman2DecimalProperties {
 
 	@Property(tries = 100)
 	boolean anyTwoDifferentLettersHaveDifferentValue(
-			@ForAll("validRomanNumeralLetter") char letter1,
-			@ForAll("validRomanNumeralLetter") char letter2
+			@ForAll("validRomanNumeralLetter") char letter1, @ForAll("validRomanNumeralLetter") char letter2
 	) {
 		Assume.that(letter1 != letter2);
-		return roman2decimal(letter1) !=  roman2decimal(letter2);
+		return roman2decimal(letter1) != roman2decimal(letter2);
 	}
 
 	@Property(tries = 100)
@@ -91,15 +85,15 @@ class Roman2DecimalProperties {
 		});
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Character> validRomanNumeralLetter() {
-		return Generator.of(ROMAN_NUMERAL_LETTERS);
+		return Arbitraries.of(ROMAN_NUMERAL_LETTERS);
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Character> nonValidRomanNumeralLetter() {
 		// TODO: Replace with any char but filtered out ROMAN_NUMERAL_LETTERS
-		return Generator.of('a', 'b', 'e', 'f');
+		return Arbitraries.of('a', 'b', 'e', 'f');
 	}
 
 	private int roman2decimal(char letter) {

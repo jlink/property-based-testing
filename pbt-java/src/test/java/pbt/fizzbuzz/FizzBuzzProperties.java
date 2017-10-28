@@ -1,7 +1,7 @@
 package pbt.fizzbuzz;
 
 import net.jqwik.api.*;
-import net.jqwik.properties.*;
+import net.jqwik.api.constraints.IntRange;
 
 class FizzBuzzProperties {
 
@@ -10,9 +10,9 @@ class FizzBuzzProperties {
 		return fizzBuzz(anInt).contains("Fizz");
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Integer> divisibleBy3() {
-		return Generator.integer(1, 33).map(i -> i * 3);
+		return Arbitraries.integer(1, 33).map(i -> i * 3);
 	}
 
 	@Property
@@ -26,15 +26,14 @@ class FizzBuzzProperties {
 		return fizzBuzz(anInt).equals(Integer.toString(anInt));
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Integer> notDivisible() {
-		return Generator.integer(1, 100) //
+		return Arbitraries.integer(1, 100) //
 				.filter(i -> i % 3 != 0 && i % 5 != 0);
 	}
 
 	private String fizzBuzz(int anInt) {
-		if (anInt % 3 == 0)
-			return "Fizz";
+		if (anInt % 3 == 0) return "Fizz";
 		return Integer.toString(anInt);
 	}
 

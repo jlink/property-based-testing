@@ -1,7 +1,6 @@
 package pbt.demos;
 
 import net.jqwik.api.*;
-import net.jqwik.properties.*;
 
 class PersonGeneratorExamples {
 
@@ -10,11 +9,11 @@ class PersonGeneratorExamples {
 		return aPerson.fullName().length() > 0;
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Person> validPerson() {
-		Arbitrary<String> firstName = Generator.string('a', 'z', 10);
-		Arbitrary<String> lastName = Generator.string('a', 'z', 20);
-		return Generator.combine(firstName, lastName).as((first, last) -> new Person(first, last));
+		Arbitrary<String> firstName = Arbitraries.string('a', 'z', 10);
+		Arbitrary<String> lastName = Arbitraries.string('a', 'z', 20);
+		return Combinators.combine(firstName, lastName).as((first, last) -> new Person(first, last));
 	}
 
 	static class Person {

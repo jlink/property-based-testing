@@ -1,7 +1,7 @@
 package pbt.demos;
 
 import net.jqwik.api.*;
-import net.jqwik.properties.*;
+import net.jqwik.api.constraints.DoubleRange;
 import org.assertj.core.api.Assertions;
 
 import static org.assertj.core.data.Percentage.*;
@@ -29,7 +29,7 @@ class ConstrainingValuesProperties {
 		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
 	}
 
-	@Generate
+	@Provide
 	Arbitrary<Double> positiveDouble() {
 		return Arbitraries.doubles().filter(aDouble -> aDouble > 0);
 	}
