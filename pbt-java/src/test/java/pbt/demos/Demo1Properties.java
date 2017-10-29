@@ -1,17 +1,23 @@
 package pbt.demos;
 
-import static java.util.Collections.*;
-
 import java.util.*;
 
 import net.jqwik.api.*;
-import org.assertj.core.api.Assertions;
+
+import static java.util.Collections.*;
+import static org.assertj.core.api.Assertions.*;
 
 class Demo1Properties {
 
+	@Example
+	void reverseList() {
+		List<Integer> aList = Arrays.asList(1, 2, 3);
+		reverse(aList);
+		assertThat(aList).containsExactly(3, 2, 1);
+	}
+
 	@Property
 	boolean reverseTwiceIsOriginal(@ForAll List<Integer> aList) {
-		// System.out.println(aList);
 		List<Integer> copy = new ArrayList<>(aList);
 		reverse(copy);
 		reverse(copy);
@@ -20,7 +26,7 @@ class Demo1Properties {
 
 	@Property
 	void lengthOfStringAlwaysPositive(@ForAll String aString) {
-		Assertions.assertThat(aString.length()).isGreaterThanOrEqualTo(0);
+		assertThat(aString.length()).isGreaterThanOrEqualTo(0);
 	}
 
 	@Property

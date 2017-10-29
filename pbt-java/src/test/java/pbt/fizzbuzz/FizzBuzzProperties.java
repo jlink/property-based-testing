@@ -32,8 +32,17 @@ class FizzBuzzProperties {
 				.filter(i -> i % 3 != 0 && i % 5 != 0);
 	}
 
+	@Property(maxDiscardRatio = 20)
+	boolean divisibleBy3and5ReturnFizzBuzz(@ForAll @IntRange(min = 1, max = 100) int anInt) {
+		Assume.that(anInt % 3 == 0);
+		Assume.that(anInt % 5 == 0);
+		return fizzBuzz(anInt).equals("FizzBuzz");
+	}
+
 	private String fizzBuzz(int anInt) {
+		if (anInt % 15 == 0) return "FizzBuzz";
 		if (anInt % 3 == 0) return "Fizz";
+		if (anInt % 5 == 0) return "Buzz";
 		return Integer.toString(anInt);
 	}
 
