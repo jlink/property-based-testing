@@ -4,7 +4,7 @@ import net.jqwik.api.*;
 
 class PersonGeneratorExamples {
 
-	@Property
+	@Property(reporting = ReportingMode.GENERATED)
 	boolean anyValidPersonHasAFullName(@ForAll Person aPerson) {
 		return aPerson.fullName().length() > 0;
 	}
@@ -27,6 +27,11 @@ class PersonGeneratorExamples {
 
 		public String fullName() {
 			return firstName + " " + lastName;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Person(%s:%s)", firstName, lastName);
 		}
 	}
 }
