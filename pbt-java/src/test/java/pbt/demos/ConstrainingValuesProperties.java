@@ -1,7 +1,7 @@
 package pbt.demos;
 
 import net.jqwik.api.*;
-import net.jqwik.api.constraints.DoubleRange;
+import net.jqwik.api.constraints.*;
 import org.assertj.core.api.Assertions;
 
 import static org.assertj.core.data.Percentage.*;
@@ -16,9 +16,7 @@ class ConstrainingValuesProperties {
 	}
 
 	@Property
-	void squareOfRootIsOriginalValue_1(
-			@ForAll @DoubleRange(min = 0, max = Double.MAX_VALUE) double aNumber
-	) {
+	void squareOfRootIsOriginalValue_1(@ForAll @Positive double aNumber) {
 		double sqrt = Math.sqrt(aNumber);
 		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
 	}
