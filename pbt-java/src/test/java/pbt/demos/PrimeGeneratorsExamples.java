@@ -24,7 +24,7 @@ class PrimeGeneratorsExamples {
 
 	@Provide
 	Arbitrary<Integer> primesGenerated() {
-		return Arbitraries.fromGenerator(random -> Shrinkable.unshrinkable(generatePrime(random)));
+		return Arbitraries.randomValue(random -> generatePrime(random));
 	}
 
 	private Integer generatePrime(Random random) {
