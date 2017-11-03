@@ -1,7 +1,10 @@
 package pbt.demos;
 
+import java.util.*;
+
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
+import net.jqwik.properties.Shrinkable;
 
 class IntegerGeneratorsExamples {
 

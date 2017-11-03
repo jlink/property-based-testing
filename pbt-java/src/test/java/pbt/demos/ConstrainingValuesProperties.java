@@ -22,13 +22,13 @@ class ConstrainingValuesProperties {
 	}
 
 	@Property
-	void squareOfRootIsOriginalValue_2(@ForAll("positiveDouble") double aNumber) {
+	void squareOfRootIsOriginalValue_2(@ForAll("positiveDoubles") double aNumber) {
 		double sqrt = Math.sqrt(aNumber);
 		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
 	}
 
 	@Provide
-	Arbitrary<Double> positiveDouble() {
+	Arbitrary<Double> positiveDoubles() {
 		return Arbitraries.doubles().filter(aDouble -> aDouble > 0);
 	}
 
