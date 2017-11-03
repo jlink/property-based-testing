@@ -36,7 +36,7 @@ compileTestJava {
 junitPlatform {
 	filters {
 		engines {
-			exclude 'junit-jupiter'
+			include 'jqwik'
 		}
 		includeClassNamePattern '.*Properties'
 		includeClassNamePattern '.*Tests?'
