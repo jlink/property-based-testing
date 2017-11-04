@@ -1,10 +1,7 @@
 package pbt.demos;
 
-import java.util.*;
-
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
-import net.jqwik.properties.Shrinkable;
 
 class IntegerGeneratorsExamples {
 
@@ -24,7 +21,7 @@ class IntegerGeneratorsExamples {
 
 	@Provide
 	Arbitrary<Integer> upTo10001() {
-		return Arbitraries.integer(0, 10001);
+		return Arbitraries.integers(0, 10001);
 	}
 
 	@Property
@@ -34,12 +31,12 @@ class IntegerGeneratorsExamples {
 
 	@Provide
 	Arbitrary<Integer> even() {
-		return Arbitraries.integer().filter(i -> i % 2 == 0);
+		return Arbitraries.integers().filter(i -> i % 2 == 0);
 	}
 
 	@Provide
 	Arbitrary<Integer> evenUpTo10000() {
-		return Arbitraries.integer(1, 10000).filter(i -> i % 2 == 0);
+		return Arbitraries.integers(1, 10000).filter(i -> i % 2 == 0);
 	}
 
 }

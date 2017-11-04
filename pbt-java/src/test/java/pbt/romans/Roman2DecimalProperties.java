@@ -78,7 +78,7 @@ class Roman2DecimalProperties {
 		return roman2decimal(letter1) != roman2decimal(letter2);
 	}
 
-	@Property(tries = 100)
+	@Property(reporting = ReportingMode.GENERATED)
 	void anyNonValidLetterThrowsIllegalArgumentException(@ForAll("nonValidRomanNumeralLetter") char letter) {
 		Assertions.assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			roman2decimal(letter);
@@ -86,14 +86,14 @@ class Roman2DecimalProperties {
 	}
 
 	@Provide
+	// TODO: Replace with @RomanNumeralLetters annotation
 	Arbitrary<Character> validRomanNumeralLetter() {
 		return Arbitraries.of(ROMAN_NUMERAL_LETTERS);
 	}
 
 	@Provide
 	Arbitrary<Character> nonValidRomanNumeralLetter() {
-		// TODO: Replace with any char but filtered out ROMAN_NUMERAL_LETTERS
-		return Arbitraries.of('a', 'b', 'e', 'f');
+		return Arbitraries.chars().filter(c -> !Arrays.asList(ROMAN_NUMERAL_LETTERS).contains(c));
 	}
 
 	private int roman2decimal(char letter) {

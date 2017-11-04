@@ -12,7 +12,7 @@ class FizzBuzzProperties {
 
 	@Provide
 	Arbitrary<Integer> divisibleBy3() {
-		return Arbitraries.integer(1, 33).map(i -> i * 3);
+		return Arbitraries.integers(1, 33).map(i -> i * 3);
 	}
 
 	@Property
@@ -28,7 +28,7 @@ class FizzBuzzProperties {
 
 	@Provide
 	Arbitrary<Integer> notDivisible() {
-		return Arbitraries.integer(1, 100) //
+		return Arbitraries.integers(1, 100) //
 				.filter(i -> i % 3 != 0 && i % 5 != 0);
 	}
 

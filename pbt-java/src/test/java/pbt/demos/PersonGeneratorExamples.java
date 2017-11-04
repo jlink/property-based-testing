@@ -12,8 +12,8 @@ class PersonGeneratorExamples {
 
 	@Provide
 	Arbitrary<Person> validPerson() {
-		Arbitrary<String> firstName = Arbitraries.string('a', 'z', 1, 10);
-		Arbitrary<String> lastName = Arbitraries.string('a', 'z', 1, 20);
+		Arbitrary<String> firstName = Arbitraries.strings('a', 'z', 1, 10);
+		Arbitrary<String> lastName = Arbitraries.strings('a', 'z', 1, 20);
 		return Combinators.combine(firstName, lastName).as((first, last) -> new Person(first, last));
 	}
 
