@@ -48,13 +48,11 @@ junitPlatform {
 dependencies {
 	compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.4'
 
-	compile("org.junit.platform:junit-platform-engine:${junitPlatformVersion}")
-	compile("org.junit.platform:junit-platform-commons:${junitPlatformVersion}")
-
 	testCompile("org.mockito:mockito-core:2.10.0")
 	testCompile("org.assertj:assertj-core:3.8.0")
 	testCompile "com.github.jlink:jqwik:${jqwikVersion}"
-	testCompile("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
+
+	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 
 	// Only necessary to enable IntelliJ support
 	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
