@@ -52,8 +52,6 @@ dependencies {
 	testCompile("org.assertj:assertj-core:3.8.0")
 	testCompile "com.github.jlink:jqwik:${jqwikVersion}"
 
-	testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
-
 	// Only necessary to enable IntelliJ support
 	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 
