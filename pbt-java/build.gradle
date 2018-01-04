@@ -34,7 +34,7 @@ compileTestJava {
 junitPlatform {
 	filters {
 		engines {
-			include 'jqwik'
+			// include 'jqwik'
 		}
 		includeClassNamePattern '.*Properties'
 		includeClassNamePattern '.*Tests?'
@@ -50,10 +50,6 @@ dependencies {
 	testCompile("org.mockito:mockito-core:2.10.0")
 	testCompile("org.assertj:assertj-core:3.8.0")
 	testCompile "net.jqwik:jqwik:${jqwikVersion}"
-
-	// Only necessary to enable IntelliJ support
-	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-
 }
 
 task wrapper(type: Wrapper) {
