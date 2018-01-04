@@ -9,12 +9,12 @@ buildscript {
 
 repositories {
 	mavenCentral()
-	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+	//maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 ext.junitPlatformVersion = '1.0.1'
 ext.junitJupiterVersion = '5.0.1'
-ext.jqwikVersion = '0.8.0-SNAPSHOT'
+ext.jqwikVersion = '0.8.0'
 
 apply plugin: 'java'
 apply plugin: 'idea'
