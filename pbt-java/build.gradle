@@ -1,7 +1,6 @@
 buildscript {
 	repositories {
 		mavenCentral()
-		//maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 	}
 	dependencies {
 		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.1'
@@ -10,13 +9,12 @@ buildscript {
 
 repositories {
 	mavenCentral()
-	//maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-	maven { url "https://jitpack.io" }
+	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 ext.junitPlatformVersion = '1.0.1'
 ext.junitJupiterVersion = '5.0.1'
-ext.jqwikVersion = '0.7.3'
+ext.jqwikVersion = '0.8.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -42,7 +40,8 @@ junitPlatform {
 		includeClassNamePattern '.*Tests?'
 		includeClassNamePattern '.*Examples?'
 	}
-	enableStandardTestTask true
+	// Only run platform tests
+	enableStandardTestTask false
 }
 
 dependencies {
@@ -50,7 +49,7 @@ dependencies {
 
 	testCompile("org.mockito:mockito-core:2.10.0")
 	testCompile("org.assertj:assertj-core:3.8.0")
-	testCompile "com.github.jlink:jqwik:${jqwikVersion}"
+	testCompile "net.jqwik:jqwik:${jqwikVersion}"
 
 	// Only necessary to enable IntelliJ support
 	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
