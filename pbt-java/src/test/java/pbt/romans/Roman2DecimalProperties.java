@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions;
 
 class Roman2DecimalProperties {
 
-	private static final Character[] ROMAN_NUMERAL_LETTERS = new Character[]{'i', 'v', 'x'};
+	private static final Character[] ROMAN_NUMERAL_LETTERS = new Character[]{'i', 'v', 'x', 'l', 'c', 'd', 'm'};
 
 	@Group
 	class BaseValues {
@@ -26,6 +26,26 @@ class Roman2DecimalProperties {
 		@Example
 		boolean x() {
 			return roman2decimal("x") == 10;
+		}
+
+		@Example
+		boolean l() {
+			return roman2decimal("l") == 50;
+		}
+
+		@Example
+		boolean c() {
+			return roman2decimal("c") == 100;
+		}
+
+		@Example
+		boolean d() {
+			return roman2decimal("d") == 500;
+		}
+
+		@Example
+		boolean m() {
+			return roman2decimal("m") == 1000;
 		}
 	}
 
@@ -51,7 +71,7 @@ class Roman2DecimalProperties {
 
 		@Property
 		boolean addingAnyDescendingListOfLettersReturnsSumOfBaseValues(
-				@ForAll("validRomanNumeralLetter") List<Character> letters
+				@ForAll("listOfRomanNumeralLetters") List<Character> letters
 		) {
 			Assume.that(letters.size() > 0);
 			String romanNumber = letters.stream() //
@@ -61,6 +81,40 @@ class Roman2DecimalProperties {
 
 			return roman2decimal(romanNumber) == expectedSum;
 		}
+
+	}
+
+	@Group
+	class Subtractions {
+
+		@Example
+		boolean iv() {
+			return roman2decimal("iv") == 4;
+		}
+
+		@Property(tries = 100)
+		boolean anySubtractionPairIsSecondMinusFirstBaseValue(@ForAll("subtractionPair") String pair) {
+			return roman2decimal(pair) == roman2decimal(pair.charAt(1)) - roman2decimal(pair.charAt(0));
+		}
+
+		@Provide
+		Arbitrary<String> subtractionPair() {
+			return Arbitraries.of("iv", "ix", "xl", "xc", "cd", "cm");
+		}
+
+		@Example
+		boolean xliv() {
+			return roman2decimal("xliv") == 44;
+		}
+
+		@Property(tries = 100)
+		boolean anyCombinationOfSubtractionPairsWork(
+				@ForAll("subtractionPair") String pair1, @ForAll("subtractionPair") String pair2
+		) {
+			Assume.that(roman2decimal(pair1) > roman2decimal(pair2));
+			return roman2decimal(pair1 + pair2) == roman2decimal(pair1) + roman2decimal(pair2);
+		}
+
 
 	}
 
@@ -78,7 +132,7 @@ class Roman2DecimalProperties {
 		return roman2decimal(letter1) != roman2decimal(letter2);
 	}
 
-	@Property(reporting = ReportingMode.GENERATED)
+	@Property
 	void anyNonValidLetterThrowsIllegalArgumentException(@ForAll("nonValidRomanNumeralLetter") char letter) {
 		Assertions.assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			roman2decimal(letter);
@@ -86,9 +140,13 @@ class Roman2DecimalProperties {
 	}
 
 	@Provide
-	// TODO: Replace with @RomanNumeralLetters annotation
 	Arbitrary<Character> validRomanNumeralLetter() {
 		return Arbitraries.of(ROMAN_NUMERAL_LETTERS);
+	}
+
+	@Provide
+	Arbitrary<List<Character>> listOfRomanNumeralLetters() {
+		return Arbitraries.listOf(validRomanNumeralLetter());
 	}
 
 	@Provide
