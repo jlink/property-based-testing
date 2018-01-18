@@ -51,8 +51,8 @@ dependencies {
 	testCompile("org.assertj:assertj-core:3.8.0")
 	testCompile "net.jqwik:jqwik:${jqwikVersion}"
 
-	// Only necessary to some IntelliJ support bugs
-	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+	// For Jupiter tests and also necessary to work around some IntelliJ bugs
+	testCompile("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 
 }
 
