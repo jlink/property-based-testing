@@ -6,15 +6,18 @@ class PersonGeneratorExamples {
 
 	@Property(tries = 50, reporting = ReportingMode.GENERATED)
 	boolean anyValidPersonHasAFullName(@ForAll Person aPerson) {
-		return aPerson.fullName().length() > 0;
-		// return aPerson.fullName().trim().length() > 0;
+		return aPerson.fullName().length() >= 5;
 	}
 
 	@Provide
 	Arbitrary<Person> validPerson() {
-		Arbitrary<String> firstName = Arbitraries.strings('a', 'z', 1, 10);
-		Arbitrary<String> lastName = Arbitraries.strings('a', 'z', 1, 20);
-		return Combinators.combine(firstName, lastName).as((first, last) -> new Person(first, last));
+		Arbitrary<Character> initialChar = Arbitraries.chars('A', 'Z');
+		Arbitrary<String> firstName = //
+				Arbitraries.strings('a', 'z', 2, 10);
+		Arbitrary<String> lastName = //
+				Arbitraries.strings('a', 'z', 2, 20);
+		return Combinators.combine(initialChar, firstName, lastName) //
+				.as((initial, first, last) -> new Person(initial + first, last));
 	}
 
 	static class Person {
