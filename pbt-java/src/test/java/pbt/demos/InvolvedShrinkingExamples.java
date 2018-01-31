@@ -10,7 +10,7 @@ class InvolvedShrinkingExamples {
 			@ForAll("second") String second //
 	) {
 		String aString = first + second;
-		return aString.length() < 4 || aString.length() > 5;
+		return aString.length() < 4 || aString.length() > 5; // Try larger upper bound...
 	}
 
 	@Provide
