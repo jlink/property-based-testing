@@ -15,10 +15,20 @@ class FizzBuzzProperties {
 		return Arbitraries.integers(1, 33).map(i -> i * 3);
 	}
 
+	@Example
+	boolean divisibleBy3AndNot5ReturnsFizz() {
+		return fizzBuzz(3).equals("Fizz");
+	}
+
 	@Property
 	boolean divisibleBy5ContainsBuzz(@ForAll @IntRange(min = 1, max = 100) int anInt) {
 		Assume.that(anInt % 5 == 0);
 		return fizzBuzz(anInt).contains("Buzz");
+	}
+
+	@Example
+	boolean divisibleBy5AndNot3ReturnsBuzz() {
+		return fizzBuzz(5).equals("Buzz");
 	}
 
 	@Property
