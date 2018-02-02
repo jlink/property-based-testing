@@ -3,7 +3,6 @@ package pbt.demos;
 import java.util.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.constraints.IntRange;
 
 import static org.assertj.core.api.Assertions.*;
 
