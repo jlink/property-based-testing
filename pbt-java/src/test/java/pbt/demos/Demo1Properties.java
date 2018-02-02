@@ -3,6 +3,7 @@ package pbt.demos;
 import java.util.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.constraints.IntRange;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,11 +17,11 @@ class Demo1Properties {
 	}
 
 	@Property
-	boolean reverseTwiceIsOriginal(@ForAll List<Integer> aList) {
-		List<Integer> copy = new ArrayList<>(aList);
+	boolean reverseTwiceIsOriginal(@ForAll List<Integer> original) {
+		List<Integer> copy = new ArrayList<>(original);
 		Collections.reverse(copy);
 		Collections.reverse(copy);
-		return copy.equals(aList);
+		return copy.equals(original);
 	}
 
 	@Property
@@ -33,9 +34,10 @@ class Demo1Properties {
 		return Math.abs(anInteger) >= 0;
 	}
 
-	@Property
+	@Property(reporting = ReportingMode.MINIMAL)
 	boolean sumOfTwoIntegersAlwaysGreaterThanEach(
-			@ForAll int positive1, @ForAll int positive2
+			@ForAll int positive1, //
+			@ForAll int positive2
 	) {
 		int sum = positive1 + positive2;
 		return sum > positive1 && sum > positive2;
