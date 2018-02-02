@@ -39,4 +39,9 @@ class IntegerGeneratorsExamples {
 		return Arbitraries.integers(1, 10000).filter(i -> i % 2 == 0);
 	}
 
+	@Provide
+	Arbitrary<Integer> _evenUpTo10000() {
+		return Arbitraries.integers(1, 5000).map(i -> i * 2);
+	}
+
 }
