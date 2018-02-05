@@ -1,8 +1,8 @@
 package pbt.demos;
 
-import java.util.*;
-
 import net.jqwik.api.*;
+
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -33,7 +33,7 @@ class Demo1Properties {
 		return Math.abs(anInteger) >= 0;
 	}
 
-	@Property(reporting = ReportingMode.MINIMAL)
+	@Property
 	boolean sumOfTwoIntegersAlwaysGreaterThanEach(
 			@ForAll int positive1, //
 			@ForAll int positive2

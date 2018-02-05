@@ -1,14 +1,14 @@
 package pbt.patterns;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import net.jqwik.api.*;
-import org.assertj.core.api.Assertions;
+import org.assertj.core.api.*;
+
+import java.util.*;
+import java.util.stream.*;
 
 class Commutativity {
 
-	@Property(reporting = ReportingMode.GENERATED)
+	@Property(reporting = Reporting.GENERATED)
 	void sortingAndFilteringAreCommutative(@ForAll("names") List<String> listOfNames) {
 		List<String> filteredThenSorted = listOfNames.stream() //
 				.filter(name -> !name.contains("a")) //

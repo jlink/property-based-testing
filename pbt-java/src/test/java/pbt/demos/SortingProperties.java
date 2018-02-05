@@ -1,12 +1,12 @@
 package pbt.demos;
 
-import java.util.List;
-
 import net.jqwik.api.*;
+
+import java.util.*;
 
 class SortingProperties {
 
-	@Property(reporting = ReportingMode.GENERATED)
+	@Property(reporting = Reporting.GENERATED)
 	boolean sortingAListWorks(@ForAll List<Integer> unsorted) {
 		return isSorted(sort(unsorted));
 	}

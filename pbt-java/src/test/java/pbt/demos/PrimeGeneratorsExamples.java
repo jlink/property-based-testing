@@ -1,8 +1,8 @@
 package pbt.demos;
 
-import java.util.*;
-
 import net.jqwik.api.*;
+
+import java.util.*;
 
 class PrimeGeneratorsExamples {
 
@@ -11,7 +11,7 @@ class PrimeGeneratorsExamples {
 		return factor(aPrime).equals(Collections.singletonList(aPrime));
 	}
 
-	@Property(reporting = ReportingMode.GENERATED)
+	@Property(reporting = Reporting.GENERATED)
 	boolean primesCannotBeFactored_2(@ForAll("primesGenerated") int aPrime) {
 		return factor(aPrime).equals(Collections.singletonList(aPrime));
 	}
