@@ -10,9 +10,8 @@ class IntegerGeneratorsExamples {
 		return factorial(anInt) < Integer.MAX_VALUE;
 	}
 
-	static int factorial(int n) {
-		return n == 0 ? 1 : n * factorial(n - 1);
-	}
+
+	// Provide:
 
 	@Property
 	boolean facultyFunctionWorksTill10001(@ForAll("upTo10001") int anInt) {
@@ -23,6 +22,10 @@ class IntegerGeneratorsExamples {
 	Arbitrary<Integer> upTo10001() {
 		return Arbitraries.integers(0, 10001);
 	}
+
+
+
+	// Filter, Map
 
 	@Property
 	boolean evenNumbersAreEven(@ForAll("even") int anInt) {
@@ -43,5 +46,14 @@ class IntegerGeneratorsExamples {
 	Arbitrary<Integer> _evenUpTo10000() {
 		return Arbitraries.integers(1, 5000).map(i -> i * 2);
 	}
+
+
+
+	// Factorial Implementation
+
+	static int factorial(int n) {
+		return n == 0 ? 1 : n * factorial(n - 1);
+	}
+
 
 }

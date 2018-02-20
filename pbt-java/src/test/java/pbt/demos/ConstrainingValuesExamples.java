@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions;
 
 import static org.assertj.core.data.Percentage.*;
 
-class ConstrainingValuesProperties {
+class ConstrainingValuesExamples {
 
 	// Expected to fail since there is no sqrt of negative numbers
 	@Property
