@@ -2,8 +2,6 @@ package pbt.demos;
 
 import net.jqwik.api.*;
 
-import java.util.*;
-
 import static org.assertj.core.api.Assertions.*;
 
 class Demo1Properties {
