@@ -12,10 +12,12 @@ class PersonGeneratorExamples {
 	@Provide
 	Arbitrary<Person> validPerson() {
 		Arbitrary<Character> initialChar = Arbitraries.chars('A', 'Z');
-		Arbitrary<String> firstName = //
-				Arbitraries.strings('a', 'z', 2, 10);
-		Arbitrary<String> lastName = //
-				Arbitraries.strings('a', 'z', 2, 20);
+		Arbitrary<String> firstName = Arbitraries.strings() //
+				.withChars('a', 'z') //
+				.withMinLength(2).withMaxLength(10);
+		Arbitrary<String> lastName = Arbitraries.strings() //
+				.withChars('a', 'z') //
+				.withMinLength(2).withMaxLength(20);
 		return Combinators.combine(initialChar, firstName, lastName) //
 				.as((initial, first, last) -> new Person(initial + first, last));
 	}
