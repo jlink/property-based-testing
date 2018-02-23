@@ -25,8 +25,10 @@ class Commutativity {
 
 	@Provide
 	Arbitrary<List<String>> names() {
-		Arbitrary<String> name = Arbitraries.strings('a', 'z', 3, 40);
-		return Arbitraries.listOf(name, 0, 30);
+		Arbitrary<String> name = Arbitraries.strings() //
+				.withCharRange('a', 'z') //
+				.ofMinLength(3).ofMaxLength(40);
+		return name.list().ofMinSize(0).ofMaxSize(30);
 	}
 
 }

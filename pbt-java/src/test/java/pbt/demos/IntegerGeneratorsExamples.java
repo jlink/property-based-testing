@@ -20,9 +20,8 @@ class IntegerGeneratorsExamples {
 
 	@Provide
 	Arbitrary<Integer> upTo10001() {
-		return Arbitraries.integers(0, 10001);
+		return Arbitraries.integers().between(0, 10001);
 	}
-
 
 
 	// Filter, Map
@@ -39,14 +38,13 @@ class IntegerGeneratorsExamples {
 
 	@Provide
 	Arbitrary<Integer> evenUpTo10000() {
-		return Arbitraries.integers(1, 10000).filter(i -> i % 2 == 0);
+		return Arbitraries.integers().between(1, 10000).filter(i -> i % 2 == 0);
 	}
 
 	@Provide
 	Arbitrary<Integer> _evenUpTo10000() {
-		return Arbitraries.integers(1, 5000).map(i -> i * 2);
+		return Arbitraries.integers().between(1, 5000).map(i -> i * 2);
 	}
-
 
 
 	// Factorial Implementation

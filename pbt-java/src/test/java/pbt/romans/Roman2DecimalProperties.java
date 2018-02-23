@@ -146,7 +146,7 @@ class Roman2DecimalProperties {
 
 	@Provide
 	Arbitrary<List<Character>> listOfRomanNumeralLetters() {
-		return Arbitraries.listOf(validRomanNumeralLetter());
+		return validRomanNumeralLetter().list();
 	}
 
 	@Provide

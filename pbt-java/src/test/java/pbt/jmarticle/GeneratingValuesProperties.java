@@ -10,6 +10,6 @@ class GeneratingValuesProperties {
 
 	@Provide
 	Arbitrary<String> postleitzahlen() {
-		return Arbitraries.strings('0', '9', 5, 5);
+		return Arbitraries.strings().withCharRange('0', '9').ofMinLength(5).ofMaxLength(5);
 	}
 }

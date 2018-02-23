@@ -11,13 +11,13 @@ class PersonGeneratorExamples {
 
 	@Provide
 	Arbitrary<Person> validPerson() {
-		Arbitrary<Character> initialChar = Arbitraries.chars('A', 'Z');
+		Arbitrary<Character> initialChar = Arbitraries.chars().between('A', 'Z');
 		Arbitrary<String> firstName = Arbitraries.strings() //
-				.withChars('a', 'z') //
-				.withMinLength(2).withMaxLength(10);
+				.withCharRange('a', 'z') //
+				.ofMinLength(2).ofMaxLength(10);
 		Arbitrary<String> lastName = Arbitraries.strings() //
-				.withChars('a', 'z') //
-				.withMinLength(2).withMaxLength(20);
+				.withCharRange('a', 'z') //
+				.ofMinLength(2).ofMaxLength(20);
 		return Combinators.combine(initialChar, firstName, lastName) //
 				.as((initial, first, last) -> new Person(initial + first, last));
 	}

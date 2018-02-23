@@ -16,16 +16,16 @@ class InvolvedShrinkingExamples {
 	@Provide
 	Arbitrary<String> first() {
 		return Arbitraries.strings() //
-				.withChars('a', 'z') //
-				.withMinLength(1).withMaxLength(10) //
+				.withCharRange('a', 'z') //
+				.ofMinLength(1).ofMaxLength(10) //
 				.filter(string -> string.endsWith("h"));
 	}
 
 	@Provide
 	Arbitrary<String> second() {
 		return Arbitraries.strings() //
-				.withChars('0', '9') //
-				.withMinLength(0).withMaxLength(10) //
+				.withCharRange('0', '9') //
+				.ofMinLength(0).ofMaxLength(10) //
 				.filter(string -> string.length() >= 1);
 	}
 }

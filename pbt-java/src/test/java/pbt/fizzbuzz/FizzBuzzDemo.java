@@ -20,7 +20,7 @@ public class FizzBuzzDemo {
 
 	@Provide
 	Arbitrary<Integer> divisibleBy3() {
-		return Arbitraries.integers().withRange(1, 33).map(i -> i * 3);
+		return Arbitraries.integers().between(1, 33).map(i -> i * 3);
 	}
 
 	@Property
@@ -31,7 +31,7 @@ public class FizzBuzzDemo {
 
 	@Provide
 	Arbitrary<Integer> divisibleBy5() {
-		return Arbitraries.integers().withRange(1, 20).map(i -> i * 5);
+		return Arbitraries.integers().between(1, 20).map(i -> i * 5);
 	}
 
 	@Property
