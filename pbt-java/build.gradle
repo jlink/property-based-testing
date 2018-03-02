@@ -1,12 +1,3 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
-	}
-}
-
 repositories {
 	mavenCentral()
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
@@ -14,11 +5,10 @@ repositories {
 
 ext.junitPlatformVersion = '1.1.0'
 ext.junitJupiterVersion = '5.1.0'
-ext.jqwikVersion = '0.8.4'
+ext.jqwikVersion = '0.8.5'
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'org.junit.platform.gradle.plugin'
 
 jar {
 	baseName = 'pbt'
@@ -31,17 +21,13 @@ compileTestJava {
 	options.compilerArgs += '-parameters'
 }
 
-junitPlatform {
-	filters {
-		engines {
-			include 'jqwik'
-		}
-		includeClassNamePattern '.*Properties'
-		includeClassNamePattern '.*Tests?'
-		includeClassNamePattern '.*Examples?'
-	}
-	// Only run platform tests
-	enableStandardTestTask false
+test {
+	useJUnitPlatform()
+
+	//	include '**/*Properties.class'
+	//	include '**/*Examples.class'
+	//	include '**/*Test.class'
+	//	include '**/*Tests.class'
 }
 
 dependencies {
@@ -58,5 +44,5 @@ dependencies {
 
 task wrapper(type: Wrapper) {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '4.2.1'
+	gradleVersion = '4.6'
 }
