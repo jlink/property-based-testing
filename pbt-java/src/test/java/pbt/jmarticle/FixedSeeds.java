@@ -4,7 +4,7 @@ import net.jqwik.api.*;
 
 class FixedSeeds {
 
-	@Property(seed = 424242l, reporting = Reporting.GENERATED)
+	@Property(seed = "424242", reporting = Reporting.GENERATED)
 	void alwaysTheSameValues(@ForAll int aNumber) {
 
 	}
