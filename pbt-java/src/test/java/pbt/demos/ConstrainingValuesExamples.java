@@ -9,6 +9,7 @@ import static org.assertj.core.data.Percentage.*;
 class ConstrainingValuesExamples {
 
 	// Expected to fail since there is no sqrt of negative numbers
+
 	@Property
 	void squareOfRootIsOriginalValue(@ForAll double aNumber) {
 		double sqrt = Math.sqrt(aNumber);
@@ -21,6 +22,9 @@ class ConstrainingValuesExamples {
 		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
 	}
 
+
+	// Provide and filter
+
 	@Property
 	void squareOfRootIsOriginalValue_2(@ForAll("positiveDoubles") double aNumber) {
 		double sqrt = Math.sqrt(aNumber);
@@ -31,6 +35,9 @@ class ConstrainingValuesExamples {
 	Arbitrary<Double> positiveDoubles() {
 		return Arbitraries.doubles().filter(aDouble -> aDouble > 0);
 	}
+
+
+	// Assume
 
 	@Property
 	void squareOfRootIsOriginalValue_3(@ForAll double aNumber) {
