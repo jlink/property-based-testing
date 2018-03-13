@@ -1,14 +1,14 @@
 package pbt.stateful;
 
-import java.util.List;
-
 import net.jqwik.api.*;
-import net.jqwik.api.constraints.Size;
+import net.jqwik.api.constraints.*;
+
+import java.util.*;
 
 class MyStackProperties {
 
 	@Property(reporting = Reporting.GENERATED)
-	void runCommands(@ForAll @Size(min= 1, max = 5) List<StackCommand> commands) {
+	void runCommands(@ForAll @Size(min= 1, max = 20) List<StackCommand> commands) {
 		StackModel model = new StackModel();
 		model.executeCommands(commands);
 	}
@@ -25,6 +25,6 @@ class MyStackProperties {
 		return Arbitraries.constant(StackCommand.pop());
 	}
 	private Arbitrary<StackCommand> clear() {
-		return Arbitraries.constant(StackCommand.pop());
+		return Arbitraries.constant(StackCommand.clear());
 	}
 }
