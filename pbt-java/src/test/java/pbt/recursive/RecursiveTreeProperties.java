@@ -6,19 +6,30 @@ class RecursiveTreeProperties {
 
 	@Property(tries = 10, reporting = Reporting.GENERATED)
 	boolean trees(@ForAll Tree aTree) {
-		return aTree.countLeaves() >= 1;
+		return aTree.countLeaves() == countLeaves(aTree);
 	}
 
 	@Provide
-	// Recursive arbitraries currently do not work
 	Arbitrary<Tree> trees() {
-		// will throw StackOverflowError
-		Arbitrary<Tree> left = trees();
-		Arbitrary<Tree> right = trees();
-		Arbitrary<Tree> branch = Combinators.combine(left, right).as(Branch::new);
-		return Arbitraries.oneOf(
-				Arbitraries.constant(new Leaf()), branch
+		Arbitrary<Tree> trees = Arbitraries.recursive(() -> trees());
+		Arbitrary<Tree> branch = Combinators.combine(trees, trees).as(Branch::new);
+		Arbitrary<Tree> leaf = Arbitraries.strings() //
+				.ofLength(5) //
+				.withCharRange('A', 'F') //
+				.map(Leaf::new);
+
+		return Arbitraries.oneOf( //
+				leaf, //
+				leaf, //
+				branch
 		);
+	}
+
+	private int countLeaves(Tree aTree) {
+		if (aTree instanceof Leaf)
+			return 1;
+		Branch branch = (Branch) aTree;
+		return countLeaves(branch.left()) + countLeaves(branch.right());
 	}
 
 }

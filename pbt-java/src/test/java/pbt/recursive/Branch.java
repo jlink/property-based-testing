@@ -19,4 +19,12 @@ public class Branch implements Tree {
 	public String toString() {
 		return String.format("[%s|%s]", left, right);
 	}
+
+	public Tree left() {
+		return left;
+	}
+
+	public Tree right() {
+		return right;
+	}
 }
