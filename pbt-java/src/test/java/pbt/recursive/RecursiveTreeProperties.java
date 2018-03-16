@@ -2,10 +2,12 @@ package pbt.recursive;
 
 import net.jqwik.api.*;
 
+import java.util.function.*;
+
 class RecursiveTreeProperties {
 
 	@Property(tries = 10, reporting = Reporting.GENERATED)
-	boolean trees(@ForAll Tree aTree) {
+	boolean randomTrees(@ForAll("trees") Tree aTree) {
 		return aTree.countLeaves() == countLeaves(aTree);
 	}
 
@@ -18,11 +20,11 @@ class RecursiveTreeProperties {
 				.withCharRange('A', 'F') //
 				.map(Leaf::new);
 
-		return Arbitraries.oneOf( //
-				leaf, //
-				leaf, //
-				branch
-		);
+		// Probability of leaf must be higher than of branch. Otherwise a stack overflow is likely.
+		return Arbitraries.frequency( //
+				Tuples.tuple(3, leaf), //
+				Tuples.tuple(2, branch) //
+		).flatMap(Function.identity());
 	}
 
 	private int countLeaves(Tree aTree) {
