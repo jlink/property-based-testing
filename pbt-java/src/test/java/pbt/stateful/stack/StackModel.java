@@ -1,4 +1,4 @@
-package pbt.stateful;
+package pbt.stateful.stack;
 
 import java.util.List;
 
@@ -10,7 +10,6 @@ public class StackModel {
 		for (StackCommand command : commands) {
 			if (command.precondition(this)) {
 				command.execute(this);
-				command.postcondition(this);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package pbt.stateful;
+package pbt.stateful.stack;
 
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.*;
