@@ -14,7 +14,7 @@ public class MyStringStack {
 	}
 
 	public void clear() {
-
+		//elements.clear();
 	}
 
 	public boolean isEmpty() {
