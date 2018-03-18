@@ -59,15 +59,14 @@ public class StateMachineRunner<S extends StateMachine> {
 
 	@Override
 	public String toString() {
-		String stateString = "unrun";
-		String actionsString = "";
-		if (hasRun) {
-			stateString = "run";
-			actionsString = JqwikStringSupport.displayString(extractValues(runActions));
-		} else {
-			actionsString = JqwikStringSupport.displayString(extractValues(candidateActions));
+		String stateString = "";
+		List<Shrinkable<Action>> actionsToShow = runActions;
+		if (!hasRun) {
+			stateString = "(not yet run)";
+			actionsToShow = candidateActions;
 		}
-		return String.format("%s(%s):%s", this.getClass().getSimpleName(), stateString, actionsString);
+		String actionsString = JqwikStringSupport.displayString(extractValues(actionsToShow));
+		return String.format("%s%s:%s", this.getClass().getSimpleName(), stateString, actionsString);
 	}
 
 	private List<Action> extractValues(List<Shrinkable<Action>> shrinkables) {
