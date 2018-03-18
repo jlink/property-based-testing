@@ -2,45 +2,40 @@ package pbt.stateful;
 
 import net.jqwik.api.*;
 import net.jqwik.properties.arbitraries.*;
-import org.junit.platform.commons.support.*;
 
 import java.util.*;
 import java.util.stream.*;
 
-public class StateMachineGenerator<S extends StateMachine> implements RandomGenerator<S> {
-	private final Class<S> stateMachineClass;
+public class StateMachineGenerator<S extends StateMachine> implements RandomGenerator<StateMachineRunner<S>> {
+	private final S stateMachine;
 	private final int genSize;
 	private final int numberOfActions;
 
-	public StateMachineGenerator(Class<S> stateMachineClass, int genSize, int numberOfActions) {
-		this.stateMachineClass = stateMachineClass;
+	public StateMachineGenerator(S stateMachine, int genSize, int numberOfActions) {
+		this.stateMachine = stateMachine;
 		this.genSize = genSize;
 		this.numberOfActions = numberOfActions;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Shrinkable<S> next(Random random) {
-		S stateMachine = ReflectionSupport.newInstance(stateMachineClass);
+	public Shrinkable<StateMachineRunner<S>> next(Random random) {
 		List<Arbitrary<Action>> arbitraries = stateMachine.actions();
-		List<RandomGenerator<Action>> generators = arbitraries.stream()
-				.map(arbitrary -> arbitrary.generator(genSize))
-				.collect(Collectors.toList());
-		fillActionCandidates(stateMachine, random, generators, numberOfActions);
-		return Shrinkable.unshrinkable(stateMachine);
+		List<RandomGenerator<Action>> generators = arbitraries.stream().map(arbitrary -> arbitrary.generator(genSize)).collect(Collectors.toList());
+		List<Shrinkable<Action>> candidateActions = generateCandidates(generators, numberOfActions, random);
+		StateMachineRunner<S> stateMachineRunner = new StateMachineRunner<>(stateMachine, candidateActions);
+		return Shrinkable.unshrinkable(stateMachineRunner);
 	}
 
-	private void fillActionCandidates(S stateMachine, Random random, List<RandomGenerator<Action>> generators, int numberOfActions) {
-
+	private List<Shrinkable<Action>> generateCandidates(List<RandomGenerator<Action>> generators, int numberOfActions, Random random) {
+		List<Shrinkable<Action>> candidates = new ArrayList<>();
 		for (int i = 0; i < numberOfActions; i++) {
 			Shrinkable<Action> next = RandomGenerators
 					.chooseValue(generators, random)
 					.sampleRandomly(random);
-
-			//noinspection unchecked
-			stateMachine.addCandidate(next);
+			candidates.add(next);
 		}
-
+		return candidates;
 	}
 
 }

@@ -9,13 +9,13 @@ import java.util.*;
 class MyStackProperties {
 
 	@Property(tries = 10, reporting = Reporting.GENERATED)
-	void checkMyStackMachine(@ForAll MyStackMachine stackMachine) {
+	void checkMyStackMachine(@ForAll StateMachineRunner<MyStackMachine> stackMachine) {
 		stackMachine.run();
 	}
 
 	@Provide
-	Arbitrary<MyStackMachine> stackMachine() {
-		return StateMachine.arbitrary(MyStackMachine.class);
+	Arbitrary<StateMachineRunner<MyStackMachine>> stackMachine() {
+		return StateMachineRunner.arbitrary(MyStackMachine.class);
 	}
 
 	@Property(reporting = Reporting.GENERATED)

@@ -6,11 +6,11 @@ import pbt.stateful.*;
 
 import java.util.*;
 
-class MyStackMachine extends StateMachine<MyStringStack> {
+class MyStackMachine implements StateMachine<MyStringStack> {
 
 
 	@Override
-	protected List<Arbitrary<Action<MyStringStack>>> actions() {
+	public List<Arbitrary<Action<MyStringStack>>> actions() {
 		return Arrays.asList(push(), clear(), pop());
 	}
 
@@ -27,7 +27,7 @@ class MyStackMachine extends StateMachine<MyStringStack> {
 	}
 
 	@Override
-	protected MyStringStack createModel() {
+	public MyStringStack createModel() {
 		return new MyStringStack();
 	}
 
