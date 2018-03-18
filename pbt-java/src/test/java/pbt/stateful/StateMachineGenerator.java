@@ -23,7 +23,8 @@ public class StateMachineGenerator<S extends StateMachine> implements RandomGene
 		List<Arbitrary<Action>> arbitraries = stateMachine.actions();
 		List<RandomGenerator<Action>> generators = arbitraries.stream().map(arbitrary -> arbitrary.generator(genSize)).collect(Collectors.toList());
 		List<Shrinkable<Action>> candidateActions = generateCandidates(generators, numberOfActions, random);
-		return new StateMachineRunnerShrinkable(stateMachine, candidateActions);
+		SequentialStateMachineRunner<S> stateMachineRunner = new SequentialStateMachineRunner<>(stateMachine, candidateActions);
+		return new ShrinkableValue<StateMachineRunner<S>>(stateMachineRunner, new StateMachineRunnerShrinkCandidates());
 	}
 
 	private List<Shrinkable<Action>> generateCandidates(List<RandomGenerator<Action>> generators, int numberOfActions, Random random) {
