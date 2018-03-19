@@ -13,7 +13,7 @@ class RecursiveTreeProperties {
 
 	@Provide
 	Arbitrary<Tree> trees() {
-		Arbitrary<Tree> trees = Arbitraries.recursive(() -> trees());
+		Arbitrary<Tree> trees = Arbitraries.lazy(() -> trees());
 		Arbitrary<Tree> branch = Combinators.combine(trees, trees).as(Branch::new);
 		Arbitrary<Tree> leaf = Arbitraries.strings() //
 				.ofLength(5) //

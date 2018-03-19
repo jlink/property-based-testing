@@ -13,7 +13,7 @@ class RecursiveNumberProperties {
 	Arbitrary<Integer> numbers() {
 		return Arbitraries.oneOf( //
 				Arbitraries.constant(1), //
-				Arbitraries.recursive(this::numbers).map(a -> a + 1)
+				Arbitraries.lazy(this::numbers).map(a -> a + 1)
 		);
 	}
 
