@@ -176,7 +176,13 @@ thinking nevertheless, and some questions started to cross your sceptic mind:
   stateful objects and side-effects?
   
 
-## Next Step
+## Next Episode
 
 In the following article we will look closer at _jqwik_ and its features, but also
 at alternatives for the JVM. 
+
+
+### P.S.
+
+You can find all code examples and more 
+[in this repository](https://github.com/jlink/property-based-testing).
