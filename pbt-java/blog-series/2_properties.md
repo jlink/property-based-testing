@@ -152,12 +152,23 @@ Quite a bunch of information: You can see the number of test `tries`,
 the number of actually run `checks`, the random `seed`, the originally falsified sample,
 and the simplest found falsified `sample`.
 
-## Open Questions
+## Further Questions
 
-Property-based Testing's promise is to relieve us from (some of) the burden of finding
-additional examples, corner cases and unknown gaps in the specification. 
+In this article, I started with a simple example. Hopefully enough, to get you
+thinking and raising questions, e.g.:
 
-//TODO: More on the open questions and what else will be tackled in the series 
+- Property-based Testing's promise is to relieve us from (some of) the burden of finding
+  additional examples, corner cases and unknown gaps in the specification. 
+  To what degree can PBT keep this promise?
+- Another thing that might bother you is the flair of indeterminism that random
+  generation brings into the game. Should you be bothered? Do the tools
+  provide means to repeat falsifying test runs?
+- Is there a fundamental reason why PBT is common in the world of functional
+  programming but almost unknown in OOP? Maybe it doesn't really work with
+  stateful objects and side-effects?
+  
 
-So far for today. In the next article of this series we will look closer at _jqwik_ and its features, but also
-at alternatives on the JVM. 
+## Next Step
+
+In the following article we will look closer at _jqwik_ and its features, but also
+at alternatives for the JVM. 
