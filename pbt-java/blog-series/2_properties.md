@@ -1,15 +1,15 @@
 # Property-based Testing in Java - From Example Tests to Properties
 
 Test-driven development in OOPLs is mostly focused on example-based test cases aka as "plain old unit tests".
-Let's say we want to check if the common JDK function `java.util.Collections.reverse()` works as expected
-and use [a simple JUnit Jupiter test](http://junit.org/junit5/docs/current/user-guide/) for that purpose:
+Let's say we want to check if the common JDK function `java.util.Collections.reverse()` works as expected.
+We use [a simple JUnit Jupiter test](http://junit.org/junit5/docs/current/user-guide/) for that purpose:
 
 ```java
 import java.util.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class CollectionsTests {
+class ListReverseTests {
     @Test
     void reverseList() {
         List<Integer> aList = Arrays.asList(1, 2, 3);
@@ -19,18 +19,19 @@ class CollectionsTests {
 }
 ```   
 
-Many developers have written similar tests for years or even decades. 
+Many, hopefully most, developers have written similar tests for years or even decades. 
 Usually with good success and a reasonable capability to detect common programming errors.
-There is one thought, though, that's been nagging in the back of my mind:
+There is one thought, though, that's always been nagging in the back of my mind:
 How can I be confident that `reverse` also works with 5 elements? With 5000? With an empty list?
-With String elements? The amount of doubts can go as high as I allow it.
+With elements of different types? The amount of doubts can go as high as I allow it.
 
 One way to fight this type of uncertainty is to add more examples and test cases. 
-I am steered by the hope that my choice of examples is sufficiently representative to
-catch bugs now and regressions in the future. When in doubt I add another test case - and another.
+I am calmed down by the hope that my choice of examples is sufficiently representative to
+catch bugs now and regressions in the future. When in doubt I add another test case - and yet another.
 Model-based testing approaches (e.g. equivalence classes and parameter combinatorics)
 address this exact problem but usually err on the side of too many tests. 
-And every single test that does not reveal an error now or in the future means a waste of resources.
+And every single test that does not reveal an error now or in the future means a waste of resources
+and additional maintenance effort.
 
 ## Properties
 
@@ -149,7 +150,14 @@ org.opentest4j.AssertionFailedError:
 
 Quite a bunch of information: You can see the number of test `tries`, 
 the number of actually run `checks`, the random `seed`, the originally falsified sample,
-and the simplest found falsified `sample`. 
+and the simplest found falsified `sample`.
+
+## Open Questions
+
+Property-based Testing's promise is to relieve us from (some of) the burden of finding
+additional examples, corner cases and unknown gaps in the specification. 
+
+//TODO: More on the open questions and what else will be tackled in the series 
 
 So far for today. In the next article of this series we will look closer at _jqwik_ and its features, but also
 at alternatives on the JVM. 
