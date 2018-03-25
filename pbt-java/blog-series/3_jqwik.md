@@ -1,25 +1,30 @@
 # Property-based Testing in Java - Jqwik
 
-In [the previous episode](???) you've already seen jqwik in action. 
+In [the previous episode](???) you've already seen [jqwik](http://jqwik.net) in action. 
 One of the interesting aspects of this PBT library is the fact that it's not 
 a standalone framework but that it hooks into JUnit 5 in order to "inherit"
 IDE and built-tool support.
 
-## Test-Engine for the JUnit Platform
+## Jqwik and the JUnit Platform
 
-    Die f�nfte Generation von JUnit kommt nicht nur mit einem aktualisierten 
-    Ansatz zur Testerstellung und Ausf�hrung, sondern basiert auf der Idee, 
-    als Plattform f�r ein gro�es Spektrum unterschiedlicher Test-Engines dienen zu k�nnen. 
-    Der gro�e Vorteil einer solchen Plattform ist zum einen, dass jede IDE und 
-    jedes Build-Werkzeug lediglich die JUnit-Plattform integrieren muss. 
-    Die Integration der einzelnen Engines erfolgt damit automatisch. 
-    Zum anderen erlaubt die Plattform, dass beliebig viele Engines nebeneinander 
-    zum Einsatz kommen k�nnen. Damit ist die Verwendung von JUnit 4 (Vintage), JUnit 5 (Jupiter) 
-    und jqwik im selben Projekt m�glich, wenn man m�chte sogar in derselben Testklasse.
-    
-    IntelliJ, Eclipse und Maven-Surefire haben diese Idee mittlerweile aufgegriffen und integrieren in ihren aktuellen Releases die JUnit-5-Plattform. F�r Gradle stellt im Augenblick noch das JUnit-5-Team ein Plugin bereit � nativer JUnit-Plattform-Support ist jedoch bereits in Arbeit.
-    Verwendung von jqwik im eigenen Projekt
-    Wenn man bereits JUnit 5 im Einsatz hat, dann gen�gt es, die aktuelle Version von jqwik via Maven, Gradle oder einem Download in den test-Klassenpfad zu bef�rdern. Falls jqwik der erste Ber�hrungspunkt zur JUnit-Plattform darstellt, empfiehlt sich die Anleitung im jqwik-User-Guide [5].
+The fifth generation of JUnit does not only come with a modernized approach to write
+and execute tests, but it is based on the idea to provide a platform for a large spectrum
+of different _test engines_. The big advantage of such an approach is that any IDE and any
+build tool only has to integrate the platform and not the individual engines. It's also
+a big plus for engine developers who don't have to bother with aspects like
+public APIs for discovering and running their test specifications.
+
+Moreover, the platform allows to have any number of engines in parallel. That's how
+JUnit 5 provides full backwards-compatibility to JUnit 4 and how a smooth migration
+path can be realized. Using JUnit 4 (called Vintage), JUnit 5 (called Jupiter) and
+_jqwik_ in a single project is not only possible, it's really simple.
+
+IntelliJ has been an early platform adopter for over a year now. As of March 2018,
+we also see native support from Eclipse, Gradle and Maven-Surefire. If you're already
+using JUnit 5, using _jqwik_ as additional engine requires a single additional dependency.
+If _jqwik_ is your first contact with the platform you should check out 
+[this part in jqwik's user guide](http://jqwik.net/user-guide.html#how-to-use).
+
 
 ## Wildcards and Type Parameters
 
