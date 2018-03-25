@@ -152,10 +152,18 @@ Quite a bunch of information: You can see the number of test `tries`,
 the number of actually run `checks`, the random `seed`, the originally falsified sample,
 and the simplest found falsified `sample`.
 
+If you want to see all the generated lists, just add a `reporting` attribute to the property annotation like this:
+
+```java
+@Property(reporting = Reporting.GENERATED)
+```
+
+You will see a surprisingly large variety in both list size and number range.
+
 ## Further Questions
 
-In this article, I started with a simple example. Hopefully enough, to get you
-thinking and raising questions, e.g.:
+The example in this article is rather simple. Hopefully, it got you
+thinking nevertheless, and some questions started to cross your sceptic mind:
 
 - Property-based Testing's promise is to relieve us from (some of) the burden of finding
   additional examples, corner cases and unknown gaps in the specification. 
