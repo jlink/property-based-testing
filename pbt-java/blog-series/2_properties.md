@@ -142,7 +142,7 @@ timestamp = 2018-01-18T11:57:17.027,
 tries = 2, 
 checks = 2, 
 seed = -6748802811761023649, 
-originalSample = [[0, 1, -1, -2147483648, �]], 
+originalSample = [[0, 1, -1, -2147483648, 2147483647]], 
 sample = [[0, -1]]
 org.opentest4j.AssertionFailedError: 
     Property [reverseTwiceIsOriginal] falsified with sample [[0, -1]]
