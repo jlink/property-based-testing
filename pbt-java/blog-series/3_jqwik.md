@@ -1,6 +1,7 @@
 # Property-based Testing in Java - Jqwik
 
-In [the previous episode](???) you've already seen [jqwik](http://jqwik.net) in action. 
+In [the previous episode]({% post_url 2018-03-26-from-examples-to-properties %}) 
+you've already seen [jqwik](http://jqwik.net) in action. 
 One of the interesting aspects of this PBT library is the fact that it's not 
 a standalone framework but that it hooks into JUnit 5 in order to "inherit"
 IDE and built-tool support.
@@ -8,8 +9,14 @@ IDE and built-tool support.
 ## Jqwik and the JUnit Platform
 
 The fifth generation of JUnit does not only come with a modernized approach to write
-and execute tests, but it is based on the idea to provide a platform for a large spectrum
-of different _test engines_. The big advantage of such an approach is that any IDE and any
+and execute tests, but it is based on the idea of providing a platform for a large spectrum
+of different _test engines_. An engine provides two entry points: One entry point is for
+discovering tests and test suites - e.g. through scanning parts of the classpath for methods with
+a certain annotation. The other entry point is used to run tests and test suites, usually
+the ones you have discovered during the discovery step. Most everything else, like
+filtering or selecting subsets of tests, will be performed by the platform itself.
+
+The big advantage of such an approach is that any IDE and any
 build tool only has to integrate the platform and not the individual engines. It's also
 a big plus for engine developers who don't have to bother with aspects like
 public APIs for discovering and running their test specifications.
@@ -28,36 +35,59 @@ If _jqwik_ is your first contact with the platform you should check out
 
 ## Wildcards and Type Parameters
 
+Let's get back to the concrete property test of the previous episode:
+
+```java
+@Property(reporting = Reporting.GENERATED)
+boolean reverseWithWildcardType(@ForAll List<?> original) {
+    return reverse(reverse(original)).equals(original);
+}
+```
+
+You might miss [the tiny change]({% post_url 2018-03-26-from-examples-to-properties %#lets-do-it-in-java): 
+Instead of a concretely typed `List<Integer>` 
+I used the _wildcard_ variant: `List<?>`. Actually, this reflects the precondition better,
+since the method under test - `Collections.reverse()` - should work with any element type.
+Under the hood _jqwik_ will create instances of an anonymous subtype of `Object`. 
+Just run the property with reporting switched on.
+
+This would, by the way, also work with a _type variable_ instead of a wildcard. 
+Upper or lower bounds, however, are not supported yet.
 
 ## Many Parameters
 
-   jqwik generiert typische und zuf�llige Eingabewerte sowie Kombinationen davon. 
-   Dabei k�nnen nicht nur � wie im obigen Beispiel � einzelne Parameter generiert werden, 
-   sondern mehrere, wie in Listing 3.
-   
-    Listing 3: Property mit mehreren Parametern
-     	@Property(reporting = ReportingMode.GENERATED)
-     	boolean joiningTwoLists( 
-     			@ForAll List<String> list1, 
-     			@ForAll List<String> list2
-     	) {
-     		List<String> joinedList = new ArrayList<>(list1);
-     		joinedList.addAll(list2);
-     		return joinedList.size() == list1.size() + list2.size();
-     	}
-    Ende Listing 3
-   
-Wenn wir diese Property ausf�hren, dann sorgt der Annotation-Wert 
-reporting=Reporting.GENERATED daf�r, dass alle 1000 generierten Werte-Menge auch 
-ausgegeben werden. Wer es ausprobiert, kann feststellen, dass sowohl die L�nge der 
-generierten Strings als auch die L�nge der generierten Listen sehr gro� sein kann. 
-Dass aber auch immer wieder ein leerer String und eine leere Liste auftauchen.
+You might have guessed that parameter generation is not restricted to a single one
+but works for as many as you need:
 
-    jqwik ist n�mlich kein vollst�ndig randomisiertes Testwerkzeug, 
-    das man ohne Nachzudenken auf ein Programm losl�sst. 
-    Stattdessen versucht jqwik auch typische Grenzf�lle � z.B. leere Listen, leere Strings, 
-    gr��te Werte � einzustreuen. Dies soll die Wahrscheinlichkeit erh�hen, L�cken 
-    in der Spezifikation und Bugs in der Implementierung zu entdecken.
+```java
+@Property(reporting = ReportingMode.GENERATED)
+boolean joiningTwoLists( 
+    @ForAll List<String> list1, 
+    @ForAll List<String> list2
+) {
+    List<String> joinedList = new ArrayList<>(list1);
+    joinedList.addAll(list2);
+    return joinedList.size() == list1.size() + list2.size();
+}
+```
+   
+If you look at the generated lists you will notice that the variance in list size
+and string length is quite high. You can also see that now and then an empty list
+and an empty string will be generated. This is due to the fact that value generation
+is not purely random and not equally distributed across the allowed domain. 
+Instead, _jqwik_ tries to be "smarter":
+
+- Smaller values (for numbers, sizes and lengths) 
+  are generated more frequently than higher values. The exact distribution depends
+  on an internal `genSize` parameter which by default is set to the number
+  of tries. The more often a property is tried, the larger the generated values are - on average.
+
+- _jqwik_ will also routinely inject typical border cases like empty lists, empty strings,
+  maximum and minimum values and others depending on the type of the values to generate
+  and additional constraints.
+
+This _smart generation approach_ aims at raising the probability to detect not so obvious
+specification gaps and implementation bugs.
 
 ## Automatic Parameter Generation
 
