@@ -219,6 +219,8 @@ Arbitrary<Person> validPerson() {
 
 ## Fighting Indeterminism
 
+
+
    Die w�hrend des Testlaufs generierten Werte sind zu einem wesentlichen Teil zuf�llig generiert. Damit m�chte man die Chance erh�hen, auf Fehler und Auslassungen zu sto�en, an die bei Konzeption und Implementierung niemand gedacht hat. Der Nachteil dieses Ansatzes ist, dass eine fehlschlagende Property bereits im n�chsten Versuch wieder erfolgreich sein k�nnte, da zuf�llig anders generierte Parameter auch zu anderen Testergebnissen f�hren k�nnten. jqwik unternimmt zwei Dinge, um dieses Problem m�glichst klein zu halten:
 * L�sst man seine Tests aus einer IDE oder in der Kommandozeile ausf�hren, dann merkt sich jqwik f�r jede fehlschlagende Property den sogenannten Seed, eine Zahl, die dem Zufallsgenerator als Startwert f�r seine pseudozuf�llig erzeugten Werte dient. Und so lange, wie diese Property fehlschl�gt, wird immer wieder der gleiche Seed verwendet und damit die gleichen Werte generiert.
 * M�chte man eine bestimmte Folge von generierten Werten festschreiben, dann kann man den Seed, der f�r jede Property im Testprotokoll auftaucht, fest eintragen, n�mlich so:
@@ -227,10 +229,38 @@ Arbitrary<Person> validPerson() {
 
 ## Other PBT Frameworks and Libs for Java
 
-Mit jqwik existiert eine Test-Engine, die sich nahtlos in die JUnit-5-Plattform integriert und dadurch automatisch von aktuellen IDEs und Build-Werkzeugen unterst�tzt wird. Wer (noch) nicht auf JUnit 5 setzt, der hat auch Alternativen zur Auswahl, u.a. QuickTheories [8] und junit-quickcheck [9].
+_jqwik_ being a JUnit 5 test engine requires you to use the JUnit platform.
+If you cannot or do not want to use JUnit 5 yet, there are a few alternatives
+ for doing PBT on the JVM:
 
-## Next Step
+- [JUnit-Quickcheck](http://pholser.github.io/junit-quickcheck): 
+  This is where _jqwik_ has stolen the annotation approach. So the way you
+  write your properties is similar. JUnit-Quickcheck is tightly integrated with JUnit 4
+  and also supports shrinking.
 
-[5] jqwik-User-Guide. http://jqwik.net/user-guide.html#how-to-use 
-[8] QuickTheories. https://github.com/ncredinburgh/QuickTheories 
-[9] junit-quickcheck. http://pholser.github.io/junit-quickcheck 
+- [QuickTheories](https://github.com/ncredinburgh/QuickTheories):
+  QuickTheories is completely test framework independent, which has pros and cons.
+  Besides shrinking it also has an experimental feature in which value generation
+  is being influenced by coverage data.
+
+- [Vavr](http://www.vavr.io/): The functional library for Java also comes with a 
+  [property-based testing module](https://github.com/vavr-io/vavr/tree/master/vavr-test).
+  Currently no shrinking support, though.
+  
+- [ScalaCheck](http://www.scalacheck.org/): 
+  Definitely a mature property based testing system with shrinking and all, 
+  iff you prefer Scala over Java. There's also 
+  [a book out there](https://www.artima.com/shop/scalacheck)
+  about ScalaCheck.
+  
+- [test.check for Clojure](https://github.com/clojure/test.check): 
+  Strongly inspired and influenced by QuickCheck. Since Clojure
+  does not have static types generators must always be declared explicitly.
+
+- [KotlinTest](https://github.com/kotlintest/kotlintest) also has basic support for PBT. 
+  Currently no shrinking yet.
+
+
+## Next Episode
+
+The next article will focus on a crucial feature of mature PBT frameworks: Shrinking.
