@@ -219,13 +219,23 @@ Arbitrary<Person> validPerson() {
 
 ## Fighting Indeterminism
 
+The values generated during a test run are mostly random. That way you enhance the chance
+to hit upon bugs and specification gaps that no one considered during conception and implementation.
+The downside of introducing chance into testing is inherent indeterminism: A falsified
+property in this run could succeed in the next since different test data might lead to different
+test results.
 
+There are two things _jqwik_ does to keep this problem in check:
 
-   Die w�hrend des Testlaufs generierten Werte sind zu einem wesentlichen Teil zuf�llig generiert. Damit m�chte man die Chance erh�hen, auf Fehler und Auslassungen zu sto�en, an die bei Konzeption und Implementierung niemand gedacht hat. Der Nachteil dieses Ansatzes ist, dass eine fehlschlagende Property bereits im n�chsten Versuch wieder erfolgreich sein k�nnte, da zuf�llig anders generierte Parameter auch zu anderen Testergebnissen f�hren k�nnten. jqwik unternimmt zwei Dinge, um dieses Problem m�glichst klein zu halten:
-* L�sst man seine Tests aus einer IDE oder in der Kommandozeile ausf�hren, dann merkt sich jqwik f�r jede fehlschlagende Property den sogenannten Seed, eine Zahl, die dem Zufallsgenerator als Startwert f�r seine pseudozuf�llig erzeugten Werte dient. Und so lange, wie diese Property fehlschl�gt, wird immer wieder der gleiche Seed verwendet und damit die gleichen Werte generiert.
-* M�chte man eine bestimmte Folge von generierten Werten festschreiben, dann kann man den Seed, der f�r jede Property im Testprotokoll auftaucht, fest eintragen, n�mlich so:
-     	@Property(seed = 424242l, reporting = ReportingMode.GENERATED)
-     	void alwaysTheSameValues(@ForAll int aNumber) { � }
+- To fix a certain suite of generated values, you can set the random seed from a falsified test
+  run directly in the property annotation:
+  ```java
+  @Property(seed = "424242", reporting = ReportingMode.GENERATED)
+  void alwaysTheSameValues(@ForAll int aNumber) { ... }
+  ```  
+- If you run your tests from an IDE or through a build tool from the command line,
+  _jqwik_ remembers the seeds from falsified properties. That means that until you get rid of
+  the problem, e.g. by fixing the bug, you will always see the same suite of generated values.
 
 ## Other PBT Frameworks and Libs for Java
 
