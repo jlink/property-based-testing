@@ -23,8 +23,7 @@ class PersonGeneratorExamples {
 	}
 
 	static class Person {
-		private final String firstName;
-		private final String lastName;
+		private final String firstName, lastName;
 
 		Person(String firstName, String lastName) {
 			this.firstName = firstName;
