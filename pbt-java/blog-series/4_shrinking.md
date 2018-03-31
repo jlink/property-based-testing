@@ -1,7 +1,10 @@
 # Property-based Testing in Java - The Importance of Being Shrunk
 
-Shrinking
-   Ein weiteres Problem, das bei randomisierter Generierung auftaucht, 
+One problem that comes with random generation is the very loose relation between
+the randomly chosen falsifying example and the problem underlying the failing
+property.
+
+       Ein weiteres Problem, das bei randomisierter Generierung auftaucht,
    ist der manchmal nur schwer zu erkennende Zusammenhang zwischen 
    den generierten Werten und dem Bug im Code. 
    Betrachten wir das folgende Beispiel:
