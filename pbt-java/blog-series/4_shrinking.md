@@ -14,7 +14,7 @@ boolean rootOfSquareShouldBeOriginalValue(@Positive @ForAll int anInt) {
 
 The property states the trivial mathematical concept that the square root of a
 squared value should be equal to the originial value.
-We have switched off "Shrinking" - I'll explain the concept later -using
+We have switched off "Shrinking" - I'll explain the concept later - using
 the `shrinking` annotation attribute.
 Running this property will fail with the following message:
 
