@@ -2,12 +2,31 @@
 
 One problem that comes with random generation is the very loose relation between
 the randomly chosen falsifying example and the problem underlying the failing
-property.
+property. A simple example illustrates the problem:
 
-       Ein weiteres Problem, das bei randomisierter Generierung auftaucht,
-   ist der manchmal nur schwer zu erkennende Zusammenhang zwischen 
-   den generierten Werten und dem Bug im Code. 
-   Betrachten wir das folgende Beispiel:
+```java
+@Property(shrinking = ShrinkingMode.OFF)
+boolean rootOfSquareShouldBeOriginalValue(@Positive @ForAll int anInt) {
+    int square = anInt * anInt;
+    return Math.sqrt(square) == anInt;
+}
+```
+
+The property states the trivial mathematical concept that the square root of a
+squared value should be equal to the originial value.
+We have switched off "Shrinking" - I'll explain the concept later -using
+the `shrinking` annotation attribute.
+Running this property will fail with the following message:
+
+```
+org.opentest4j.AssertionFailedError:
+    Property [rootOfSquareShouldBeOriginalValue] falsified with sample [2147483647]
+```
+
+The sample is actually quite a high number...
+
+
+Betrachten wir das folgende Beispiel:
 
 
 ```java
