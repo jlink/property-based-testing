@@ -16,7 +16,7 @@ class ShrinkingExampleProperties {
 		return aList;
 	}
 
-	@Property(shrinking = ShrinkingMode.ON)
+	@Property(shrinking = ShrinkingMode.FULL)
 	boolean reverseShouldSwapFirstAndLast(@ForAll List<Integer> aList) {
 		Assume.that(!aList.isEmpty());
 		List<Integer> reversed = brokenReverse(aList);
