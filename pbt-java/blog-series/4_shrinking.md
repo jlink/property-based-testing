@@ -26,17 +26,15 @@ org.opentest4j.AssertionFailedError:
     Property [rootOfSquareShouldBeOriginalValue] falsified with sample [1207764160]
 ```
 
-The sample found is just random. Unless you already have an inkling of what
+The falsified sample found by _jqwik_ is random. Unless you already have an inkling of what
 the issue might be, the number itself does not give you an additional hint.
 Even the fact that it's rather large might be a coincidence. At this point
 you will either add additional logging, introduce assertions or even
 start up the debugger to get more information about the problem at hand.
 
-Let's take a different route, switch shrinking on (`ShrinkingMode.FULL`)
+Let's take a different route, turn shrinking to full power (`ShrinkingMode.FULL`)
 and rerun the property:
 
-
-Betrachten wir das folgende Beispiel:
 
 ```
 originalSample = [1207764160],
@@ -107,7 +105,9 @@ will make shrinking easier.
 
 ## Container Types
 
-
+The task of shrinking gets a bit more tricky when we have to deal with
+containers or other composed types. Here's a property which checks a broken
+implementation of `reverse`.
 
 
 ```java
@@ -119,7 +119,7 @@ static <E> List<E> brokenReverse(List<E> aList) {
         return aList;
     }
  
-@Property(shrinking = ShrinkingMode.OFF)
+@Property
 boolean reverseShouldSwapFirstAndLast(@ForAll List<Integer> aList) {
     Assume.that(!aList.isEmpty());
     List<Integer> reversed = brokenReverse(aList);
@@ -127,30 +127,23 @@ boolean reverseShouldSwapFirstAndLast(@ForAll List<Integer> aList) {
 }
 ```   
    
-   In diesem Beispiel testen wir eine kaputte Implementierung brokenReverse. 
-   Ein erster Testlauf liefert ein Ergebnis, das in etwa so aussieht:
-     org.opentest4j.AssertionFailedError: 
-     Property [reverseShouldSwapFirstAndLast] falsified with sample 
-         [[0, 1, -1, -2147483648, 2147483647, -247, 247, 39, -31, 39, 477784874]]
-
-Welche Eigenschaft dieser Liste ist f�r das Fehlverhalten verantwortlich? 
-Sind es die negativen Zahlen? Ist es der doppelte Eintrag? Da hilft nur Debuggen, oder?
-
-    Geben wir jqwik noch eine Chance und schalten diesmal das �Schrumpfen� ein, 
-    indem wir ShrinkingMode.ON  verwenden � oder diesen Eintrag entfernen. 
-    Dann sieht das Ergebnis ein wenig anders aus:
-     org.opentest4j.AssertionFailedError: 
-     Property [reverseShouldSwapFirstAndLast] falsified with sample 
-         [[0, 0, 0, -1]]
-         
-   Das ist doch ein deutlich angenehmeres Beispiel, das uns fast den Implementierungsfehler 
-   erraten l�sst: Es k�nnte mit der L�nge der Liste zu tun haben � und genau so ist es ja auch.
+The output should look similar to this:
    
-   Hinter den Kulissen hat jqwik die urspr�nglich fehlschlagende Beispiel-Liste genommen, 
-   und diese �geschrumpft�, um ein m�glichst einfaches und aussagekr�ftiges Sample zu erhalten. 
-   Mit dieser als Shrinking bezeichneten Funktionalit�t, sind die meisten Property-Testbibliotheken 
-   ausgestattet.
+```
+originalSample = [[0, 1, -1, -2147483648, 2147483647, -932716982, ...]], 
+sample = [[0, 0, 0, -1]]
 
+org.opentest4j.AssertionFailedError: 
+    Property [reverseShouldSwapFirstAndLast] falsified with sample [[0, 0, 0, -1]]
+```
+
+What we can see is that shrinking took place on different levels. Both the length of the list
+and the individual list elements got stripped down to what _jqwik_ considered to be the
+simplest examples still failing: A list with 4 elements in which only a single element
+differs from all the others. And already we could argue about if this really is 
+"the simplest" example: Wouldn't "1" be even simpler than "-1"? Should the different
+element be on the first position?  
+   
 ## Type-Based versus Integrated Shrinking
 
 
