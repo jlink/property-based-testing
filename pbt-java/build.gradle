@@ -3,8 +3,8 @@ repositories {
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
-ext.junitPlatformVersion = '1.1.0'
-ext.junitJupiterVersion = '5.1.0'
+ext.junitPlatformVersion = '1.1.1'
+ext.junitJupiterVersion = '5.1.1'
 ext.jqwikVersion = '0.8.10-SNAPSHOT'
 
 apply plugin: 'java'
@@ -40,6 +40,8 @@ dependencies {
 	// For Jupiter tests and also necessary to work around some IntelliJ bugs
 	testCompile("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 
+	testCompile('com.pholser:junit-quickcheck-generators:0.8')
+	testCompile("org.junit.vintage:junit-vintage-engine:${junitJupiterVersion}")
 }
 
 task wrapper(type: Wrapper) {
