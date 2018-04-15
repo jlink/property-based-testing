@@ -42,6 +42,8 @@ dependencies {
 
 	testCompile('com.pholser:junit-quickcheck-generators:0.8')
 	testCompile("org.junit.vintage:junit-vintage-engine:${junitJupiterVersion}")
+
+	testCompile group: 'org.quicktheories', name: 'quicktheories', version: '0.25'
 }
 
 task wrapper(type: Wrapper) {
