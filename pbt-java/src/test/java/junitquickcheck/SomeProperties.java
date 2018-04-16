@@ -2,7 +2,6 @@ package junitquickcheck;
 
 import com.pholser.junit.quickcheck.*;
 import com.pholser.junit.quickcheck.generator.*;
-import com.pholser.junit.quickcheck.generator.java.lang.IntegerGenerator;
 import com.pholser.junit.quickcheck.random.SourceOfRandomness;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.*;
@@ -28,20 +27,29 @@ public class SomeProperties {
 
 
 	@Property()
-	public void shouldShrinkTo101String(@From(NumericString.class) String iString) {
-		int i = Integer.parseInt(iString);
+	public void shouldShrinkTo105(
+			@From(DivisibleBy5.class) //
+			@When(seed = -4386629332000517955L) //
+					int i //
+	) {
+		System.out.println(i);
+		// Why are there i's that are not multiples of 5?
 		Assert.assertTrue(i % 2 == 0);
 	}
 
-	public static class NumericString extends Generator<String> {
+	public static class DivisibleBy5 extends Generator<Integer> {
 
-		public NumericString() {
-			super(String.class);
+		public DivisibleBy5() {
+			super(Integer.class);
 		}
 
 		@Override
-		public String generate(SourceOfRandomness random, GenerationStatus status) {
-			return String.valueOf(random.nextInt(100, 1000));
+		public Integer generate(SourceOfRandomness random, GenerationStatus status) {
+			return gen().type(int.class) //
+					.map(i -> Math.abs(i * 5)) //
+					.filter(i -> i > 100) //
+					.filter(i -> i < 1000) //
+					.generate(random, status);
 		}
 	}
 }
