@@ -32,8 +32,6 @@ public class SomeProperties {
 			@When(seed = -4386629332000517955L) //
 					int i //
 	) {
-		System.out.println(i);
-		// Why are there i's that are not multiples of 5?
 		Assert.assertTrue(i % 2 == 0);
 	}
 
@@ -46,9 +44,9 @@ public class SomeProperties {
 		@Override
 		public Integer generate(SourceOfRandomness random, GenerationStatus status) {
 			return gen().type(int.class) //
-					.map(i -> Math.abs(i * 5)) //
 					.filter(i -> i > 100) //
 					.filter(i -> i < 1000) //
+					.map(i -> Math.abs(i * 5)) //
 					.generate(random, status);
 		}
 	}
