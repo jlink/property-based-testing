@@ -29,7 +29,6 @@ public class SomeProperties {
 	@Property()
 	public void shouldShrinkTo105(
 			@From(DivisibleBy5.class) //
-			@When(seed = -4386629332000517955L) //
 					int i //
 	) {
 		Assert.assertTrue(i % 2 == 0);
