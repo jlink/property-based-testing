@@ -146,13 +146,90 @@ element be on the first position?
    
 ## Type-Based versus Integrated Shrinking
 
+The original
+[QuickCheck for Haskell](https://hackage.haskell.org/package/QuickCheck)
+relies mostly on the type information for shrinking. That's to say
+that when you have - for example - a parameter of type `String` that results
+in a failed property, the framework will use a generic shrinking strategy for
+`String` values, regardless of how the value was generated in the first place.
 
+Given an expressive type system like Haskell's this _type-based shrinking_
+is usually not a problem since Haskell programmers try to encode
+all domain constraints in type signatures. When you're dealing with a
+less expressive type system like Java's or when essential property
+preconditions are used explicitely for value generation, this
+approach can lead to problems.
 
-   Typischerweise findet dieses Schrumpfen ausschlie�lich auf Basis des statischen Typs statt, 
-   was jedoch zu dem Problem f�hren kann, dass ein geschrumpfter Wert sich au�erhalb des 
-   spezifizierten Bereichs bewegen kann. 
-   Aus diesem Grund setzt jqwik auf Integrated Shrinking [6], was aufw�ndiger zu implementieren ist, 
-   daf�r aber garantiert, dass geschrumpfte Werte die gleichen Eigenschaften besitzen 
-   wie generierte Werte.
+Let's consider the following example:
 
-[6] Integrated vs type based shrinking. http://hypothesis.works/articles/integrated-shrinking/
+```java
+@Property
+boolean shouldShrinkTo101(@ForAll("numberStrings") String aNumberString) {
+    return Integer.parseInt(aNumberString) % 2 == 0;
+}
+
+@Provide
+Arbitrary<String> numberStrings() {
+    return Arbitraries.integers().between(100, 1000).map(String::valueOf);
+}
+```
+
+When _jqwik_ is executing this property one of the created examples
+will eventually be the string representation of an odd number. Let's
+assume the value is `"197"`. A merely type-based shrinking approach
+would probably try to remove characters and eventually end up at `"1"` as the
+simplest falsifiable example. What a pity that `"1"` is outside the range
+of values that can potentially be generated.
+Therefore, it should never be tried during shrinking!
+
+[_Integrated shrinking_](http://hypothesis.works/articles/integrated-shrinking/)
+is an alternative technique which considers all
+information present at generation time for its shrinking. _jqwik_
+actually has an _integrated shrinker_ and will never shrink to values
+outside the generating constraints.
+In the example above the value to which _jqwik_ eventually shrinks
+should be  `"101"`.
+
+The drawback of _integrated shrinking_ is the complexity of shrinking
+mechanisms. For the users of PBT libraries this is mostly transparent,
+but for the implementors of those libraries this can be a real burden.
+To get a grasp of the difficulty involved, try to understand the following
+complicated (even if contrived) property:
+
+```java
+@Property
+boolean shrinkingCanBeComplicated(
+        @ForAll("first") String first, //
+        @ForAll("second") String second //
+) {
+    String aString = first + second;
+    return aString.length() < 4 || aString.length() > 5;
+}
+
+@Provide
+Arbitrary<String> first() {
+    return Arbitraries.strings() //
+            .withCharRange('a', 'z') //
+            .ofMinLength(1).ofMaxLength(10) //
+            .filter(string -> string.endsWith("h"));
+}
+
+@Provide
+Arbitrary<String> second() {
+    return Arbitraries.strings() //
+            .withCharRange('0', '9') //
+            .ofMinLength(0).ofMaxLength(10) //
+            .filter(string -> string.length() >= 1);
+}
+```
+
+_jqwik_ is able to shrink to either `["h", "000"]` or `["aah", "0"]`
+or `["ah", "00"]` depending on the initial random seed. Given the
+involved compositions, mappings, filters and constraints this is
+quite an accomplishment. Don't you think so, too?
+
+## Next Episode
+
+The next article will present a few patterns that can guide you to identify
+and formulate properties for your own code.
+
