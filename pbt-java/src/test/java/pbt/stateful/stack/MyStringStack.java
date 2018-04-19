@@ -14,6 +14,7 @@ public class MyStringStack {
 	}
 
 	public void clear() {
+		//if (elements.size() < 3) elements.clear();
 		//elements.clear();
 	}
 
@@ -27,5 +28,10 @@ public class MyStringStack {
 
 	public String top() {
 		return elements.get(0);
+	}
+
+	@Override
+	public String toString() {
+		return elements.toString();
 	}
 }
