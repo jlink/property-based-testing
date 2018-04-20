@@ -1,6 +1,6 @@
 # Property-based Testing in Java - The Importance of Being Shrunk
 
-One problem that comes with random generation is the very loose relation between
+One problem that comes with random generation is the loose relation between
 the randomly chosen falsifying example and the problem underlying the failing
 property. A simple example illustrates the problem:
 
@@ -27,12 +27,12 @@ org.opentest4j.AssertionFailedError:
 ```
 
 The falsified sample found by _jqwik_ is random. Unless you already have an inkling of what
-the issue might be, the number itself does not give you an additional hint.
+the issue might be, the number itself does not give you an obvious hint.
 Even the fact that it's rather large might be a coincidence. At this point
 you will either add additional logging, introduce assertions or even
 start up the debugger to get more information about the problem at hand.
 
-Let's take a different route, turn shrinking to full power (`ShrinkingMode.FULL`)
+Let's take a different route, turn shrinking on with (`ShrinkingMode.FULL`)
 and rerun the property:
 
 
@@ -60,48 +60,11 @@ falsified values:
 @Poperty(reporting = Reporting.FALSIFIED, shrinking = ShrinkingMode.FULL)
 ```
 
-Looking at the reporting output will reveal that shrinking starts with
-big steps (halving the number) and in the end by decreasing the number
-with step size 1. In this example 46341 is indeed the smallest integer
+In this example 46341 is indeed the smallest integer
 number that falsified the property. And what's the special thing about it?
 As you might have guessed the square of 46341 - 2147488281 - is larger
 than `Integer.MAX_VALUE` and will thus lead to integer overflow.
 Conclusion: The property above only holds for int-type numbers up to 46340.
-
-## The Simplest Falsifying Sample
-
-So we might agree that this time _jqwik_ was indeed able to find the simplest
-example that produces the failure. In general, however, this is not always
-the case. Why's that? A few reasons:
-
-- It's not always easy to agree on what "simplest" means in a given context.
-  Would you consider +5 to be simpler than -5? Maybe yes. +2 to be simpler than -1? Hmm...
-
-  As soon as you get in the realm of combined arbitraries and more than
-  one parameter there can be several shrinking targets that could all be
-  considered to be "the simplest". There might even be an innumerous number of them.
-  Further down I'll show an example with more than one potential best shrunk value.
-
-- Even if we can agree on a common metric for "the simplest" shrinking
-  might not find it. From a computational point of view, shrinking is a
-  search problem with an almost infinite search space. That's why
-  _jqwik_ - or any PBT library - has to use heuristics in order to prune the
-  search space as much as possible. The heuristics of one tool might
-  be superior in one scenario but fail to produce any reasonable simplification
-  in another.
-
-- For shrinking to work at all, deterministic property checking is crucial.
-  As long as a property can be considered to be (practically) a pure
-  function - i.e. only the generated values influence checking results - everything
-  is fine. But as soon as you have indeterministic effects in falsification
-  itself the whole approach breaks down. That's why concurrent property
-  testing and shrinking often don't go together.
-
-My recommendation: Don't expect any library to always find the simplest
-falsifying sample for you. Instead, develop an intuition for what the
-library can reasonable do in terms of simplifying randomly found samples.
-And sometimes, simplifying the parameters you use in the property,
-will make shrinking easier.
 
 ## Container Types
 
@@ -144,6 +107,41 @@ differs from all the others. And already we could argue about if this really is
 "the simplest" example: Wouldn't "1" be even simpler than "-1"? Should the different
 element be on the first position?  
    
+## The Simplest Falsifying Sample
+
+So we might agree that in the examples above _jqwik_ was indeed able to find the simplest
+values that produce the failure. In general, however, this is not always
+the case. Why's that? A few reasons:
+
+- It's not always easy to agree on what "simplest" means in a given context.
+  Would you consider +5 to be simpler than -5? Maybe yes. +2 to be simpler than -1? Hmm...
+
+  As soon as you get in the realm of combined arbitraries and more than
+  one parameter there can be several shrinking targets that could all be
+  considered to be "the simplest". There might even be an innumerous number of them.
+  Later, I'll show an example with more than one potential best shrunk value.
+
+- Even if we can agree on a common metric for "the simplest" shrinking
+  might not find it. From a computational point of view, shrinking is a
+  search problem with an almost infinite search space. That's why
+  _jqwik_ - or any PBT library - has to use heuristics in order to prune the
+  search space as much as possible. The heuristics of one tool might
+  be superior in one scenario but fail to produce any reasonable simplification
+  in another.
+
+- For shrinking to work at all, deterministic property checking is crucial.
+  As long as a property can be considered to be (practically) a pure
+  function - i.e. only the generated values influence checking results - everything
+  is fine. But as soon as you have indeterministic effects in falsification
+  itself the whole approach breaks down. That's why concurrent property
+  testing and shrinking often don't go together.
+
+My recommendation: Don't expect any library to always find the simplest
+falsifying sample for you. Instead, develop an intuition for what the
+library can reasonable do in terms of simplifying randomly found samples.
+And sometimes, simplifying the parameters you use in the property,
+will make shrinking easier.
+
 ## Type-Based versus Integrated Shrinking
 
 The original
@@ -154,10 +152,10 @@ in a failed property, the framework will use a generic shrinking strategy for
 `String` values, regardless of how the value was generated in the first place.
 
 Given an expressive type system like Haskell's this _type-based shrinking_
-is usually not a problem since Haskell programmers try to encode
+is usually not a big problem since Haskell programmers aim at encoding
 all domain constraints in type signatures. When you're dealing with a
 less expressive type system like Java's or when essential property
-preconditions are used explicitely for value generation, this
+preconditions are used explicitely for value generation, the type-based
 approach can lead to problems.
 
 Let's consider the following example:
@@ -184,11 +182,11 @@ Therefore, it should never be tried during shrinking!
 
 [_Integrated shrinking_](http://hypothesis.works/articles/integrated-shrinking/)
 is an alternative technique which considers all
-information present at generation time for its shrinking. _jqwik_
-actually has an _integrated shrinker_ and will never shrink to values
+information present at generation time while shrinking. _jqwik_
+actually has an _integrated shrinker_ and will therefore never shrink to values
 outside the generating constraints.
 In the example above the value to which _jqwik_ eventually shrinks
-should be  `"101"`.
+is `"101"`.
 
 The drawback of _integrated shrinking_ is the complexity of shrinking
 mechanisms. For the users of PBT libraries this is mostly transparent,
@@ -230,6 +228,6 @@ quite an accomplishment. Don't you think so, too?
 
 ## Next Episode
 
-The next article will present a few patterns that can guide you to identify
+In the next article we will look at a few patterns that can guide you to identify
 and formulate properties for your own code.
 
