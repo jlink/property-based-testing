@@ -33,7 +33,7 @@ class ConstrainingValuesExamples {
 
 	@Provide
 	Arbitrary<Double> positiveDoubles() {
-		return Arbitraries.doubles().filter(aDouble -> aDouble > 0);
+		return Arbitraries.doubles().between(0, Double.MAX_VALUE);
 	}
 
 
