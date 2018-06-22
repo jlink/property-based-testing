@@ -3,8 +3,8 @@ repositories {
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
-ext.junitPlatformVersion = '1.1.1'
-ext.junitJupiterVersion = '5.1.1'
+ext.junitPlatformVersion = '1.2.0'
+ext.junitJupiterVersion = '5.2.0'
 ext.jqwikVersion = '0.8.12-SNAPSHOT'
 
 apply plugin: 'java'
@@ -46,7 +46,7 @@ dependencies {
 	testCompile group: 'org.quicktheories', name: 'quicktheories', version: '0.25'
 }
 
-task wrapper(type: Wrapper) {
+wrapper {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '4.7'
+	gradleVersion = '4.8.1'
 }
