@@ -11,7 +11,7 @@ class MyStringStackActions {
 		return Arbitraries.oneOf(push(), clear(), pop());
 	}
 
-	private static Arbitrary<Action<MyStringStack>> push() {
+	public static Arbitrary<Action<MyStringStack>> push() {
 		return Arbitraries.strings().alpha().ofLength(5).map(PushAction::new);
 	}
 
@@ -51,7 +51,7 @@ class MyStringStackActions {
 		@Override
 		public MyStringStack run(MyStringStack model) {
 			model.clear();
-			Assertions.assertThat(model.isEmpty()).isTrue();
+			Assertions.assertThat(model).isEqualTo(new MyStringStack());
 			return model;
 		}
 
