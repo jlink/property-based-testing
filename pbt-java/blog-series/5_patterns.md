@@ -55,6 +55,14 @@ I've stolen all names elsewhere:
 
   Some properties of our code do not change after applying our logic.
 
+  For example:
+
+  - Sorting and mapping should never change the size of a collection.
+  - After filtering out some values, the remaining values should
+    still be in the same order.
+  - When you use stateful objects in sets or as key in maps, whatever
+    you do with them should never change their hash value.
+
 - __Commutativity__
 
   If a set of functions is commutative, change of order in applying the functions
@@ -78,6 +86,11 @@ I've stolen all names elsewhere:
 
   Some logic is hard to execute but easy to check. Consider e.g.
   the effort for _finding prime numbers_ versus _checking a prime number_.
+
+- __Induction: Solve a smaller problem first__
+
+  You might be able to divert your domain check in a base case and
+  a general rule [derived from that base case](#induction).
 
 - __Stateful Testing__
 
@@ -183,3 +196,53 @@ org.junit.ComparisonFailure: expected:<"[]"> but was:<"[?]">
 ```
 
 Even a standard character like '€' cannot be reliably encoded in all charsets!
+
+
+## Induction
+
+Those of us with a bit of formal mathematical education are familiar with
+the term [_complete induction_](https://en.wikipedia.org/wiki/Mathematical_induction#Complete_induction).
+While it's used as a technique to proof theorems in mathematics we can
+use a very similar approach to formulate domain properties without
+fully duplicating domain logic in our tests.
+
+I'll use _Sorting a List of Integers_ as example:
+- Our base case is simple: Lists of length 1 or below are always sorted.
+- The rule for larger lists is also straightforward:
+  A list is sorted when its first element is smaller than its second element
+  and when the list without the first element is also sorted.
+
+Here's the equivalent code:
+
+
+```java
+class SortingProperties {
+
+	@Property
+	boolean sortingAListWorks(@ForAll List<Integer> unsorted) {
+		return isSorted(sort(unsorted));
+	}
+
+	private boolean isSorted(List<Integer> sorted) {
+		if (sorted.size() <= 1) return true;
+		return sorted.get(0) <= sorted.get(1) //
+				&& isSorted(sorted.subList(1, sorted.size()));
+	}
+
+	private List<Integer> sort(List<Integer> unsorted) {
+		unsorted.sort((a, b) -> a > b ? 1 : -1);
+		return unsorted;
+	}
+}
+```
+
+Mind that this property actually _does_ check the desired functional property
+of `List.sort`. In this case we might consider forgo example-based
+testing completely.
+
+
+## Next Episode
+
+In the forthcoming article I will have a closer look at _Stateful Testing_,
+which is well suited to be tackled with Property-Based-Testing ideas.
+
