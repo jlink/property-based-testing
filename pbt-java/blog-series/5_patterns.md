@@ -236,8 +236,8 @@ class SortingProperties {
 }
 ```
 
-Mind that this property actually _does_ check the desired functional property
-of `List.sort`. In this case we might consider forgo example-based
+Mind that this property actually _does_ check a desired functional quality
+of `List.sort`. In this case we might even consider forgo example-based
 testing completely.
 
 
