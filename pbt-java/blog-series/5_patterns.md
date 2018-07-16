@@ -3,7 +3,7 @@ It's been 3 months that I tried to shed some light on the importance of
 Now that we've covered many of the technicalities of the approach it's
 time to occupy with the how to use PBT in practice.
 
-# Property-based Testing in Java - Patterns
+# Patterns to Find Good Properties
 
 When you're taking your early steps with PBT finding suitable properties can
 feel like an almost impossible task. Whereas examples often appear naturally
@@ -20,22 +20,36 @@ I've stolen all names elsewhere:
 
 - __Business Rule as Property__ (aka _Obvious Property_)
 
-  Sometimes the domain specification itself can be rather easily interpreted
-  and written as a property.
+  Sometimes the domain specification itself can be interpreted
+  and [written as a property](#pattern-business-rule-as-property).
 
 - __Fuzzying__
 
   Code should never explode, even if you feed it with lots of diverse and unusual
-  input data.
+  input data. Thus, the main idea is to generate the input, execute the
+  function under test and check that:
+
+  - No exceptions occur, at least no unexpected ones
+  - No 5xx return codes in http requests, maybe you even require 2xx all the time
+  - All return values are valid
+  - Runtime is under an acceptable threshold
+  - Using the same input several times will produce the same outcome
+
+  _Fuzzying_ is often done in retrospect when you want to check your
+  existing code for robustness. It's also more common in
+  _integrated testing_ since while doing _micro or unit testing_ you can
+  usually be more specific than just demanding "Don't blow up!".
+
 
 - __Inverse Functions__
 
   If a function has an inverse function, then applying function first
-  and inverse second should return the original input.
+  and inverse second [should return the original input](#inverse-functions).
 
 - __Idempotent Functions__
 
   The multiple application of an idempotent function should not change results.
+  Ordering a list a second time, for example, shouldn't change it anymore.
 
 - __Invariant Functions__
 
@@ -125,3 +139,47 @@ by the number of checks: If a single integrated check takes one second,
 1000 runs of this check will take more than 15 minutes.
 
 
+## Inverse Functions
+
+You have already seen an example of this pattern. In the
+[second episode]({% post_url 2018-03-26-from-examples-to-properties %})
+we checked JDK's `Collections.reverse()` method. _Reverse_ is a special
+case since it is its own inverse function.
+
+Let's therefore try something else, namely `URLEncoder.encode` and
+`URLDecoder.decode`. Both functions take a string to en/decode and the
+name of a charset as arguments. The property method to check the "invertibility"
+of encoding any string with any charset is fairly simple:
+
+```java
+@Property
+void encodeAndDecodeAreInverse(
+        @ForAll @StringLength(min = 1, max = 20) String toEncode,
+        @ForAll("charset") String charset
+) throws UnsupportedEncodingException {
+    String encoded = URLEncoder.encode(toEncode, charset);
+    assertThat(URLDecoder.decode(encoded, charset)).isEqualTo(toEncode);
+}
+
+@Provide
+Arbitrary<String> charset() {
+    Set<String> charsets = Charset.availableCharsets().keySet();
+    return Arbitraries.of(charsets.toArray(new String[charsets.size()]));
+}
+```
+
+What surprised me - and might surprise you: _Decode_ is NOT an inverse
+function of _encode_ for all charsets:
+
+```
+timestamp = 2018-07-16T11:32:45.021,
+    seed = 1207350373430593188,
+    originalSample = ["萸偟쌴穎䀝珣亂兝뢏", "ISO-2022-JP-2"],
+    sample = ["", "Big5"]
+
+org.junit.ComparisonFailure: expected:<"[]"> but was:<"[?]">
+    Expected :""
+    Actual   :"?"
+```
+
+Even a standard character like '€' cannot be reliably encoded in all charsets!
