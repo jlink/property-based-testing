@@ -11,7 +11,7 @@ class MyStringStackActions {
 		return Arbitraries.oneOf(push(), clear(), pop());
 	}
 
-	public static Arbitrary<Action<MyStringStack>> push() {
+	static Arbitrary<Action<MyStringStack>> push() {
 		return Arbitraries.strings().alpha().ofLength(5).map(PushAction::new);
 	}
 
