@@ -5,9 +5,9 @@ import net.jqwik.api.stateful.*;
 
 class CircularBufferProperties {
 
-	@Property(tries = 10, reporting = Reporting.GENERATED)
-	void checkMyStackMachine(@ForAll("sequences") ActionSequence<CircularBuffer> sequence) {
-		sequence.run(new CircularBuffer(10));
+	@Property(tries = 100, reporting = Reporting.GENERATED)
+	void checkSequentialStateMachine(@ForAll("sequences") ActionSequence<CircularBuffer> sequence) {
+		sequence.run(null);
 	}
 
 	@Provide

@@ -6,47 +6,84 @@ import net.jqwik.api.stateful.*;
 class CircularBufferActions {
 
 	static Arbitrary<Action<CircularBuffer>> actions() {
-		return Arbitraries.oneOf(put(), get(), size());
+		return Arbitraries.oneOf(create(), put(), get(), size());
+	}
+
+	static Arbitrary<Action<CircularBuffer>> create() {
+		return Arbitraries.integers().between(0, 100).map(NewAction::new);
 	}
 
 	static Arbitrary<Action<CircularBuffer>> put() {
-		return null;
-//		return Arbitraries.strings().alpha().ofLength(5).map(PutAction::new);
+		return Arbitraries.integers().map(Object::toString).map(PutAction::new);
 	}
 
 	private static Arbitrary<Action<CircularBuffer>> get() {
-		return null;
-//		return Arbitraries.constant(new GetAction());
+		return Arbitraries.constant(new GetAction());
 	}
 
 	private static Arbitrary<Action<CircularBuffer>> size() {
-		return null;
-//		return Arbitraries.constant(new SizeAction());
+		return Arbitraries.constant(new SizeAction());
 	}
 
-	private static class PutAction implements Action<CircularBuffer> {
+	private static class NewAction implements Action<CircularBuffer> {
 
-		@Override
-		public boolean precondition(CircularBuffer model) {
-			return false;
+		private final int initialCapacity;
+
+		public NewAction(int initialCapacity) {
+			this.initialCapacity = initialCapacity;
 		}
 
 		@Override
 		public CircularBuffer run(CircularBuffer model) {
-			return null;
+			return new CircularBuffer(initialCapacity);
 		}
+
+		@Override
+		public String toString() {
+			return String.format("new CircularBuffer(%s)", initialCapacity);
+		}
+
+	}
+
+	private static class PutAction implements Action<CircularBuffer> {
+
+		private final Object element;
+
+		public PutAction(Object element) {
+			this.element = element;
+		}
+
+		@Override
+		public boolean precondition(CircularBuffer model) {
+			return model != null;
+		}
+
+		@Override
+		public CircularBuffer run(CircularBuffer model) {
+			return model;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("put(%s)", element);
+		}
+
 	}
 
 	private static class GetAction implements Action<CircularBuffer> {
 
 		@Override
 		public boolean precondition(CircularBuffer model) {
-			return false;
+			return model != null;
 		}
 
 		@Override
 		public CircularBuffer run(CircularBuffer model) {
-			return null;
+			return model;
+		}
+		@Override
+		public String toString() {
+			return "get()";
 		}
 	}
 
@@ -54,12 +91,17 @@ class CircularBufferActions {
 
 		@Override
 		public boolean precondition(CircularBuffer model) {
-			return false;
+			return model != null;
 		}
 
 		@Override
 		public CircularBuffer run(CircularBuffer model) {
-			return null;
+			return model;
+		}
+
+		@Override
+		public String toString() {
+			return "size()";
 		}
 	}
 }
