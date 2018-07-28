@@ -1,51 +1,73 @@
 package pbt.stateful.circularbuffer;
 
+import java.util.*;
+
 import net.jqwik.api.*;
 import net.jqwik.api.stateful.*;
 
+import static org.assertj.core.api.Assertions.*;
+
 class CircularBufferActions {
 
-	static Arbitrary<Action<CircularBuffer>> actions() {
-		return Arbitraries.oneOf(create(), put(), get(), size());
-	}
+	static class Model {
+		int capacity;
+		CircularBuffer<Object> buffer;
+		List<Object> contents = new ArrayList<>();
 
-	static Arbitrary<Action<CircularBuffer>> create() {
-		return Arbitraries.integers().between(0, 100).map(NewAction::new);
-	}
-
-	static Arbitrary<Action<CircularBuffer>> put() {
-		return Arbitraries.integers().map(Object::toString).map(PutAction::new);
-	}
-
-	private static Arbitrary<Action<CircularBuffer>> get() {
-		return Arbitraries.constant(new GetAction());
-	}
-
-	private static Arbitrary<Action<CircularBuffer>> size() {
-		return Arbitraries.constant(new SizeAction());
-	}
-
-	private static class NewAction implements Action<CircularBuffer> {
-
-		private final int initialCapacity;
-
-		public NewAction(int initialCapacity) {
-			this.initialCapacity = initialCapacity;
-		}
-
-		@Override
-		public CircularBuffer run(CircularBuffer model) {
-			return new CircularBuffer(initialCapacity);
+		void initialize(int capacity) {
+			this.capacity = capacity;
+			this.buffer = new CircularBuffer<>(capacity);
+			this.contents.clear();
 		}
 
 		@Override
 		public String toString() {
-			return String.format("new CircularBuffer(%s)", initialCapacity);
+			return buffer.toString();
+		}
+	}
+
+	static Arbitrary<Action<Model>> actions() {
+		return Arbitraries.oneOf(create(), put(), get(), size());
+	}
+
+	static Arbitrary<Action<Model>> create() {
+		return Arbitraries.integers().between(0, 100).map(NewAction::new);
+	}
+
+	static Arbitrary<Action<Model>> put() {
+		return Arbitraries.integers().map(Object::toString).map(PutAction::new);
+	}
+
+	private static Arbitrary<Action<Model>> get() {
+		return Arbitraries.constant(new GetAction());
+	}
+
+	private static Arbitrary<Action<Model>> size() {
+		return Arbitraries.constant(new SizeAction());
+	}
+
+	private static class NewAction implements Action<Model> {
+
+		private final int capacity;
+
+		public NewAction(int capacity) {
+			this.capacity = capacity;
+		}
+
+		@Override
+		public Model run(Model model) {
+			model.initialize(capacity);
+			return model;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("new(%s)", capacity);
 		}
 
 	}
 
-	private static class PutAction implements Action<CircularBuffer> {
+	private static class PutAction implements Action<Model> {
 
 		private final Object element;
 
@@ -54,12 +76,14 @@ class CircularBufferActions {
 		}
 
 		@Override
-		public boolean precondition(CircularBuffer model) {
-			return model != null;
+		public boolean precondition(Model model) {
+			return model.buffer != null && model.contents.size() < model.capacity;
 		}
 
 		@Override
-		public CircularBuffer run(CircularBuffer model) {
+		public Model run(Model model) {
+			model.contents.add(element);
+			model.buffer.put(element);
 			return model;
 		}
 
@@ -70,32 +94,43 @@ class CircularBufferActions {
 
 	}
 
-	private static class GetAction implements Action<CircularBuffer> {
+	private static class GetAction implements Action<Model> {
 
 		@Override
-		public boolean precondition(CircularBuffer model) {
-			return model != null;
+		public boolean precondition(Model model) {
+			return model.buffer != null && !model.contents.isEmpty();
 		}
 
 		@Override
-		public CircularBuffer run(CircularBuffer model) {
+		public Model run(Model model) {
+			Object element = model.buffer.get();
+			Object head = model.contents.remove(0);
+			assertThat(element).isEqualTo(head);
 			return model;
 		}
+
 		@Override
 		public String toString() {
 			return "get()";
 		}
 	}
 
-	private static class SizeAction implements Action<CircularBuffer> {
+	private static class SizeAction implements Action<Model> {
 
 		@Override
-		public boolean precondition(CircularBuffer model) {
-			return model != null;
+		public boolean precondition(Model model) {
+			return model.buffer != null;
 		}
 
 		@Override
-		public CircularBuffer run(CircularBuffer model) {
+		public Model run(Model model) {
+			int size = model.buffer.size();
+			int expectedSize = model.contents.size();
+			assertThat(size).isLessThanOrEqualTo(model.capacity);
+			assertThat(size)
+					.as("size should be %s but was %s", expectedSize, size)
+					.isEqualTo(expectedSize);
+
 			return model;
 		}
 
