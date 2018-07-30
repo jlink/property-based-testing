@@ -17,8 +17,14 @@ class CircularBufferProperties {
 						.as("Size must not be negative")
 						.isGreaterThanOrEqualTo(0);
 
+		Invariant<Model> sizeMustNotExceedCapacity = model ->
+				assertThat(model.buffer.size())
+						.as("Size must not exceed capacity")
+						.isLessThanOrEqualTo(model.capacity);
+
 		sequence
 				.withInvariant(sizeMustNotBeNegative)
+				.withInvariant(sizeMustNotExceedCapacity)
 				.run(new Model());
 	}
 
