@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import net.jqwik.api.*;
+import net.jqwik.api.constraints.*;
+
 import org.assertj.core.api.Assertions;
 
 class Roman2DecimalProperties {
@@ -71,9 +73,8 @@ class Roman2DecimalProperties {
 
 		@Property
 		boolean addingAnyDescendingListOfLettersReturnsSumOfBaseValues(
-				@ForAll("listOfRomanNumeralLetters") List<Character> letters
+				@ForAll("listOfRomanNumeralLetters") @Size(min = 1, max = 10) List<Character> letters
 		) {
-			Assume.that(letters.size() > 0);
 			String romanNumber = letters.stream() //
 					.sorted(Comparator.comparingInt(c -> -roman2decimal(c))).map(c -> Character.toString(c)).collect(Collectors.joining(""));
 
