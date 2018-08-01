@@ -2,6 +2,8 @@ package pbt.romans;
 
 import java.util.*;
 
+import org.antlr.runtime.tree.*;
+
 public class Romans {
 
 	private static final String[] SUBTRACTION_PAIRS = new String[]{"iv", "ix", "xl", "xc", "cd", "cm"};
@@ -38,10 +40,18 @@ public class Romans {
 	}
 
 	private static int baseValueOf(char letter) {
-		Integer value = BASE_VALUES.get(letter);
+		Integer value = toDecimalBaseValues().get(letter);
 		if (null == value) {
 			throw new IllegalArgumentException(String.format("Letter '%s' is not allowed in roman numbers.", letter));
 		}
 		return value;
+	}
+
+	private static Map<Character, Integer> toDecimalBaseValues() {
+		return BASE_VALUES;
+	}
+
+	public static String decimal2roman(int decimal) {
+		return "i";
 	}
 }
