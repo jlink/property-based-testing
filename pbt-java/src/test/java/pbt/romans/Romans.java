@@ -1,8 +1,7 @@
 package pbt.romans;
 
 import java.util.*;
-
-import org.antlr.runtime.tree.*;
+import java.util.stream.*;
 
 public class Romans {
 
@@ -52,6 +51,24 @@ public class Romans {
 	}
 
 	public static String decimal2roman(int decimal) {
-		return "i";
+		Character letter = toRomanBaseValues().get(decimal);
+		if (letter != null)
+			return String.valueOf(letter);
+
+		String roman = "";
+		SortedSet<Integer> sortedBaseValues = new TreeSet<>(toRomanBaseValues().keySet());
+		for (Integer baseValue : ((TreeSet<Integer>) sortedBaseValues).descendingSet()) {
+			if (decimal >= baseValue) {
+				roman += toRomanBaseValues().get(baseValue);
+				decimal -= baseValue;
+			}
+		}
+		return roman;
+	}
+
+	private static Map<Integer, Character> toRomanBaseValues() {
+		return BASE_VALUES.entrySet()
+						  .stream()
+						  .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 	}
 }
