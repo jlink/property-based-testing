@@ -51,10 +51,22 @@ public class Romans {
 	}
 
 	public static String decimal2roman(int decimal) {
-		Character letter = toRomanBaseValues().get(decimal);
-		if (letter != null)
-			return String.valueOf(letter);
+		String roman = concatenateLettersForBaseValues(decimal);
+		roman = substituteSubtractionPairs(roman);
+		return roman;
+	}
 
+	private static String substituteSubtractionPairs(String roman) {
+		return roman
+				.replace("dcccc", "cm")
+				.replace("cccc", "cd")
+				.replace("lxxxx", "xc")
+				.replace("xxxx", "xl")
+				.replace("viiii", "ix")
+				.replace("iiii", "iv");
+	}
+
+	private static String concatenateLettersForBaseValues(int decimal) {
 		String roman = "";
 		NavigableSet<Integer> sortedBaseValues = new TreeSet<>(toRomanBaseValues().keySet());
 		for (Integer baseValue : sortedBaseValues.descendingSet()) {

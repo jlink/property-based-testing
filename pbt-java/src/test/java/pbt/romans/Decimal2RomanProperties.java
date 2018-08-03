@@ -3,6 +3,7 @@ package pbt.romans;
 import java.util.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.constraints.IntRange;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -65,12 +66,28 @@ class Decimal2RomanProperties {
 		}
 	}
 
-	//@Group
+	@Group
 	class Subtractions {
-
 		@Example
-		void four() {
+		void plainSubtractionPairs() {
 			assertThat(Romans.decimal2roman(4)).isEqualTo("iv");
+			assertThat(Romans.decimal2roman(9)).isEqualTo("ix");
+			assertThat(Romans.decimal2roman(40)).isEqualTo("xl");
+			assertThat(Romans.decimal2roman(90)).isEqualTo("xc");
+			assertThat(Romans.decimal2roman(400)).isEqualTo("cd");
+			assertThat(Romans.decimal2roman(900)).isEqualTo("cm");
+		}
+
+		@Property
+		void anyDecimalNumber(@ForAll @IntRange(min = 1, max = 10000) int decimal) {
+			String roman = Romans.decimal2roman(decimal);
+			assertThat(Romans.roman2decimal(roman)).isEqualTo(decimal);
+			for (char c : roman.toCharArray()) {
+				if (c != 'm') {
+					int count = Collections.frequency(Arrays.asList(roman.toCharArray()), c);
+					assertThat(count).isLessThanOrEqualTo(3);
+				}
+			}
 		}
 	}
 
