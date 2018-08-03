@@ -56,9 +56,9 @@ public class Romans {
 			return String.valueOf(letter);
 
 		String roman = "";
-		SortedSet<Integer> sortedBaseValues = new TreeSet<>(toRomanBaseValues().keySet());
-		for (Integer baseValue : ((TreeSet<Integer>) sortedBaseValues).descendingSet()) {
-			if (decimal >= baseValue) {
+		NavigableSet<Integer> sortedBaseValues = new TreeSet<>(toRomanBaseValues().keySet());
+		for (Integer baseValue : sortedBaseValues.descendingSet()) {
+			while (decimal >= baseValue) {
 				roman += toRomanBaseValues().get(baseValue);
 				decimal -= baseValue;
 			}
