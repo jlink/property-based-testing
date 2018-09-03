@@ -5,7 +5,7 @@ repositories {
 
 ext.junitPlatformVersion = '1.2.0'
 ext.junitJupiterVersion = '5.2.0'
-ext.jqwikVersion = '0.8.15-SNAPSHOT'
+ext.jqwikVersion = '0.8.15'
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -33,7 +33,7 @@ test {
 dependencies {
 	compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.4'
 
-	testCompile("org.mockito:mockito-core:2.18.0")
+	testCompile("org.mockito:mockito-core:2.21.0")
 	testCompile("org.assertj:assertj-core:3.9.1")
 	testCompile "net.jqwik:jqwik:${jqwikVersion}"
 
@@ -48,5 +48,5 @@ dependencies {
 
 wrapper {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '4.8.1'
+	gradleVersion = '4.10'
 }
