@@ -37,6 +37,7 @@ class MyStringStackActions {
 			model.push(element);
 			Assertions.assertThat(model.isEmpty()).isFalse();
 			Assertions.assertThat(model.size()).isEqualTo(sizeBefore + 1);
+			Assertions.assertThat(model.top()).isEqualTo(element);
 			return model;
 		}
 
@@ -51,7 +52,7 @@ class MyStringStackActions {
 		@Override
 		public MyStringStack run(MyStringStack model) {
 			model.clear();
-			Assertions.assertThat(model).isEqualTo(new MyStringStack());
+			Assertions.assertThat(model.isEmpty()).isTrue();
 			return model;
 		}
 
