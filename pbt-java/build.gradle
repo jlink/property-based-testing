@@ -44,6 +44,9 @@ dependencies {
 	testCompile("org.junit.vintage:junit-vintage-engine:${junitJupiterVersion}")
 
 	testCompile group: 'org.quicktheories', name: 'quicktheories', version: '0.25'
+
+	testCompile 'com.squareup.okhttp3:okhttp:3.11.0'
+	testCompile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
 }
 
 wrapper {
