@@ -17,6 +17,19 @@ class ListReverseProperties {
 		return clone;
 	}
 
+	@Property
+	boolean reverseMakesFirstElementLast(@ForAll List<Integer> original) {
+		Assume.that(original.size() > 2);
+		Integer lastReversed = reverse(original).get(original.size() - 1);
+		return original.get(0).equals(lastReversed);
+	}
+
+	@Property
+	boolean sizeRemainsTheSame(@ForAll List<Integer> original) {
+		List<Integer> reversed = reverse(original);
+		return original.size() == reversed.size();
+	}
+
 
 	// Using wildcards and type variables in properties
 
