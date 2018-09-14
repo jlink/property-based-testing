@@ -3,9 +3,12 @@ package pbt.web;
 import java.lang.annotation.*;
 import java.util.*;
 
+import com.fasterxml.jackson.core.util.*;
+
 import net.jqwik.api.*;
-import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.providers.*;
+
+import static net.jqwik.api.Arbitraries.*;
 
 public class JsonArbitraryProvider implements ArbitraryProvider {
 
@@ -29,22 +32,23 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	}
 
 	private Arbitrary<String> arrays() {
-		return jsonArray(json());
+		return oneOf(
+				jsonArray(jsonNumber()),
+				jsonArray(jsonString())
+		);
 	}
 
 	private Arbitrary<String> jsonArray(Arbitrary<String> json) {
 		return json.list().ofMaxSize(100).map(list -> "[" + String.join(", ", list) + "]");
 	}
 
-	private Arbitrary<String> json() {
-		return Arbitraries.oneOf(
-				jsonNumber(),
-				jsonString()
-		);
-	}
-
 	private Arbitrary<String> jsonString() {
-		return Arbitraries.strings().alpha().map(s -> String.format("\"%s\"", s));
+		return Arbitraries.strings()
+						  .alpha()
+						  .numeric()
+						  .withChars('.', ' ', ':', '"')
+						  .map(s -> new String(BufferRecyclers.quoteAsJsonText(s)))
+						  .map(s -> String.format("\"%s\"", s));
 	}
 
 	private Arbitrary<String> jsonNumber() {
