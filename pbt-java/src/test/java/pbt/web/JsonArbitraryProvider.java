@@ -56,27 +56,19 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 			IntegerArbitrary numberOfProperties = integers().between(1, 5);
 			return numberOfProperties
 						   .flatMap(props -> {
-										List<Arbitrary<Tuple2<String, String>>> entries =
-												IntStream.range(0, props)
-														 .mapToObj(i -> Combinators.combine(jsonKey(), jsonValue()).as(Tuples::tuple))
-														 .collect(Collectors.toList());
-										return Combinators.combine(entries).as(keysAndValues -> {
-											String propString = keysAndValues
-																		.stream()
-																		.map(entry -> String.format("\"%s\": %s", entry.get1(), entry.get2()))
-																		.collect(Collectors.joining(","));
-											return "{ " + propString + " }";
-										});
-									}
-
-						   );
+							   List<Arbitrary<Tuple2<String, String>>> entries =
+									   IntStream.range(0, props)
+												.mapToObj(i -> Combinators.combine(jsonKey(), jsonValue()).as(Tuples::tuple))
+												.collect(Collectors.toList());
+							   return Combinators.combine(entries).as(keysAndValues -> "{ " + objectBody(keysAndValues) + " }");
+						   });
 		});
+	}
 
-//		return lazy(() -> {
-//			Arbitrary<String> key = jsonKey();
-//			Arbitrary<String> value = oneOf(jsonArray(), jsonNumber(), jsonString(), jsonObject());
-//			return flatCombine(key, value, (k, v) -> constant(String.format("{ \"%s\": %s}", k, v)));
-//		});
+	private String objectBody(List<Tuple2<String, String>> keysAndValues) {
+		return keysAndValues.stream()
+							.map(entry -> String.format("\"%s\":%s", entry.get1(), entry.get2()))
+							.collect(Collectors.joining(", "));
 	}
 
 	private Arbitrary<String> jsonValue() {
@@ -93,11 +85,6 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 
 	private Arbitrary<String> jsonKey() {
 		return strings().ofMinLength(1).ofMaxLength(20).alpha().numeric().withChars('_', '.', '-');
-	}
-
-	//TODO: Replace with Combinators.flatCombine as soon as available
-	private Arbitrary<String> flatCombine(Arbitrary<String> key, Arbitrary<String> value, Combinators.F2<String, String, Arbitrary<String>> combinator) {
-		return key.flatMap(k -> value.flatMap( v -> combinator.apply(k, v)));
 	}
 
 	private Arbitrary<String> array(Arbitrary<String> json) {
