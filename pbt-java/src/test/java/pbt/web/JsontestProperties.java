@@ -40,7 +40,7 @@ class JsontestProperties {
 	void validateObjects(@ForAll @JsonObject String json) throws IOException {
 		Map originalObject = toMap(json);
 
-		Response response = callValidate("{a:1}");
+		Response response = callValidate(json);
 		assertThat(response.code()).isEqualTo(200);
 
 		Map responseMap = toMap(response.body().string());

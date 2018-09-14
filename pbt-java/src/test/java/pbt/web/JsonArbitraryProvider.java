@@ -2,10 +2,13 @@ package pbt.web;
 
 import java.lang.annotation.*;
 import java.util.*;
+import java.util.stream.*;
 
 import com.fasterxml.jackson.core.util.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.Tuples.*;
+import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.providers.*;
 
 import static net.jqwik.api.Arbitraries.*;
@@ -40,17 +43,52 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	private Arbitrary<String> jsonArray() {
 		return oneOf(
 				array(jsonNumber()),
+				array(jsonNumber()),
 				array(jsonString()),
+				array(jsonString()),
+				array(jsonBoolean()),
 				array(jsonObject())
 		);
 	}
 
 	private Arbitrary<String> jsonObject() {
 		return lazy(() -> {
-			Arbitrary<String> key = jsonKey();
-			Arbitrary<String> value = oneOf(jsonArray(), jsonNumber(), jsonString(), jsonObject());
-			return flatCombine(key, value, (k, v) -> constant(String.format("{ \"%s\": %s}", k, v)));
+			IntegerArbitrary numberOfProperties = integers().between(1, 5);
+			return numberOfProperties
+						   .flatMap(props -> {
+										List<Arbitrary<Tuple2<String, String>>> entries =
+												IntStream.range(0, props)
+														 .mapToObj(i -> Combinators.combine(jsonKey(), jsonValue()).as(Tuples::tuple))
+														 .collect(Collectors.toList());
+										return Combinators.combine(entries).as(keysAndValues -> {
+											String propString = keysAndValues
+																		.stream()
+																		.map(entry -> String.format("\"%s\": %s", entry.get1(), entry.get2()))
+																		.collect(Collectors.joining(","));
+											return "{ " + propString + " }";
+										});
+									}
+
+						   );
 		});
+
+//		return lazy(() -> {
+//			Arbitrary<String> key = jsonKey();
+//			Arbitrary<String> value = oneOf(jsonArray(), jsonNumber(), jsonString(), jsonObject());
+//			return flatCombine(key, value, (k, v) -> constant(String.format("{ \"%s\": %s}", k, v)));
+//		});
+	}
+
+	private Arbitrary<String> jsonValue() {
+		return oneOf(jsonArray(), jsonNumber(), jsonNumber(), jsonString(), jsonString(), jsonBoolean(), jsonNull(), jsonObject());
+	}
+
+	private Arbitrary<String> jsonBoolean() {
+		return of("true", "false");
+	}
+
+	private Arbitrary<String> jsonNull() {
+		return constant("null");
 	}
 
 	private Arbitrary<String> jsonKey() {
