@@ -22,21 +22,35 @@ class JsontestProperties {
 	private OkHttpClient client = new OkHttpClient();
 
 	@Property(tries = 50, reporting = Reporting.GENERATED)
+	@Label("arrays can be validated")
 	void validateArrays(@ForAll @JsonArray String json) throws IOException {
 		List originalList = toList(json);
+
+		Response response = callValidate(json);
+		assertThat(response.code()).isEqualTo(200);
+
+		Map responseMap = toMap(response.body().string());
+		assertThat(responseMap.get("validate")).isEqualTo(true);
+		assertThat(responseMap.get("object_or_array")).isEqualTo("array");
+		assertThat(responseMap.get("size")).isEqualTo(originalList.size());
+	}
+
+	@Property(tries = 50, reporting = Reporting.GENERATED)
+	@Label("objects can be validated")
+	void validateObjects(@ForAll @JsonObject String json) throws IOException {
+		Map originalObject = toMap(json);
 
 		Response response = callValidate("{a:1}");
 		assertThat(response.code()).isEqualTo(200);
 
-		Map map = toMap(response.body().string());
-		assertThat(map.get("validate")).isEqualTo(true);
-		assertThat(map.get("object_or_array")).isEqualTo("object");
-
-		// Should return the size of the array but always returns 1
-		// assertThat(map.get("size")).isEqualTo(originalList.size());
+		Map responseMap = toMap(response.body().string());
+		assertThat(responseMap.get("validate")).isEqualTo(true);
+		assertThat(responseMap.get("object_or_array")).isEqualTo("object");
+		assertThat(responseMap.get("size")).isEqualTo(originalObject.size());
 	}
 
 	@Example
+	@Label("http://validate.jsontest.com answers")
 	void validateEndpoint() throws IOException {
 
 		Response response = callValidate("{a:1}");
