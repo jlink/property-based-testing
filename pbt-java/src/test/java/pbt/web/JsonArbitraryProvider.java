@@ -52,13 +52,15 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	}
 
 	private Arbitrary<String> jsonObject() {
+		// Must be lazy due to recursive creation of json object arbitraries
 		return lazy(() -> {
 			IntegerArbitrary numberOfProperties = integers().between(1, 5);
+			Arbitrary<String> jsonKey = unique(jsonKey());
 			return numberOfProperties
 						   .flatMap(props -> {
 							   List<Arbitrary<Tuple2<String, String>>> entries =
 									   IntStream.range(0, props)
-												.mapToObj(i -> Combinators.combine(jsonKey(), jsonValue()).as(Tuples::tuple))
+												.mapToObj(i -> Combinators.combine(jsonKey, jsonValue()).as(Tuples::tuple))
 												.collect(Collectors.toList());
 							   return Combinators.combine(entries).as(keysAndValues -> "{ " + objectBody(keysAndValues) + " }");
 						   });
@@ -87,6 +89,27 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 		return strings().ofMinLength(1).ofMaxLength(20).alpha().numeric().withChars('_', '.', '-');
 	}
 
+	// TODO: Replace with Arbitrary.unique() as soon as available in jqwik
+	private<T> Arbitrary<T> unique(Arbitrary<T> arbitrary) {
+		return genSize -> new RandomGenerator<T>() {
+			RandomGenerator<T> baseGenerator = arbitrary.generator(genSize);
+			Set<T> generatedValues = new HashSet<>();
+
+			@Override
+			public Shrinkable<T> next(Random random) {
+				while(true) {
+					Shrinkable<T> next = baseGenerator.next(random);
+					if (generatedValues.contains(next.value())) {
+						continue;
+					} else {
+						generatedValues.add(next.value());
+					}
+					return next;
+				}
+			}
+		};
+	}
+
 	private Arbitrary<String> array(Arbitrary<String> json) {
 		return json.list().ofMaxSize(100).map(list -> "[" + String.join(", ", list) + "]");
 	}
@@ -104,7 +127,7 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 		return Arbitraries.doubles().ofScale(4).map(d -> Double.toString(d));
 	}
 
-	// TODO: Replace with targetType.isAnnotated() as soon as available in jqwik
+	// TODO: Replace with TypeUsage.isAnnotated() as soon as available in jqwik
 	private boolean isAnnotated(TypeUsage targetType, Class<? extends Annotation> annotationType) {
 		for (Annotation annotation : targetType.getAnnotations()) {
 			if (annotation.annotationType().equals(annotationType))
