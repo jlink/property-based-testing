@@ -3,6 +3,7 @@ package pbt.web;
 import java.io.*;
 import java.util.*;
 
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import okhttp3.*;
 
@@ -22,10 +23,11 @@ class JsontestProperties implements AutoCloseable {
 
 	private OkHttpClient client = new OkHttpClient();
 
-	@Property(tries = 50, reporting = Reporting.GENERATED)
+	@Property(tries = 50)
 	@Label("arrays can be validated")
 	void validateArrays(@ForAll @JsonArray String json) throws IOException {
 		List originalList = toList(json);
+		// prettyPrint(originalList);
 
 		try (Response response = callValidate(json)) {
 			assertThat(response.code()).isEqualTo(200);
@@ -37,10 +39,11 @@ class JsontestProperties implements AutoCloseable {
 		}
 	}
 
-	@Property(tries = 50, reporting = Reporting.GENERATED)
+	@Property(tries = 50)
 	@Label("objects can be validated")
 	void validateObjects(@ForAll @JsonObject String json) throws IOException {
 		Map originalObject = toMap(json);
+		// prettyPrint(originalObject);
 
 		try (Response response = callValidate(json)) {
 			assertThat(response.code()).isEqualTo(200);
@@ -53,7 +56,7 @@ class JsontestProperties implements AutoCloseable {
 	}
 
 	@Example
-	@Label("endpoint answers")
+	@Label("endpoint is available")
 	void endpointAnswers() throws IOException {
 
 		try (Response response = callValidate("{a:1}")) {
@@ -85,6 +88,12 @@ class JsontestProperties implements AutoCloseable {
 				.get()
 				.build();
 		return client.newCall(request).execute();
+	}
+
+	private void prettyPrint(Object jsonObject) throws JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String pretty = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+		System.out.println(pretty);
 	}
 
 	@Override
