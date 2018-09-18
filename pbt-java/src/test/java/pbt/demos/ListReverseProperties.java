@@ -2,6 +2,8 @@ package pbt.demos;
 
 import java.util.*;
 
+import org.assertj.core.api.*;
+
 import net.jqwik.api.*;
 
 class ListReverseProperties {
@@ -28,6 +30,12 @@ class ListReverseProperties {
 	boolean sizeRemainsTheSame(@ForAll List<Integer> original) {
 		List<Integer> reversed = reverse(original);
 		return original.size() == reversed.size();
+	}
+
+	@Property
+	void allElementsStay(@ForAll List<Integer> original) {
+		List<Integer> reversed = reverse(original);
+		Assertions.assertThat(original).allMatch(element -> reversed.contains(element));
 	}
 
 
