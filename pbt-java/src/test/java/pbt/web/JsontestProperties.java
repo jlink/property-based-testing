@@ -2,6 +2,7 @@ package pbt.web;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
@@ -21,7 +22,18 @@ class JsontestProperties implements AutoCloseable {
 
 	private final String BASE_URL = "http://validate.jsontest.com";
 
-	private OkHttpClient client = new OkHttpClient();
+	private final OkHttpClient client;
+
+	public JsontestProperties() {
+		this.client =
+				new OkHttpClient()
+						.newBuilder()
+						.connectTimeout(5, TimeUnit.SECONDS)
+						.readTimeout(5, TimeUnit.SECONDS)
+						.writeTimeout(5, TimeUnit.SECONDS)
+						.build();
+
+	}
 
 	@Property(tries = 50)
 	@Label("arrays can be validated")

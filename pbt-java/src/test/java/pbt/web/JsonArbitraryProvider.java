@@ -54,7 +54,7 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 		// Must be lazy due to recursive creation of json object arbitraries
 		return lazy(() -> {
 			IntegerArbitrary numberOfProperties = integers().between(0, 5);
-			Arbitrary<String> jsonKey = unique(jsonKey());
+			Arbitrary<String> jsonKey = jsonKey().unique();
 			return numberOfProperties
 						   .flatMap(props -> {
 							   List<Arbitrary<Tuple2<String, String>>> entries =
@@ -86,27 +86,6 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 
 	private Arbitrary<String> jsonKey() {
 		return strings().ofMinLength(1).ofMaxLength(20).alpha().numeric().withChars('_', '.', '-');
-	}
-
-	// TODO: Replace with Arbitrary.unique() as soon as available in jqwik
-	private<T> Arbitrary<T> unique(Arbitrary<T> arbitrary) {
-		return genSize -> new RandomGenerator<T>() {
-			RandomGenerator<T> baseGenerator = arbitrary.generator(genSize);
-			Set<T> generatedValues = new HashSet<>();
-
-			@Override
-			public Shrinkable<T> next(Random random) {
-				while(true) {
-					Shrinkable<T> next = baseGenerator.next(random);
-					if (generatedValues.contains(next.value())) {
-						continue;
-					} else {
-						generatedValues.add(next.value());
-					}
-					return next;
-				}
-			}
-		};
 	}
 
 	private Arbitrary<String> array(Arbitrary<String> json) {
