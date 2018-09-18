@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.*;
  * <p>
  * See http://www.jsontest.com/
  */
+@Label("http://validate.jsontest.com")
 class JsontestProperties implements AutoCloseable {
 
 	private final String BASE_URL = "http://validate.jsontest.com";
@@ -52,8 +53,8 @@ class JsontestProperties implements AutoCloseable {
 	}
 
 	@Example
-	@Label("http://validate.jsontest.com answers")
-	void endpointExists() throws IOException {
+	@Label("endpoint answers")
+	void endpointAnswers() throws IOException {
 
 		try (Response response = callValidate("{a:1}")) {
 			assertThat(response.code()).isEqualTo(200);

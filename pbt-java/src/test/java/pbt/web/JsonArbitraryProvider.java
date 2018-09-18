@@ -1,6 +1,5 @@
 package pbt.web;
 
-import java.lang.annotation.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -19,10 +18,10 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	public boolean canProvideFor(TypeUsage targetType) {
 		if (!targetType.isOfType(String.class))
 			return false;
-		if (isAnnotated(targetType, JsonArray.class)) {
+		if (targetType.isAnnotated(JsonArray.class)) {
 			return true;
 		}
-		if (isAnnotated(targetType, JsonObject.class)) {
+		if (targetType.isAnnotated(JsonObject.class)) {
 			return true;
 		}
 		return false;
@@ -31,10 +30,10 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	@Override
 	public Set<Arbitrary<?>> provideFor(TypeUsage targetType, SubtypeProvider subtypeProvider) {
 		Set<Arbitrary<?>> arbitraries = new HashSet<>();
-		if (isAnnotated(targetType, JsonArray.class)) {
+		if (targetType.isAnnotated(JsonArray.class)) {
 			arbitraries.add(jsonArray());
 		}
-		if (isAnnotated(targetType, JsonObject.class)) {
+		if (targetType.isAnnotated(JsonObject.class)) {
 			arbitraries.add(jsonObject());
 		}
 		return arbitraries;
@@ -54,7 +53,7 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	private Arbitrary<String> jsonObject() {
 		// Must be lazy due to recursive creation of json object arbitraries
 		return lazy(() -> {
-			IntegerArbitrary numberOfProperties = integers().between(1, 5);
+			IntegerArbitrary numberOfProperties = integers().between(0, 5);
 			Arbitrary<String> jsonKey = unique(jsonKey());
 			return numberOfProperties
 						   .flatMap(props -> {
@@ -127,17 +126,9 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 		return Arbitraries.doubles().ofScale(4).map(d -> Double.toString(d));
 	}
 
-	// TODO: Replace with TypeUsage.isAnnotated() as soon as available in jqwik
-	private boolean isAnnotated(TypeUsage targetType, Class<? extends Annotation> annotationType) {
-		for (Annotation annotation : targetType.getAnnotations()) {
-			if (annotation.annotationType().equals(annotationType))
-				return true;
-		}
-		return false;
-	}
-
 	@Override
 	public int priority() {
+		// Must be larger than 0 to replace default String arbitrary
 		return 1;
 	}
 }
