@@ -28,6 +28,8 @@ test {
 	//	include '**/*Examples.class'
 	//	include '**/*Test.class'
 	//	include '**/*Tests.class'
+
+	// testLogging.showStandardStreams = true
 }
 
 dependencies {
