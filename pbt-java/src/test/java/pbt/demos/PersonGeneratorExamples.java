@@ -11,15 +11,18 @@ class PersonGeneratorExamples {
 
 	@Provide
 	Arbitrary<Person> validPerson() {
-		Arbitrary<Character> initialChar = Arbitraries.chars().between('A', 'Z');
 		Arbitrary<String> firstName = Arbitraries.strings() //
 				.withCharRange('a', 'z') //
-				.ofMinLength(2).ofMaxLength(10);
+				.ofMinLength(2).ofMaxLength(10)
+				.map(this::capitalize);
 		Arbitrary<String> lastName = Arbitraries.strings() //
 				.withCharRange('a', 'z') //
 				.ofMinLength(2).ofMaxLength(20);
-		return Combinators.combine(initialChar, firstName, lastName) //
-				.as((initial, first, last) -> new Person(initial + first, last));
+		return Combinators.combine(firstName, lastName).as(Person::new);
+	}
+
+	private String capitalize(String str) {
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
 	}
 
 	static class Person {
