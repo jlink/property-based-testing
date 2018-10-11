@@ -7,12 +7,12 @@ import java.util.*;
 class PrimeGeneratorsExamples {
 
 	@Property
-	boolean primesCannotBeFactored(@ForAll("primes") int aPrime) {
+	boolean primes_cannot_be_factored(@ForAll("primes") int aPrime) {
 		return factor(aPrime).equals(Collections.singletonList(aPrime));
 	}
 
 	@Property(reporting = Reporting.GENERATED)
-	boolean primesCannotBeFactored_2(@ForAll("primesGenerated") int aPrime) {
+	boolean primes_cannot_be_factored_2(@ForAll("primesGenerated") int aPrime) {
 		return factor(aPrime).equals(Collections.singletonList(aPrime));
 	}
 
