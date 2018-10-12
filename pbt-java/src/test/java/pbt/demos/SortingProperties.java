@@ -6,7 +6,8 @@ import java.util.*;
 
 class SortingProperties {
 
-	@Property(reporting = Reporting.GENERATED)
+	@Property
+	@Report(Reporting.GENERATED)
 	boolean sortingAListWorks(@ForAll List<Integer> unsorted) {
 		return isSorted(sort(unsorted));
 	}

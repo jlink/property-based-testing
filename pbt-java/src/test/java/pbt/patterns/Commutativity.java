@@ -8,7 +8,7 @@ import java.util.stream.*;
 
 class Commutativity {
 
-	@Property(reporting = Reporting.GENERATED)
+	@Property @Report(Reporting.GENERATED)
 	void sortingAndFilteringAreCommutative(@ForAll("names") List<String> listOfNames) {
 		List<String> filteredThenSorted = listOfNames.stream() //
 				.filter(name -> !name.contains("a")) //

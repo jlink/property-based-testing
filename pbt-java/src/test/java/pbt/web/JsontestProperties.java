@@ -35,7 +35,7 @@ class JsontestProperties implements AutoCloseable {
 
 	}
 
-	@Property(tries = 50)
+	@Property(tries = 10)
 	@Label("arrays can be validated")
 	void validateArrays(@ForAll @JsonArray String json) throws IOException {
 		List originalList = toList(json);
@@ -51,7 +51,7 @@ class JsontestProperties implements AutoCloseable {
 		}
 	}
 
-	@Property(tries = 50)
+	@Property(tries = 10)
 	@Label("objects can be validated")
 	void validateObjects(@ForAll @JsonObject String json) throws IOException {
 		Map originalObject = toMap(json);

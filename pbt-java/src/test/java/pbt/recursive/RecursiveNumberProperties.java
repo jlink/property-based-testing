@@ -4,7 +4,7 @@ import net.jqwik.api.*;
 
 class RecursiveNumberProperties {
 
-	@Property(tries = 20, reporting = Reporting.GENERATED)
+	@Property(tries = 20) @Report(Reporting.GENERATED)
 	boolean trees(@ForAll("numbers") int aNumber) {
 		return aNumber >= 1;
 	}

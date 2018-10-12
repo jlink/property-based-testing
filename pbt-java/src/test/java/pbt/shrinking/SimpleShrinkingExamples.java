@@ -5,7 +5,7 @@ import net.jqwik.api.constraints.Positive;
 
 class SimpleShrinkingExamples {
 
-	@Property(reporting = Reporting.FALSIFIED, shrinking = ShrinkingMode.FULL)
+	@Property(shrinking = ShrinkingMode.FULL) @Report(Reporting.GENERATED)
 	boolean rootOfSquareShouldBeOriginalValue(@Positive @ForAll int anInt) {
 		Assume.that(anInt != Integer.MAX_VALUE);
 		int square = anInt * anInt;

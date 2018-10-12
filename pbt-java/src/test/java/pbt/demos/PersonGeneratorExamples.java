@@ -4,7 +4,8 @@ import net.jqwik.api.*;
 
 class PersonGeneratorExamples {
 
-	@Property(tries = 50, reporting = Reporting.GENERATED)
+	@Property(tries = 50)
+	@Report(Reporting.GENERATED)
 	boolean anyValidPersonHasAFullName(@ForAll Person aPerson) {
 		return aPerson.fullName().length() >= 5;
 	}

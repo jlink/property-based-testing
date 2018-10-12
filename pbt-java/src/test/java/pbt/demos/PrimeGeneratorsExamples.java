@@ -11,7 +11,8 @@ class PrimeGeneratorsExamples {
 		return factor(aPrime).equals(Collections.singletonList(aPrime));
 	}
 
-	@Property(reporting = Reporting.GENERATED)
+	@Property
+	@Report(Reporting.GENERATED)
 	boolean primes_cannot_be_factored_2(@ForAll("primesGenerated") int aPrime) {
 		return factor(aPrime).equals(Collections.singletonList(aPrime));
 	}

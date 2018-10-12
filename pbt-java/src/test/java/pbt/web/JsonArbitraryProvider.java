@@ -6,11 +6,12 @@ import java.util.stream.*;
 import com.fasterxml.jackson.core.util.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.Tuples.*;
+import net.jqwik.api.Tuple.*;
 import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.providers.*;
 
 import static net.jqwik.api.Arbitraries.*;
+import static net.jqwik.api.Arbitraries.of;
 
 public class JsonArbitraryProvider implements ArbitraryProvider {
 
@@ -59,7 +60,7 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 						   .flatMap(props -> {
 							   List<Arbitrary<Tuple2<String, String>>> entries =
 									   IntStream.range(0, props)
-												.mapToObj(i -> Combinators.combine(jsonKey, jsonValue()).as(Tuples::tuple))
+												.mapToObj(i -> Combinators.combine(jsonKey, jsonValue()).as(Tuple::of))
 												.collect(Collectors.toList());
 							   return Combinators.combine(entries).as(keysAndValues -> "{ " + objectBody(keysAndValues) + " }");
 						   });

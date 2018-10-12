@@ -4,7 +4,7 @@ import net.jqwik.api.*;
 
 class GeneratingValuesProperties {
 
-	@Property(reporting = Reporting.GENERATED)
+	@Property @Report(Reporting.GENERATED)
 	void letsGeneratePostleitzahlen(@ForAll("postleitzahlen") String zipCode) {
 	}
 
