@@ -12,7 +12,7 @@ class SimpleShrinkingExamples {
 		return Math.sqrt(square) == anInt;
 	}
 
-	@Property(seed = "-2", shrinking = ShrinkingMode.FULL)
+	@Property(seed = "-2", shrinking = ShrinkingMode.FULL, generation = GenerationMode.RANDOMIZED)
 	boolean shouldShrinkTo101(@ForAll("numberStrings") String aNumberString) {
 		return Integer.parseInt(aNumberString) % 2 == 0;
 	}

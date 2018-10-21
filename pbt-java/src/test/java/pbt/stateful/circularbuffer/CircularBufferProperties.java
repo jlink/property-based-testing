@@ -9,7 +9,8 @@ import static org.assertj.core.api.Assertions.*;
 
 class CircularBufferProperties {
 
-	@Property //(reporting = Reporting.GENERATED)
+	@Property
+	//@Report(Reporting.GENERATED)
 	void checkSequentialStateMachine(@ForAll("sequences") ActionSequence<Model> sequence) {
 
 		Invariant<Model> sizeMustNotBeNegative = model ->

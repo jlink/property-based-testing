@@ -46,7 +46,8 @@ class Decimal2RomanProperties {
 			assertThat(Romans.decimal2roman(1666)).isEqualTo("mdclxvi");
 		}
 
-		@Property(tries = 100) //, reporting = Reporting.GENERATED)
+		@Property(tries = 100)
+		//@Report(Reporting.GENERATED)
 		void nonDuplicateLetters(@ForAll("setOfBaseValues") Set<Integer> baseValues) {
 			int decimal = baseValues.stream().mapToInt(i -> i).sum();
 			Statistics.collect(decimal);

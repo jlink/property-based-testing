@@ -1,8 +1,8 @@
 package pbt.jmarticle;
 
-import net.jqwik.api.*;
-
 import java.util.*;
+
+import net.jqwik.api.*;
 
 class CollectionsProperties {
 
@@ -14,7 +14,8 @@ class CollectionsProperties {
 		return copy.equals(aList);
 	}
 
-	@Property //(reporting = Reporting.GENERATED)
+	@Property
+	//@Report(Reporting.GENERATED)
 	boolean joiningTwoLists( //
 			@ForAll List<String> list1, //
 			@ForAll List<String> list2
