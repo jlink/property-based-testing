@@ -15,6 +15,8 @@ class ListReverseProperties {
 
 	private <T> List<T> reverse(List<T> original) {
 		List<T> clone = new ArrayList<>(original);
+		// Should produce failing properties:
+		// List<T> clone = new ArrayList<>(new HashSet<>(original));
 		Collections.reverse(clone);
 		return clone;
 	}
