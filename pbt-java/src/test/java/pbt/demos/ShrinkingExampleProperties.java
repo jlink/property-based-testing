@@ -22,4 +22,11 @@ class ShrinkingExampleProperties {
 		List<Integer> reversed = brokenReverse(aList);
 		return aList.get(0) == reversed.get(aList.size() - 1);
 	}
+
+	@Property
+	boolean failAndShrinkToListOfTwo(@ForAll List<?> original) {
+		Set<?> set = new HashSet<>(original);
+		return set.size() == original.size();
+	}
+
 }
