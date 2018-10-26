@@ -29,6 +29,7 @@ test {
 	//	include '**/*Test.class'
 	//	include '**/*Tests.class'
 
+	// events = ["passed", "failed", "skipped"]
 	// testLogging.showStandardStreams = true
 }
 
