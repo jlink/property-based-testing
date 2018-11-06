@@ -7,15 +7,22 @@ import net.jqwik.api.*;
 class AggregatorProperties {
 
 	@Property
-	void allMeasurementsHaveKeyInTally(@ForAll List<Integer> measurements) {
+	boolean allMeasuredValuesShowUpAsKeysInTally(@ForAll List<Integer> measurements) {
+		Aggregator aggregator = new Aggregator();
+		measurements.forEach(aggregator::receive);
+		return measurements.stream().allMatch(m -> aggregator.tally().containsKey(m));
 	}
 
 	@Property
-	void numbersNeverMeasuredDontHaveKeyInTally(@ForAll List<Integer> measurements) {
+	void numbersNeverMeasuredDontShowUpInTally(@ForAll List<Integer> measurements) {
 	}
 
 	@Property
-	void sumOfAllCountsIsNumberOfMeasurements(@ForAll List<Integer> measurements) {
+	boolean sumOfAllCountsIsNumberOfMeasurements(@ForAll List<Integer> measurements) {
+		Aggregator aggregator = new Aggregator();
+		measurements.forEach(aggregator::receive);
+		int sumOfAllCounts = aggregator.tally().values().stream().mapToInt(i -> i).sum();
+		return sumOfAllCounts == measurements.size();
 	}
 
 	@Property

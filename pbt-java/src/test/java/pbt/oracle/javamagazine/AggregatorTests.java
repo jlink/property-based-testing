@@ -2,13 +2,11 @@ package pbt.oracle.javamagazine;
 
 import java.util.*;
 
-import org.assertj.core.api.*;
-
-import net.jqwik.api.*;
+import org.junit.jupiter.api.*;
 
 class AggregatorTests {
 
-	@Example
+	@Test
 	void tallyOfSeveralValues() {
 		Aggregator aggregator = new Aggregator();
 		aggregator.receive(1);
@@ -17,8 +15,8 @@ class AggregatorTests {
 		aggregator.receive(2);
 
 		Map<Integer, Integer> tally = aggregator.tally();
-		Assertions.assertThat(tally.get(1)).isEqualTo(1);
-		Assertions.assertThat(tally.get(2)).isEqualTo(2);
-		Assertions.assertThat(tally.get(3)).isEqualTo(1);
+		Assertions.assertEquals(1, (int) tally.get(1));
+		Assertions.assertEquals(2, (int) tally.get(2));
+		Assertions.assertEquals(3, (int) tally.get(1));
 	}
 }
