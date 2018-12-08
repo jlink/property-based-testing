@@ -1,7 +1,5 @@
 package pbt.stateful.circularbuffer;
 
-import net.jqwik.support.*;
-
 /**
  * Example was borrowed from
  * https://github.com/owickstrom/hedgehog-inline-java-testing/blob/master/src/main/java/example/CircularBuffer.java
@@ -37,7 +35,7 @@ public class CircularBuffer<T> {
 
 	@Override
 	public String toString() {
-		return String.format("CircularBuffer(%s)", JqwikStringSupport.displayString(buf));
+		return String.format("CircularBuffer(%s)", buf);
 	}
 }
 
