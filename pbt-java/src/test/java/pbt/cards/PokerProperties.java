@@ -1,6 +1,7 @@
 package pbt.cards;
 
 import java.util.*;
+import java.util.stream.*;
 
 import org.assertj.core.api.*;
 
@@ -69,4 +70,24 @@ class PokerProperties {
 			return Tuple.of(first, second);
 		});
 	}
+
+	@Property
+	void shuffledDecksAreGenerated_alternative(@ForAll("decks2") List<PlayingCard> deck) {
+		Assertions.assertThat(deck).hasSize(52);
+		Assertions.assertThat(new HashSet<>(deck)).hasSize(52);
+	}
+
+	@Provide
+	Arbitrary<List<PlayingCard>> decks2() {
+		// The decks() method above only works if random generation for finding unique values
+		// of cards does not fail too often. This is not a problem in the
+		// current setup but other applications of unique() might suffer from that.
+		// The code below provides an alternative approach:
+
+		List<PlayingCard> allCards = cards().allValues()
+											.map(stream -> stream.collect(Collectors.toList()))
+											.orElseThrow(() -> new RuntimeException("Cannot generate all cards"));
+		return Arbitraries.shuffle(allCards);
+	}
+
 }
