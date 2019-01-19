@@ -1,9 +1,16 @@
 package pbt.fizzbuzz;
 
 import net.jqwik.api.*;
-import net.jqwik.api.constraints.IntRange;
+import net.jqwik.api.constraints.*;
+
+import static org.assertj.core.api.Assertions.*;
 
 public class FizzBuzzDemo {
+
+	@Example
+	void normal_numbers_return_themselves() {
+		assertThat(count(1)).isEqualTo("1");
+	}
 
 	@Property
 	boolean allNumbersNotDivisibleBy3or5ReturnThemselves(@ForAll @IntRange(min = 1, max = 100) int index) {
