@@ -8,24 +8,12 @@ import net.jqwik.api.*;
 
 class ListReverseProperties {
 
-	@Property
-	boolean reverseTwiceIsOriginal(@ForAll List<Integer> original) {
-		return reverse(reverse(original)).equals(original);
-	}
-
 	private <T> List<T> reverse(List<T> original) {
 		List<T> clone = new ArrayList<>(original);
 		// Should produce failing properties:
 		// List<T> clone = new ArrayList<>(new HashSet<>(original));
 		Collections.reverse(clone);
 		return clone;
-	}
-
-	@Property
-	boolean reverseMakesFirstElementLast(@ForAll List<Integer> original) {
-		Assume.that(original.size() > 2);
-		Integer lastReversed = reverse(original).get(original.size() - 1);
-		return original.get(0).equals(lastReversed);
 	}
 
 	@Property
@@ -40,6 +28,17 @@ class ListReverseProperties {
 		Assertions.assertThat(original).allMatch(element -> reversed.contains(element));
 	}
 
+	@Property
+	boolean reverseMakesFirstElementLast(@ForAll List<Integer> original) {
+		Assume.that(original.size() > 2);
+		Integer lastReversed = reverse(original).get(original.size() - 1);
+		return original.get(0).equals(lastReversed);
+	}
+
+	@Property
+	boolean reverseTwiceIsOriginal(@ForAll List<Integer> original) {
+		return reverse(reverse(original)).equals(original);
+	}
 
 	// Using wildcards and type variables in properties
 
