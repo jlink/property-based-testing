@@ -134,3 +134,86 @@ public class Board {
 		}
 	}
 
+
+## Step 6
+
+	@Property
+	void center_of_new_board_is_empty(@ForAll @UseType Board board) {
+		int center = board.size() / 2 + 1;
+		assertThat(board.hole(center, center)).isEqualTo(Hole.EMPTY);
+	}
+
+public class Board...
+	public Hole hole(int x, int y) {
+		if (x == center() && y == center())
+			return Hole.EMPTY;
+		return Hole.PEG;
+	}
+
+	private int center() {
+		return size / 2 + 1;
+	}
+
+## Step 7
+
+	@Property
+	void center_of_new_board_is_empty(@ForAll("newBoards") Board board) {
+		int center = board.size() / 2 + 1;
+		assertThat(board.hole(center, center)).isEqualTo(Hole.EMPTY);
+	}
+
+	@Provide
+	Arbitrary<Board> newBoards() {
+		return Arbitraries.integers().between(1, 20).filter(i -> i%2 != 0).map(Board::new);
+	}
+
+
+## Step 8
+
+	@Property
+	void holes_of_new_board_contain_pegs(@ForAll("newBoards") Board board) {
+		Arbitrary<Integer> allX = Arbitraries.integers().between(1, board.size());
+		Arbitrary<Integer> allY = Arbitraries.integers().between(1, board.size());
+
+		Arbitrary<Tuple.Tuple2<Integer, Integer>> allXandY = Combinators.combine(allX, allY).as(Tuple::of);
+
+		allXandY.allValues().ifPresent(
+				stream -> stream.forEach(xAndY -> {
+					int x = xAndY.get1();
+					int y = xAndY.get2();
+					assertThat(board.hole(x, y)).isEqualTo(Hole.PEG);
+				})
+		);
+
+		//Assume.that(x != 3 || y != 3);
+	}
+
+    => Fails due to center
+    
+    
+## Step 9
+
+	@Property
+	void holes_of_new_board_contain_pegs(@ForAll("newBoards") Board board) {
+		Arbitrary<Integer> allX = Arbitraries.integers().between(1, board.size());
+		Arbitrary<Integer> allY = Arbitraries.integers().between(1, board.size());
+
+		Arbitrary<Tuple.Tuple2<Integer, Integer>> allXandY = Combinators.combine(allX, allY).as(Tuple::of);
+
+		allXandY.allValues().ifPresent(
+				stream -> stream.forEach(xAndY -> {
+					int x = xAndY.get1();
+					int y = xAndY.get2();
+					if (x == center(board) && y == center(board)) {
+						return;
+					}
+					assertThat(board.hole(x, y)).isEqualTo(Hole.PEG);
+				})
+		);
+	}
+
+	private int center(@ForAll("newBoards") Board board) {
+		return board.size() / 2 + 1;
+	}
+
+    ==> Delete @Group OfSize5: No longer needed

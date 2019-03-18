@@ -10,12 +10,21 @@ public class Board {
 	}
 
 	public Hole hole(int x, int y) {
-		if (x == 3 && y == 3)
+		if (x == center() && y == center())
 			return Hole.EMPTY;
 		return Hole.PEG;
 	}
 
+	private int center() {
+		return size / 2 + 1;
+	}
+
 	public int size() {
 		return size;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Board(%s)", size);
 	}
 }
