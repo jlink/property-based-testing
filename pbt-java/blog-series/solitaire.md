@@ -217,3 +217,104 @@ public class Board...
 	}
 
     ==> Delete @Group OfSize5: No longer needed
+    
+## Step 10
+
+	@Example
+	void peg_can_be_removed() {
+		Board board = new Board(3);
+		board.removePeg(1, 1);
+		assertThat(board.hole(1, 1)).isEqualTo(Hole.EMPTY);
+	}
+
+
+public class Board {
+	private boolean removed = false;
+
+	public Hole hole(int x, int y) {
+		if (x == center() && y == center())
+			return Hole.EMPTY;
+		return removed ? Hole.EMPTY : Hole.PEG;
+	}
+
+	public void removePeg(int x, int y) {
+		removed = true;
+	}
+}
+
+
+## Step 11: Translate example into property
+
+	@Property
+	void peg_can_be_removed(@ForAll("boardsWithPosition") Tuple3<Board, Integer, Integer> boardWithPosition) {
+		Board board = boardWithPosition.get1();
+		Integer x = boardWithPosition.get2();
+		Integer y = boardWithPosition.get3();
+
+		Assume.that(x != center(board) || y != center(board));
+
+		board.removePeg(x, y);
+		assertThat(board.hole(x, y)).isEqualTo(Hole.EMPTY);
+	}
+
+	@Provide
+	Arbitrary<Tuple3<Board, Integer, Integer>> boardsWithPosition() {
+		Arbitrary<Board> boards = newBoards();
+		return boards.flatMap(board -> {
+			Arbitrary<Integer> xs = Arbitraries.integers().between(1, board.size());
+			Arbitrary<Integer> ys = Arbitraries.integers().between(1, board.size());
+			return Combinators.combine(boards, xs, ys).as(Tuple::of);
+		});
+	}
+
+
+## Step 12: Let property check more
+
+### Refactoring
+
+	@Property
+	void holes_of_new_board_contain_pegs(@ForAll("newBoards") Board board) {
+		forAllPositions(board, xAndY -> {
+			int x = xAndY.get1();
+			int y = xAndY.get2();
+			if (x == center(board) && y == center(board)) {
+				return;
+			}
+			assertThat(board.hole(x, y)).isEqualTo(Hole.PEG);
+		});
+	}
+
+	private void forAllPositions(@ForAll("newBoards") Board board, Consumer<Tuple2<Integer, Integer>> asserter) {
+		Arbitrary<Integer> allX = Arbitraries.integers().between(1, board.size());
+		Arbitrary<Integer> allY = Arbitraries.integers().between(1, board.size());
+
+		Arbitrary<Tuple2<Integer, Integer>> allXandY = Combinators.combine(allX, allY).as(Tuple::of);
+
+		allXandY.allValues().ifPresent(
+				stream -> {
+					stream.forEach(asserter);
+				}
+		);
+	}
+
+### Enhance checking
+
+	@Property
+	void peg_can_be_removed(@ForAll("boardsWithPosition") Tuple3<Board, Integer, Integer> boardWithPosition) {
+		Board board = boardWithPosition.get1();
+		Integer x = boardWithPosition.get2();
+		Integer y = boardWithPosition.get3();
+
+		Assume.that(x != center(board) || y != center(board));
+
+		board.removePeg(x, y);
+		assertThat(board.hole(x, y)).isEqualTo(Hole.EMPTY);
+
+		forAllPositions(board, xAndY -> {
+			if (!xAndY.equals(Tuple.of(x, y))) {
+				assertThat(board.hole(xAndY.get1(), xAndY.get2())).isEqualTo(Hole.PEG);
+			}
+		});
+	}
+
+==> Property fails because implementation is not adequate

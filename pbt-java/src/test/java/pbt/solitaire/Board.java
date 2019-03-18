@@ -2,6 +2,7 @@ package pbt.solitaire;
 
 public class Board {
 	private final int size;
+	private boolean removed = false;
 
 	public Board(int size) {
 		if (size < 1 || size % 2 == 0)
@@ -12,7 +13,7 @@ public class Board {
 	public Hole hole(int x, int y) {
 		if (x == center() && y == center())
 			return Hole.EMPTY;
-		return Hole.PEG;
+		return removed ? Hole.EMPTY : Hole.PEG;
 	}
 
 	private int center() {
@@ -26,5 +27,9 @@ public class Board {
 	@Override
 	public String toString() {
 		return String.format("Board(%s)", size);
+	}
+
+	public void removePeg(int x, int y) {
+		removed = true;
 	}
 }
