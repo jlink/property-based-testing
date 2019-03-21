@@ -1,19 +1,28 @@
 package pbt.solitaire;
 
-public class Board {
+import java.io.*;
+import java.util.*;
+
+public class Board implements Serializable {
 	private final int size;
-	private boolean removed = false;
+	private List<Hole> holes = new ArrayList<>();
 
 	public Board(int size) {
 		if (size < 1 || size % 2 == 0)
 			throw new IllegalArgumentException("Only boards of odd size >= 1 allowed");
 		this.size = size;
+		initHoles(size);
+	}
+
+	private void initHoles(int size) {
+		for (int i = 0; i < size * size; i++) {
+			holes.add(Hole.PEG);
+		}
+		removePeg(center(), center());
 	}
 
 	public Hole hole(int x, int y) {
-		if (x == center() && y == center())
-			return Hole.EMPTY;
-		return removed ? Hole.EMPTY : Hole.PEG;
+		return holes.get(calculateIndex(x, y));
 	}
 
 	private int center() {
@@ -30,6 +39,11 @@ public class Board {
 	}
 
 	public void removePeg(int x, int y) {
-		removed = true;
+		int index = calculateIndex(x, y);
+		holes.set(index, Hole.EMPTY);
+	}
+
+	private int calculateIndex(int x, int y) {
+		return (x-1) * size + (y -1);
 	}
 }

@@ -64,7 +64,7 @@ class BoardProperties {
 		assertThat(board.hole(x, y)).isEqualTo(Hole.EMPTY);
 
 		forAllPositions(board, xAndY -> {
-			if (!xAndY.equals(Tuple.of(x, y))) {
+			if (!xAndY.equals(Tuple.of(x, y)) && !xAndY.equals(Tuple.of(center(board), center(board)))) {
 				assertThat(board.hole(xAndY.get1(), xAndY.get2())).isEqualTo(Hole.PEG);
 			}
 		});
@@ -76,7 +76,7 @@ class BoardProperties {
 		return boards.flatMap(board -> {
 			Arbitrary<Integer> xs = Arbitraries.integers().between(1, board.size());
 			Arbitrary<Integer> ys = Arbitraries.integers().between(1, board.size());
-			return Combinators.combine(boards, xs, ys).as(Tuple::of);
+			return Combinators.combine(xs, ys).as((x, y) -> Tuple.of(board, x, y));
 		});
 	}
 
@@ -86,7 +86,7 @@ class BoardProperties {
 
 	@Provide
 	Arbitrary<Board> newBoards() {
-		return Arbitraries.integers().between(1, 20).filter(i -> i % 2 != 0).map(Board::new);
+		return Arbitraries.integers().between(5, 20).filter(i -> i % 2 != 0).map(Board::new);
 	}
 
 }

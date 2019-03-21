@@ -311,10 +311,54 @@ public class Board {
 		assertThat(board.hole(x, y)).isEqualTo(Hole.EMPTY);
 
 		forAllPositions(board, xAndY -> {
-			if (!xAndY.equals(Tuple.of(x, y))) {
+			if (!xAndY.equals(Tuple.of(x, y)) && !xAndY.equals(Tuple.of(center(board), center(board)))) {
 				assertThat(board.hole(xAndY.get1(), xAndY.get2())).isEqualTo(Hole.PEG);
 			}
 		});
 	}
 
+	@Provide
+	Arbitrary<Tuple3<Board, Integer, Integer>> boardsWithPosition() {
+		Arbitrary<Board> boards = newBoards();
+		return boards.flatMap(board -> {
+			Arbitrary<Integer> xs = Arbitraries.integers().between(1, board.size());
+			Arbitrary<Integer> ys = Arbitraries.integers().between(1, board.size());
+			return Combinators.combine(xs, ys).as((x, y) -> Tuple.of(board, x, y));
+		});
+	}
+
 ==> Property fails because implementation is not adequate
+
+## Step 13: Introduce real storage of holes
+
+public class Board implements Serializable {
+	private final int size;
+	private List<Hole> holes = new ArrayList<>();
+
+	public Board(int size) {
+		if (size < 1 || size % 2 == 0)
+			throw new IllegalArgumentException("Only boards of odd size >= 1 allowed");
+		this.size = size;
+		initHoles(size);
+	}
+
+	private void initHoles(int size) {
+		for (int i = 0; i < size * size; i++) {
+			holes.add(Hole.PEG);
+		}
+		removePeg(center(), center());
+	}
+
+	public Hole hole(int x, int y) {
+		return holes.get(calculateIndex(x, y));
+	}
+
+	public void removePeg(int x, int y) {
+		int index = calculateIndex(x, y);
+		holes.set(index, Hole.EMPTY);
+	}
+
+	private int calculateIndex(int x, int y) {
+		return (x-1) * size + (y -1);
+	}
+}
