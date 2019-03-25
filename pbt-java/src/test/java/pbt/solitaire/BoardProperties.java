@@ -23,29 +23,26 @@ class BoardProperties {
 
 	@Property
 	void center_of_new_board_is_empty(@ForAll("newBoards") Board board) {
-		int center = center(board);
-		assertThat(board.hole(center, center)).isEqualTo(Hole.EMPTY);
+		Position center = board.center();
+		assertThat(board.hole(center)).isEqualTo(Hole.EMPTY);
 	}
 
 	@Property
 	void holes_of_new_board_contain_pegs(@ForAll("newBoards") Board board) {
-		forAllPositions(board, xAndY -> {
-			int x = xAndY.get1();
-			int y = xAndY.get2();
-			if (x == center(board) && y == center(board)) {
+		forAllPositions(board, position -> {
+			if (board.isCenter(position)) {
 				return;
 			}
-			assertThat(board.hole(x, y)).isEqualTo(Hole.PEG);
+			assertThat(board.hole(position)).isEqualTo(Hole.PEG);
 		});
 	}
 
-	private void forAllPositions(@ForAll("newBoards") Board board, Consumer<Tuple2<Integer, Integer>> asserter) {
+	private void forAllPositions(Board board, Consumer<Position> asserter) {
 		Arbitrary<Integer> allX = Arbitraries.integers().between(1, board.size());
 		Arbitrary<Integer> allY = Arbitraries.integers().between(1, board.size());
+		Arbitrary<Position> allPositions = Combinators.combine(allX, allY).as(Position::xy);
 
-		Arbitrary<Tuple2<Integer, Integer>> allXandY = Combinators.combine(allX, allY).as(Tuple::of);
-
-		allXandY.allValues().ifPresent(
+		allPositions.allValues().ifPresent(
 				stream -> {
 					stream.forEach(asserter);
 				}
@@ -53,40 +50,35 @@ class BoardProperties {
 	}
 
 	@Property
-	void peg_can_be_removed(@ForAll("boardsWithPosition") Tuple3<Board, Integer, Integer> boardWithPosition) {
+	void peg_can_be_removed(@ForAll("boardsWithPosition") Tuple2<Board, Position> boardWithPosition) {
 		Board board = boardWithPosition.get1();
-		Integer x = boardWithPosition.get2();
-		Integer y = boardWithPosition.get3();
+		Position position = boardWithPosition.get2();
 
-		Assume.that(x != center(board) || y != center(board));
+		Assume.that(!board.isCenter(position));
 
-		board.removePeg(x, y);
-		assertThat(board.hole(x, y)).isEqualTo(Hole.EMPTY);
+		board.removePeg(position);
+		assertThat(board.hole(position)).isEqualTo(Hole.EMPTY);
 
-		forAllPositions(board, xAndY -> {
-			if (!xAndY.equals(Tuple.of(x, y)) && !xAndY.equals(Tuple.of(center(board), center(board)))) {
-				assertThat(board.hole(xAndY.get1(), xAndY.get2())).isEqualTo(Hole.PEG);
+		forAllPositions(board, each -> {
+			if (!each.equals(position) && !board.isCenter(each)) {
+				assertThat(board.hole(each)).isEqualTo(Hole.PEG);
 			}
 		});
 	}
 
 	@Provide
-	Arbitrary<Tuple3<Board, Integer, Integer>> boardsWithPosition() {
+	Arbitrary<Tuple2<Board, Position>> boardsWithPosition() {
 		Arbitrary<Board> boards = newBoards();
 		return boards.flatMap(board -> {
 			Arbitrary<Integer> xs = Arbitraries.integers().between(1, board.size());
 			Arbitrary<Integer> ys = Arbitraries.integers().between(1, board.size());
-			return Combinators.combine(xs, ys).as((x, y) -> Tuple.of(board, x, y));
+			return Combinators.combine(xs, ys).as((x, y) -> Tuple.of(board, Position.xy(x, y)));
 		});
-	}
-
-	private int center(@ForAll("newBoards") Board board) {
-		return board.size() / 2 + 1;
 	}
 
 	@Provide
 	Arbitrary<Board> newBoards() {
-		return Arbitraries.integers().between(5, 20).filter(i -> i % 2 != 0).map(Board::new);
+		return Arbitraries.integers().between(1, 20).filter(i -> i % 2 != 0).map(Board::new);
 	}
 
 }

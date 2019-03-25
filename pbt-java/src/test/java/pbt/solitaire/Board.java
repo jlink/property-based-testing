@@ -18,15 +18,20 @@ public class Board implements Serializable {
 		for (int i = 0; i < size * size; i++) {
 			holes.add(Hole.PEG);
 		}
-		removePeg(center(), center());
+		removePeg(center());
 	}
 
-	public Hole hole(int x, int y) {
-		return holes.get(calculateIndex(x, y));
+	public Hole hole(Position position) {
+		return holes.get(calculateIndex(position));
 	}
 
-	private int center() {
-		return size / 2 + 1;
+	public Position center() {
+		int centerIndex = size / 2 + 1;
+		return Position.xy(centerIndex, centerIndex);
+	}
+
+	public boolean isCenter(Position position) {
+		return position.equals(center());
 	}
 
 	public int size() {
@@ -38,12 +43,12 @@ public class Board implements Serializable {
 		return String.format("Board(%s)", size);
 	}
 
-	public void removePeg(int x, int y) {
-		int index = calculateIndex(x, y);
+	public void removePeg(Position position) {
+		int index = calculateIndex(position);
 		holes.set(index, Hole.EMPTY);
 	}
 
-	private int calculateIndex(int x, int y) {
-		return (x-1) * size + (y -1);
+	private int calculateIndex(Position position) {
+		return (position.x() -1) * size + (position.y() -1);
 	}
 }
