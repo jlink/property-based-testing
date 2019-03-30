@@ -42,11 +42,7 @@ class BoardProperties {
 		Arbitrary<Integer> allY = Arbitraries.integers().between(1, board.size());
 		Arbitrary<Position> allPositions = Combinators.combine(allX, allY).as(Position::xy);
 
-		allPositions.allValues().ifPresent(
-				stream -> {
-					stream.forEach(asserter);
-				}
-		);
+		allPositions.forEachValue(asserter);
 	}
 
 	@Property
