@@ -6,7 +6,7 @@ class PersonGeneratorExamples {
 
 	@Property(tries = 50)
 	@Report(Reporting.GENERATED)
-	boolean anyValidPersonHasAFullName(@ForAll Person aPerson) {
+	boolean anyValidPersonHasAFullName(@ForAll("validPerson") Person aPerson) {
 		return aPerson.fullName().length() >= 5;
 	}
 
