@@ -37,10 +37,10 @@ dependencies {
 	// For Jupiter tests and also necessary to work around some IntelliJ bugs
 	testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
 
-	testImplementation('com.pholser:junit-quickcheck-generators:0.8')
+	testImplementation('com.pholser:junit-quickcheck-generators:0.8.2')
 	testImplementation("org.junit.vintage:junit-vintage-engine:${junitJupiterVersion}")
 
-	testImplementation group: 'org.quicktheories', name: 'quicktheories', version: '0.25'
+	testImplementation group: 'org.quicktheories', name: 'quicktheories', version: '0.26'
 
 	testImplementation 'com.squareup.okhttp3:okhttp:3.11.0'
 	testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
@@ -48,5 +48,5 @@ dependencies {
 
 wrapper {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '5.2.1'
+	gradleVersion = '5.4.1'
 }
