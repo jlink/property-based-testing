@@ -124,7 +124,7 @@ Arbitrary<Integer> primes() {
 Trying just 6 different prime numbers might look to you like too much of a simplification, 
 especially since one of the promises of PBT is to provide a wide coverage of the problem space.
 However, the six examples are enough to drive generality into our implementation.
-And we can always add more thorough prime number generation later.
+We can always add more thorough prime number generation later - and we will.
 
 Rerunning the property will still fail, but now with a domain-specific error:
 
@@ -144,7 +144,18 @@ public static List<Integer> factorize(int number) {
 }
 ```
 
-And the first property on our list is done:
+Knowing that in the end we'll sometimes have to add more than a single factor
+I start refactoring towards this capability:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    factors.add(number);
+    return factors;
+}
+```
+
+All tests and properties still succeed and the first property on our list is done:
 
 ```text
 ✓ factorize(2) -> [2] 
@@ -159,5 +170,137 @@ product of all returned numbers must be equal to input number
 all numbers in produced list must be primes
 ```
 
-If we wanted to we could now get rid of the initial example test since
+If we wanted we could now get rid of the initial example test since
 it's fully covered by the property.
+
+
+### From Example to Property - Again
+
+Tackling the next property - squared primes - gives us the opportunity to
+revisit a tactic that we've already seen earlier. Let's start with the
+property test method:
+
+```java
+@Property
+void factorizing_squared_prime_returns_prime_twice(@ForAll("primes") int prime) {
+    List<Integer> factors = Primes.factorize(prime * prime);
+    Assertions.assertThat(factors).containsExactly(prime, prime);
+}
+```
+
+Run and see it fail as expected! When I tried to think of simple way to
+make it work for all primes I couldn't. My trick to tackle this too big of a
+step is to scale down from property to single example. One way to do that
+without having to write yet another (example) test is to temporarily 
+fix the incoming value of a property test:
+
+```java
+@Property
+void factorizing_squared_prime_returns_prime_twice(@ForAll("primes") int prime) {
+	prime = 2;
+    List<Integer> factors = Primes.factorize(prime * prime);
+    Assertions.assertThat(factors).containsExactly(prime, prime);
+}
+```
+
+This will result in the same test failure but it can easily be repaired:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    if (number == 4) {
+        factors.add(2);
+        number /= 2;
+    }
+    factors.add(number);
+    return factors;
+}
+```
+
+Extracting `2` into a variable seems a natural refactoring in this case:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    if (number == candidate * candidate) {
+        factors.add(candidate);
+        number /= candidate;
+    }
+    factors.add(number);
+    return factors;
+}
+```
+
+And now the general property seems achievable:
+
+```java
+@Property
+void factorizing_squared_prime_returns_prime_twice(@ForAll("primes") int prime) {
+	prime = 2;
+    List<Integer> factors = Primes.factorize(prime * prime);
+    Assertions.assertThat(factors).containsExactly(prime, prime);
+}
+```
+
+fails with message:
+
+```text
+java.lang.AssertionError: 
+    Expecting:
+      <[9]>
+    to contain exactly (and in same order):
+      <[3, 3]>
+```
+
+Fixing this is a small step now:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    while (number % candidate != 0) {
+        candidate++;
+    }
+    if (number == candidate * candidate) {
+        factors.add(candidate);
+        number /= candidate;
+    }
+    factors.add(number);
+    return factors;
+}
+```
+
+and can further be simplified to:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    while (number % candidate != 0) {
+        candidate++;
+    }
+    if (number == candidate * candidate) {
+        factors.add(candidate);
+    }
+    factors.add(candidate);
+    return factors;
+}
+```
+
+The code's not pretty (yet); in TDD you have to be patient with your design.
+At least one more item to check off:
+
+```text
+✓ factorize(2) -> [2] 
+✓ factorize(prime) -> [prime]
+✓ factorize(prime^2) -> [prime, prime] 
+factorize(prime^n) -> [prime, ..., prime]
+factorize(prime1 * prime2) -> [prime1, prime2]
+factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
+

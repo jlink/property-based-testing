@@ -20,6 +20,12 @@ class PrimeFactorizationTests {
 		Assertions.assertThat(factors).containsExactly(prime);
 	}
 
+	@Property
+	void factorizing_squared_prime_returns_prime_twice(@ForAll("primes") int prime) {
+		List<Integer> factors = Primes.factorize(prime * prime);
+		Assertions.assertThat(factors).containsExactly(prime, prime);
+	}
+
 	@Provide
 	Arbitrary<Integer> primes() {
 		return Arbitraries.of(2, 3, 5, 7, 23, 101);
