@@ -26,16 +26,18 @@ concrete examples. Having properties as an additional means of expression I tend
 mix concrete examples with properties in my initial inbox. As for the kata at hand
 I came up with the following test ideas:
 
-- factorize(2) -> [2]
-- factorize(prime) -> [prime]
-- factorize(prime^2) -> [prime, prime] 
-- factorize(prime^n) -> [prime, ..., prime]
-- factorize(prime1 * prime2) -> [prime1, prime2]
-- factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
-- factorize(n < 2) -> IllegalArgumentException
-- factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
-- product of all returned numbers must be equal to input number
-- all numbers in produced list must be primes
+```text
+factorize(2) -> [2] 
+factorize(prime) -> [prime]
+factorize(prime^2) -> [prime, prime] 
+factorize(prime^n) -> [prime, ..., prime]
+factorize(prime1 * prime2) -> [prime1, prime2]
+factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
 
 The items did not come to my mind in this order but I tried to sort them by assumed
 implementation complexity, appending a few generic properties at the end.
@@ -43,7 +45,8 @@ implementation complexity, appending a few generic properties at the end.
 
 ### Starting with an Example
 
-More often than not I start with an easy example test, just to figure out the interface:
+More often than not I start with an easy example test, just to figure out the interface.
+Luckily the first item in our inbox covers just that:
 
 ```java
 class PrimeFactorizationTests {
@@ -65,5 +68,19 @@ public class Primes {
 }
 ```
 
+Et voilà, the first inbox item can be checked:
+
+```text
+✓ factorize(2) -> [2] 
+factorize(prime) -> [prime]
+factorize(prime^2) -> [prime, prime] 
+factorize(prime^n) -> [prime, ..., prime]
+factorize(prime1 * prime2) -> [prime1, prime2]
+factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
 
 
