@@ -92,5 +92,11 @@ With property-based testing in mind we have reason to hope that the generic
 nature of properties will enforce generic implementation more or less
 by itself. Let's see how that works out:
 
-
+```java
+@Example
+void factorizing_a_prime_returns_list_with_just_the_prime(@ForAll("primes") int prime) {
+    List<Integer> factors = Primes.factorize(prime);
+    Assertions.assertThat(factors).containsExactly(prime);
+}
+```
  
