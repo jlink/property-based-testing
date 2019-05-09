@@ -68,7 +68,7 @@ public class Primes {
 }
 ```
 
-Et voilà, the first inbox item can be checked:
+Et voilà, the first inbox item can be ticked off:
 
 ```text
 ✓ factorize(2) -> [2] 
@@ -83,4 +83,14 @@ product of all returned numbers must be equal to input number
 all numbers in produced list must be primes
 ```
 
+### A first Property
 
+At this point a test-driven developer will often ask the question:
+Is the current test enough to justify a more generic implementation of 
+`factorize()` or do we need additional examples from which to _triangulate_.
+With property-based testing in mind we have reason to hope that the generic
+nature of properties will enforce generic implementation more or less
+by itself. Let's see how that works out:
+
+
+ 
