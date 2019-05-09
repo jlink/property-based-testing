@@ -14,10 +14,15 @@ class PrimeFactorizationTests {
 		Assertions.assertThat(factors).containsExactly(2);
 	}
 
-	@Example
+	@Property
 	void factorizing_a_prime_returns_list_with_just_the_prime(@ForAll("primes") int prime) {
 		List<Integer> factors = Primes.factorize(prime);
 		Assertions.assertThat(factors).containsExactly(prime);
+	}
+
+	@Provide
+	Arbitrary<Integer> primes() {
+		return Arbitraries.of(2, 3, 5, 7, 23, 101);
 	}
 
 }

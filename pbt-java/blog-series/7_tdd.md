@@ -93,10 +93,71 @@ nature of properties will enforce generic implementation more or less
 by itself. Let's see how that works out:
 
 ```java
-@Example
+@Property
 void factorizing_a_prime_returns_list_with_just_the_prime(@ForAll("primes") int prime) {
     List<Integer> factors = Primes.factorize(prime);
     Assertions.assertThat(factors).containsExactly(prime);
 }
 ```
- 
+
+Running this property will yield an exception:
+
+```text
+net.jqwik.api.CannotFindArbitraryException: 
+    Cannot find an Arbitrary [primes] for Parameter of type 
+        [@net.jqwik.api.ForAll(value=primes) int]
+```
+
+What the error message tells us is that we have to implement a provider method
+for primes. We could now search our brain for algorithms to detect or 
+generate prime numbers. We could also import a maths library. 
+Or we can be pragmatic and just enumerate a few primes and let jqwik
+choose among them:
+
+```java
+@Provide
+Arbitrary<Integer> primes() {
+    return Arbitraries.of(2, 3, 5, 7, 23, 101);
+}
+```
+
+Trying just 6 different prime numbers might look to you like too much of a simplification, 
+especially since one of the promises of PBT is to provide a wide coverage of the problem space.
+However, the six examples are enough to drive generality into our implementation.
+And we can always add more thorough prime number generation later.
+
+Rerunning the property will still fail, but now with a domain-specific error:
+
+```
+jaa.lang.AssertionError: 
+    Expecting:
+      <[2]>
+    to contain exactly (and in same order):
+      <[3]>
+```
+
+This can be fixed by a simple change:
+
+```java
+public static List<Integer> factorize(int number) {
+    return Collections.singletonList(number);
+}
+```
+
+And the first property on our list is done:
+
+```text
+✓ factorize(2) -> [2] 
+✓ factorize(prime) -> [prime]
+factorize(prime^2) -> [prime, prime] 
+factorize(prime^n) -> [prime, ..., prime]
+factorize(prime1 * prime2) -> [prime1, prime2]
+factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
+
+If we wanted to we could now get rid of the initial example test since
+it's fully covered by the property.

@@ -4,6 +4,6 @@ import java.util.*;
 
 public class Primes {
 	public static List<Integer> factorize(int number) {
-		return Collections.singletonList(2);
+		return Collections.singletonList(number);
 	}
 }
