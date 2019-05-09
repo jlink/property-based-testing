@@ -304,3 +304,122 @@ product of all returned numbers must be equal to input number
 all numbers in produced list must be primes
 ```
 
+### Generalizing an Existing Property
+
+The next point on our list is nothing more than a generalized version of
+the previous one. Thus, we first introduce the new parameter and rename
+the property appropriately:
+
+```java
+@Property
+void factorizing_prime_raised_to_n_returns_n_times_prime(
+        @ForAll("primes") int prime,
+        @ForAll @IntRange(min = 1, max = 2) int n
+) {
+    List<Integer> factors = Primes.factorize((int) Math.pow(prime, n));
+    Assertions.assertThat(factors).containsOnly(prime);
+    Assertions.assertThat(factors).hasSize(n);
+}
+```
+
+This works out of the box, so we can increase the upper limit of `n`:
+
+```java
+@Property
+void factorizing_prime_raised_to_n_returns_n_times_prime(
+        @ForAll("primes") int prime,
+        @ForAll @IntRange(min = 1, max = 5) int n
+) { ... }
+```
+
+This will fail with a sample of `[2, 3]`. But again, it's a rather
+smallish change that can make all of our tests succeed:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    while (number % candidate != 0) {
+        candidate++;
+    }
+    while (number % candidate == 0) {
+        factors.add(candidate);
+        number /= candidate;
+    }
+    return factors;
+}
+```
+
+Well, at least I thought it would work. In reality I got the following
+error message:
+
+```text
+sample = [101, 5]
+
+java.lang.AssertionError: 
+    Expecting:
+      <[2147483647]>
+    to contain only:
+      <[101]>
+```
+
+What's happening here is that 101^5 is bigger than the maximum representable
+value of type `int`. Java's policy to just overflow and be quiet makes that
+not obvious. What we have to do is make sure that the number we try will
+_not_ overflow. To reach that goal we have several choices:
+
+- Generate only primes that are below `Integer.MAX_VALUE` when raised 
+  to the power of 5 
+- Reduce the max value of n to 4
+- Filter out those combinations of `prime` and `n` that exceed `Integer.MAX_VALUE`
+
+I choose to take the latter option here because it results in more different
+tests. And exploring the possible range of values to its limits is one of
+the promised virtues of PBT. Since the filter criteria covers more than
+one parameter we have to use assumptions:
+
+```java
+	@Property
+	void factorizing_prime_raised_to_n_returns_n_times_prime(
+			@ForAll("primes") int prime,
+			@ForAll @IntRange(min = 1, max = 5) int n
+	) {
+		Assume.that(
+				BigInteger.valueOf(prime).pow(n)
+				    .compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
+		...
+	}
+```
+
+Now the property will succeed and it's interesting to look at the report:
+
+```
+PrimeFactorizationTests:factorizing prime raised to n returns n times prime = 
+                              |-----------------------jqwik-----------------------
+tries = 30                    | # of calls to property
+checks = 29                   | # of not rejected calls
+generation-mode = EXHAUSTIVE  | parameters are exhaustively generated
+after-failure = SAMPLE_FIRST  | try previously failed sample, then previous seed
+seed = 1584749916605677180    | random seed to reproduce generated values
+```
+
+The values of `tries` and `checks` reveals two things: Only a single
+combination was filtered out. And only 30 sets of input values were created
+at all! Why not 1000, which is the default number of tries? Well,
+in cases where _jqwik_ can figure out that the number of all possible combinations
+of values is lower than the number of tries it will just generate all
+possibilities. And since we only provided 6 different primes to choose from
+6 * 5 is 30. And sure enough, one more item can be marked as "done":
+
+```text
+✓ factorize(2) -> [2] 
+✓ factorize(prime) -> [prime]
+✓ factorize(prime^2) -> [prime, prime] 
+✓ factorize(prime^n) -> [prime, ..., prime]
+factorize(prime1 * prime2) -> [prime1, prime2]
+factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
