@@ -698,3 +698,36 @@ void all_numbers_above_1_can_be_factorized(
 ```
 
 I pretty sure this would run a few hours on my machine though...
+
+### The last Property
+
+We are now left with the following inbox:
+
+```text
+✓ factorize(2) -> [2] 
+✓ factorize(prime) -> [prime]
+✓ factorize(prime^2) -> [prime, prime] 
+✓ factorize(prime^n) -> [prime, ..., prime]
+✓ factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+✓ factorize(n < 2) -> IllegalArgumentException
+✓ factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+✓ product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
+
+There is one property left that we haven't implemented yet: "All numbers
+in produced list must be primes." 
+Can _you_ think of an implementation that would succeed
+in all tested properties but fail this last one? Frankly, I can't.
+For the sceptics among you: Go ahead and write the missing property.
+For all the others: Be happy with what we have!
+
+
+## Conclusion
+
+As I could hopefully demonstrate in this example, 
+`Property-Test-Driven Development` can work - at least sometimes.
+A pattern that you could see here is to start with an example test and
+to promote it to a property-based test later. In cases where this approach
+works I end up with both more concise tests and more trust in my code.
+That's why I always look for those opportunities in my existing example tests.
