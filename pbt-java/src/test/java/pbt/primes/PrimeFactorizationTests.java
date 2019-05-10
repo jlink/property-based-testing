@@ -27,9 +27,9 @@ class PrimeFactorizationTests {
 			@ForAll("primes") int prime,
 			@ForAll @IntRange(min = 1, max = 5) int n
 	) {
-		Assume.that(BigInteger.valueOf(prime).pow(n)
-							  .compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
-		List<Integer> factors = Primes.factorize((int) Math.pow(prime, n));
+		BigInteger numberToFactorize = BigInteger.valueOf(prime).pow(n);
+		Assume.that(numberToFactorize.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
+		List<Integer> factors = Primes.factorize(numberToFactorize.intValueExact());
 		Assertions.assertThat(factors).containsOnly(prime);
 		Assertions.assertThat(factors).hasSize(n);
 	}

@@ -9,7 +9,7 @@ public class Primes {
 		while (number % candidate != 0) {
 			candidate++;
 		}
-		while (number % candidate == 0) {
+		while (number >= candidate) {
 			factors.add(candidate);
 			number /= candidate;
 		}

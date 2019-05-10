@@ -280,7 +280,7 @@ public static List<Integer> factorize(int number) {
     while (number % candidate != 0) {
         candidate++;
     }
-    if (number == candidate * candidate) {
+    if (number > candidate) {
         factors.add(candidate);
     }
     factors.add(candidate);
@@ -342,7 +342,7 @@ public static List<Integer> factorize(int number) {
     while (number % candidate != 0) {
         candidate++;
     }
-    while (number % candidate == 0) {
+    while (number >= candidate) {
         factors.add(candidate);
         number /= candidate;
     }
@@ -379,16 +379,17 @@ the promised virtues of PBT. Since the filter criteria covers more than
 one parameter we have to use assumptions:
 
 ```java
-	@Property
-	void factorizing_prime_raised_to_n_returns_n_times_prime(
-			@ForAll("primes") int prime,
-			@ForAll @IntRange(min = 1, max = 5) int n
-	) {
-		Assume.that(
-				BigInteger.valueOf(prime).pow(n)
-				    .compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
-		...
-	}
+@Property
+void factorizing_prime_raised_to_n_returns_n_times_prime(
+        @ForAll("primes") int prime,
+        @ForAll @IntRange(min = 1, max = 5) int n
+) {
+    BigInteger numberToFactorize = BigInteger.valueOf(prime).pow(n);
+    Assume.that(numberToFactorize.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
+    List<Integer> factors = Primes.factorize(numberToFactorize.intValueExact());
+    Assertions.assertThat(factors).containsOnly(prime);
+    Assertions.assertThat(factors).hasSize(n);
+}
 ```
 
 Now the property will succeed and it's interesting to look at the report:
