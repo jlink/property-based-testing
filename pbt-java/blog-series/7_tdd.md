@@ -629,4 +629,72 @@ void all_numbers_above_1_can_be_factorized(
 
 On my machine `max = 100_000_000` is still handled fine within a few seconds.
 Turning it up to `1_000_000_000` got the runtime above my patience limit for
-microtests. Maybe we can optimize a little bit?
+microtests. Maybe we can optimize the algorithm a little bit? Next try:
+
+```java
+public static List<Integer> factorize(int number) {
+    if (number < 2) {
+        throw new IllegalArgumentException();
+    }
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    while (number >= candidate) {
+        while (number % candidate != 0) {
+            if (candidate * candidate > number) {
+                candidate = number;
+            } else {
+                candidate++;
+            }
+        }
+        factors.add(candidate);
+        number /= candidate;
+    }
+    return factors;
+}
+```
+
+This will get us to `max = Integer.MAX_VALUE - 1` but `max = Integer.MAX_VALUE`
+does not finish. Again, we're running into an overflow in the condition:
+
+```java
+if (candidate * candidate > number) { ... }
+```
+
+Using the square root instead of the square gets rid of this problem. So here's
+the final version of our prime factorization algorithm, which works for all 
+numbers between 2 and `Integer.MAX_VALUE`. At least _jqwik_ has not found
+a counter example yet:
+
+```java
+public static List<Integer> factorize(int number) {
+    if (number < 2) {
+        throw new IllegalArgumentException();
+    }
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    while (number >= candidate) {
+        while (number % candidate != 0) {
+            if (Math.sqrt(number) < candidate) {
+                candidate = number;
+            } else {
+                candidate++;
+            }
+        }
+        factors.add(candidate);
+        number /= candidate;
+    }
+    return factors;
+}
+```
+
+If you really really want to know if it works for _all_ valid numbers
+you can configure the property method like that:
+
+```java
+@Property(generation = GenerationMode.EXHAUSTIVE)
+void all_numbers_above_1_can_be_factorized(
+        @ForAll @IntRange(min = 2) int number
+) { ... }
+```
+
+I pretty sure this would run a few hours on my machine though...

@@ -11,7 +11,11 @@ public class Primes {
 		int candidate = 2;
 		while (number >= candidate) {
 			while (number % candidate != 0) {
-				candidate++;
+				if (Math.sqrt(number) < candidate) {
+					candidate = number;
+				} else {
+					candidate++;
+				}
 			}
 			factors.add(candidate);
 			number /= candidate;
