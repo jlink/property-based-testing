@@ -50,6 +50,15 @@ class PrimeFactorizationTests {
 		Assertions.assertThat(factors).isEqualTo(primes);
 	}
 
+	@Property
+	void numbers_below_2_are_illegal(
+			@ForAll @IntRange(min = Integer.MIN_VALUE, max = 1) int number
+	) {
+		Assertions.assertThatThrownBy(() -> {
+			Primes.factorize(number);
+		}).isInstanceOf(IllegalArgumentException.class);
+	}
+
 	@Provide
 	Arbitrary<List<Integer>> listOfPrimes() {
 		return primes().list().ofMinSize(1).ofMaxSize(5);

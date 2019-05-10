@@ -2,8 +2,9 @@
 
 It's been a few months that I wrote about
 [stateful testing]({% post_url 2018-09-06-stateful-testing %}).
-Since then I've given a few workshops about property-based testing and
+Since then I've given a couple of workshops about property-based testing and
 jqwik has reached [version 1.1.3](https://jqwik.net/release-notes.html#113).
+
 So, I'm getting more and more committed to PBT but, to be frank, when developing
 software for clients my main approach is still Test-Driven Development with
 mostly example-based test cases.
@@ -532,3 +533,46 @@ factorize(2 <= number <= Integer.MAX_VALUE) -> no exception
 product of all returned numbers must be equal to input number
 all numbers in produced list must be primes
 ```
+
+### Error Cases
+
+Testing illegal input and rejecting it is easy in our case. That's why
+I'll make it short and just show the property and the implementation
+that fulfills it:
+
+```java
+@Property
+void numbers_below_2_are_illegal(
+        @ForAll @IntRange(min = Integer.MIN_VALUE, max = 1) int number
+) {
+    Assertions.assertThatThrownBy(() -> {
+        Primes.factorize(number);
+    }).isInstanceOf(IllegalArgumentException.class);
+}
+```
+
+```java
+public static List<Integer> factorize(int number) {
+    if (number < 2) {
+        throw new IllegalArgumentException();
+    }
+    ...
+}
+```
+
+So here's the remaining inbox:
+
+```text
+✓ factorize(2) -> [2] 
+✓ factorize(prime) -> [prime]
+✓ factorize(prime^2) -> [prime, prime] 
+✓ factorize(prime^n) -> [prime, ..., prime]
+✓ factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+✓ factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```
+
+
+### Putting the Implementation under Pressure
