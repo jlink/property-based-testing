@@ -612,7 +612,7 @@ tries = 1000                  | # of calls to property
 checks = 301                  | # of not rejected calls
 ``` 
 
-As a next step I'll take the next two items from our inbox,
+Now I'll take the next two items from our inbox,
 combine them into one property method and use it to explore how big numbers
 are handled by out factorization algorithm:
 
