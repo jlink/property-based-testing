@@ -59,14 +59,26 @@ class PrimeFactorizationTests {
 		}).isInstanceOf(IllegalArgumentException.class);
 	}
 
+	@Property
+	void all_numbers_above_1_can_be_factorized(
+			@ForAll @IntRange(min = 2, max = 1_000_000_000) int number
+	) {
+		List<Integer> factors = Primes.factorize(number);
+		Integer product = factors.stream().reduce(1, (a, b) -> a * b);
+		Assertions.assertThat(product).isEqualTo(number);
+	}
+
 	@Provide
 	Arbitrary<List<Integer>> listOfPrimes() {
-		return primes().list().ofMinSize(1).ofMaxSize(5);
+		return primes().list().ofMinSize(1).ofMaxSize(20);
 	}
 
 	@Provide
 	Arbitrary<Integer> primes() {
-		return Arbitraries.of(2, 3, 5, 7, 23, 101);
+		return Arbitraries.of(
+				2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+				53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101
+		);
 	}
 
 }

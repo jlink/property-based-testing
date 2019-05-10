@@ -576,3 +576,57 @@ all numbers in produced list must be primes
 
 
 ### Putting the Implementation under Pressure
+
+Up to now we've been quite careful with our choice of primes and the number
+of primes the product of which we factorize in the tests. Let's first enhance
+the list of primes to consider to the first 26:
+
+```java
+@Provide
+Arbitrary<Integer> primes() {
+    return Arbitraries.of(
+            2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+            53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101
+    );
+} 
+```
+
+No problems with that. As a next step, we can raise the maximum size
+of the list of primes to 20:
+
+```java
+@Provide
+Arbitrary<List<Integer>> listOfPrimes() {
+    return primes().list().ofMinSize(1).ofMaxSize(20);
+}
+```
+
+Still no problem. Checking the _jqwik_ report, however, reveals that now more than
+two thirds of generated examples will be thrown away due to the assumption
+in the property:
+
+```text
+PrimeFactorizationTests:factorizing product of list of primes will return original list = 
+                              |-----------------------jqwik-----------------------
+tries = 1000                  | # of calls to property
+checks = 301                  | # of not rejected calls
+``` 
+
+As a next step I'll take the next two items from our inbox,
+combine them into one property method and use it to explore how big numbers
+are handled by out factorization algorithm:
+
+```java
+@Property
+void all_numbers_above_1_can_be_factorized(
+        @ForAll @IntRange(min = 2, max = 10000) int number
+) {
+    List<Integer> factors = Primes.factorize(number);
+    Integer product = factors.stream().reduce(1, (a, b) -> a * b);
+    Assertions.assertThat(product).isEqualTo(number);
+}
+```
+
+On my machine `max = 100_000_000` is still handled fine within a few seconds.
+Turning it up to `1_000_000_000` got the runtime above my patience limit for
+microtests. Maybe we can optimize a little bit?
