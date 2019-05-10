@@ -424,3 +424,111 @@ factorize(2 <= number <= Integer.MAX_VALUE) -> no exception
 product of all returned numbers must be equal to input number
 all numbers in produced list must be primes
 ```
+
+### Adding the final Functional Requirements
+
+From a functional perspective all that's missing is factorization of numbers
+with mixed prime factors. The next property - 
+`factorize(prime1 * prime2) -> [prime1, prime2]` - would be another stepping
+stone. Since I can almost imagine the working implementation for the general case
+I feel comfortable enough to skip this step and go the full mile:
+
+```text
+factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+```
+
+Knowing from experience that integer overflow might strike here, I build in
+the guarding assumption from the start:
+
+```java
+@Property
+void factorizing_product_of_list_of_primes_will_return_original_list(
+        @ForAll("listOfPrimes") List<Integer> primes
+) {
+    BigInteger product =
+            primes.stream()
+                  .map(BigInteger::valueOf)
+                  .reduce(BigInteger.ONE, BigInteger::multiply);
+    Assume.that(product.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
+
+    List<Integer> factors = Primes.factorize(product.intValueExact());
+    Assertions.assertThat(factors).isEqualTo(primes);
+}
+
+@Provide
+Arbitrary<List<Integer>> listOfPrimes() {
+    return primes().list().ofMinSize(1).ofMaxSize(5);
+}
+```
+
+As expected running the property reveals the simplest example that fails:
+
+```
+org.opentest4j.AssertionFailedError: 
+    Expecting:
+     <[2, 2]>
+    to be equal to:
+     <[2, 3]>
+    but was not.
+```
+
+Sure enough, all I have to do is pulling in the first loop into the second:
+
+```java
+public static List<Integer> factorize(int number) {
+    List<Integer> factors = new ArrayList<>();
+    int candidate = 2;
+    while (number >= candidate) {
+        while (number % candidate != 0) {
+            candidate++;
+        }
+        factors.add(candidate);
+        number /= candidate;
+    }
+    return factors;
+}
+```
+
+I was too bold, though: 
+
+```
+org.opentest4j.AssertionFailedError: 
+    Expecting:
+     <[2, 7]>
+    to be equal to:
+     <[7, 2]>
+    but was not.
+```
+
+The problem is the order of factors. Since they should - and are indeed -
+returned in ascending order the original list of primes must also be in
+ascending order to match the result. We could do the sorting in the provider
+method, but the property itself seems to be the better place:
+
+```java
+@Property
+void factorizing_product_of_list_of_primes_will_return_original_list(
+        @ForAll("listOfPrimes") List<Integer> primes
+) {
+    primes.sort(Integer::compareTo);
+    BigInteger product = ... ;
+    Assume.that(product.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
+
+    List<Integer> factors = Primes.factorize(product.intValueExact());
+    Assertions.assertThat(factors).isEqualTo(primes);
+}
+```
+
+And indeed, all tests succeed now and we can happily revisit our inbox:
+
+```text
+✓ factorize(2) -> [2] 
+✓ factorize(prime) -> [prime]
+✓ factorize(prime^2) -> [prime, prime] 
+✓ factorize(prime^n) -> [prime, ..., prime]
+✓ factorize(prime1 * .... * primeN) -> [prime1, ..., primeN]
+factorize(n < 2) -> IllegalArgumentException
+factorize(2 <= number <= Integer.MAX_VALUE) -> no exception  
+product of all returned numbers must be equal to input number
+all numbers in produced list must be primes
+```

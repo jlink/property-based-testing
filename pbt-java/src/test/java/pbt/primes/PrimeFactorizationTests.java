@@ -6,6 +6,7 @@ import java.util.*;
 import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.constraints.*;
 
 class PrimeFactorizationTests {
@@ -32,6 +33,26 @@ class PrimeFactorizationTests {
 		List<Integer> factors = Primes.factorize(numberToFactorize.intValueExact());
 		Assertions.assertThat(factors).containsOnly(prime);
 		Assertions.assertThat(factors).hasSize(n);
+	}
+
+	@Property
+	void factorizing_product_of_list_of_primes_will_return_original_list(
+			@ForAll("listOfPrimes") List<Integer> primes
+	) {
+		primes.sort(Integer::compareTo);
+		BigInteger product =
+				primes.stream()
+					  .map(BigInteger::valueOf)
+					  .reduce(BigInteger.ONE, BigInteger::multiply);
+		Assume.that(product.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0);
+
+		List<Integer> factors = Primes.factorize(product.intValueExact());
+		Assertions.assertThat(factors).isEqualTo(primes);
+	}
+
+	@Provide
+	Arbitrary<List<Integer>> listOfPrimes() {
+		return primes().list().ofMinSize(1).ofMaxSize(5);
 	}
 
 	@Provide
