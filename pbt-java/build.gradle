@@ -5,7 +5,7 @@ repositories {
 
 ext.junitPlatformVersion = '1.4.2'
 ext.junitJupiterVersion = '5.4.2'
-ext.jqwikVersion = '1.1.4-SNAPSHOT'
+ext.jqwikVersion = '1.1.4'
 
 apply plugin: 'java'
 
@@ -30,14 +30,14 @@ test {
 dependencies {
 	implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.4'
 
-	testImplementation("org.mockito:mockito-core:2.23.4")
-	testImplementation("org.assertj:assertj-core:3.11.1")
+	testImplementation("org.mockito:mockito-core:2.27.0")
+	testImplementation("org.assertj:assertj-core:3.12.2")
 	testImplementation "net.jqwik:jqwik:${jqwikVersion}"
 
 	// For Jupiter tests and also necessary to work around some IntelliJ bugs
 	testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
 
-	testImplementation('com.pholser:junit-quickcheck-generators:0.8.2')
+	testImplementation('com.pholser:junit-quickcheck-generators:0.9')
 	testImplementation("org.junit.vintage:junit-vintage-engine:${junitJupiterVersion}")
 
 	testImplementation group: 'org.quicktheories', name: 'quicktheories', version: '0.26'
@@ -48,5 +48,5 @@ dependencies {
 
 wrapper {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '5.4.1'
+	gradleVersion = '5.4.2'
 }
