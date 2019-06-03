@@ -43,13 +43,13 @@ class ListReverseProperties {
 	// Using wildcards and type variables in properties
 
 	@Property
-	@Report(Reporting.GENERATED)
+	//@Report(Reporting.GENERATED)
 	boolean reverseWithWildcardType(@ForAll List<?> original) {
 		return reverse(reverse(original)).equals(original);
 	}
 
 	@Property
-	@Report(Reporting.GENERATED)
+	//@Report(Reporting.GENERATED)
 	<T> boolean reverseWithTypeVariable(@ForAll List<T> original) {
 		return reverse(reverse(original)).equals(original);
 	}
