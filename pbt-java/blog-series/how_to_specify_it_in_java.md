@@ -24,9 +24,9 @@ to explain differences between the original and my code.
 >
 > Searching for “property-based testing” on Youtube results in a lot of hits. Most of the top 100 consist of talks recorded at developer conferences and meetings, where (mostly) other people than this author present ideas, tools and methods for property-based testing, or applications that make use of it. Clearly, property-based testing is an idea whose time has come. But clearly, it is also poorly understood, requiring explanation over and over again!
 >
-> We have found that many developers trying property-based testing for the first time find it difficult to identify properties to write—and find the simple examples in tutorials difficult to generalize. This is known as the oracle problem, and it is common to all approaches that use test case generation.
+> We have found that many developers trying property-based testing for the first time find it difficult to identify properties to write — and find the simple examples in tutorials difficult to generalize. This is known as the oracle problem, and it is common to all approaches that use test case generation.
 >
-> In this paper, therefore, we take a simple—but non-trivial—example of a purely functional data structure, and present five different approaches to writing properties, along with the pitfalls of each to keep in mind. We compare and contrast their effectiveness with the help of eight buggy implementations. We hope that the concrete advice presented here will enable readers to side-step the “where do I start?” question, and quickly derive the benefits that property-based testing has to offer.
+> In this paper, therefore, we take a simple — but non-trivial — example of a purely functional data structure, and present five different approaches to writing properties, along with the pitfalls of each to keep in mind. We compare and contrast their effectiveness with the help of eight buggy implementations. We hope that the concrete advice presented here will enable readers to side-step the “where do I start?” question, and quickly derive the benefits that property-based testing has to offer.
 
 > ## 2 A Primer in Property-Based Testing 
 >
