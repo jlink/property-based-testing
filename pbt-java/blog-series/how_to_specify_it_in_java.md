@@ -57,6 +57,11 @@ boolean reverseList() {
 } 
 ```
 
+`@Example` is _jqwik's_ equivalent to JUnit's `@Test`. Moreover it allows
+to return a boolean value to state success or failure of a test. For
+more complicated checks the assertion style of most Java test libraries
+is also supported.
+
 > This test is written in the same form as most test cases worldwide: we apply the function under test (reverse) to known arguments (1,2,3), and then com- pare the result to a known expected value (3,2,1). Developers are practiced in coming up with these examples, and predicting expected results. But what happens when we try to write a property instead?
 
 ```java
@@ -127,8 +132,8 @@ checks = 2                    | # of not rejected calls
 sample = [[0, -1]]
 ```
 
-> Here the `sample` line shows the value of `aList` for which the test failed (0, -1) \[...\].
->
+Here the `sample` line shows the value of `aList` for which the test failed (0, -1).
+
 > Interestingly, the counterexample _jqwik_ reports for this property is always (0, -1) or (0, 1). These are not the random counterexamples that _jqwik_ finds first; they are the result of shrinking the random counterexamples via a systematic greedy search for a simpler failing test. Shrinking lists tries to remove elements, and numbers shrink towards zero; the reason we see these two counterexamples is that xs must contain at least two different elements to falsify the property, and 0 and 1/-1 are the smallest pair of different integers. Shrinking is one of the most useful features of property-based testing, resulting in counterexamples which are usually easy to debug, because every part of the counterexample is relevant to the failure.
 >
-> Now we have seen the benefits of property-based testing—random generation of very many test cases, and shrinking of counterexamples to minimal failing tests—and the major pitfall: the temptation to replicate the implementation in the tests, incurring high costs for little benefit. In the remainder of this paper, we present systematic ways to define properties without falling into this trap. We will (largely) ignore the question of how to generate effective test cases—that are good at reaching buggy behaviour in the implementation under test—because in the absence of good properties, good generators are of little value.
+> Now we have seen the benefits of property-based testing — random generation of very many test cases, and shrinking of counterexamples to minimal failing tests — and the major pitfall: the temptation to replicate the implementation in the tests, incurring high costs for little benefit. In the remainder of this paper, we present systematic ways to define properties without falling into this trap. We will (largely) ignore the question of how to generate effective test cases—that are good at reaching buggy behaviour in the implementation under test — because in the absence of good properties, good generators are of little value.
