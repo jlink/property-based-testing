@@ -40,6 +40,11 @@ class ListReverseProperties {
 		return reverse(reverse(original)).equals(original);
 	}
 
+	@Property
+	boolean reverseKeepsTheOriginalList(@ForAll List<Integer> aList) {
+		return reverse(aList).equals(aList);
+	}
+
 	// Using wildcards and type variables in properties
 
 	@Property

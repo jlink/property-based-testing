@@ -17,6 +17,7 @@ class ListReverseTests {
 		List<Integer> aList = asList(1, 2, 3);
 		Collections.reverse(aList);
 		assertThat(aList).containsExactly(3, 2, 1);
+		assertThat(aList).isEqualTo(asList(3, 2, 1));
 	}
 
 	@Group
