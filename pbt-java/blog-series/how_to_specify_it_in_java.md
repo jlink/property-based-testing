@@ -13,7 +13,11 @@ as property testing library.
 [John was kind enough](https://twitter.com/rjmh/status/1147034204439490560) 
 to allow me to use _his text_ enriched by my examples. 
 Where necessary I will also add a few sentences of my own
-to explain differences between the original and my code. 
+to explain differences between the original and my code.
+
+So here we go...
+
+
 
 > ## 1 Introduction
 >
