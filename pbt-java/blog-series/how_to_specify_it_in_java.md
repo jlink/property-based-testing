@@ -227,7 +227,7 @@ I left out the generic types and the code of two subfunctions.
 
 > That is, all the keys in a left subtree must be less than the key in the node, and all the keys in the right subtree must be greater.
 >
-> This definition is obviously correct, but also inefficient: it is quadratic in the size of the tree in the worst case. A more efficient definition would exploit the validity of the left and right subtrees, and compare only the last key in the left subtree, and the first key in the right subtree, against the key in a Branch node. But the equivalence of these two definitions depends on reasoning, and we prefer to avoid reasoning that is not checked by tests—if it turns out to be wrong, or is invalidated by later changes to the code, then tests using the more efficient definition might fail to detect some bugs. Testing that two definitions are equivalent would require testing a property such as
+> This definition is obviously correct, but also inefficient: it is quadratic in the size of the tree in the worst case. A more efficient definition would exploit the validity of the left and right subtrees, and compare only the last key in the left subtree, and the first key in the right subtree, against the key in a Branch node. But the equivalence of these two definitions depends on reasoning, and we prefer to avoid reasoning that is not checked by tests — if it turns out to be wrong, or is invalidated by later changes to the code, then tests using the more efficient definition might fail to detect some bugs. Testing that two definitions are equivalent would require testing a property such as
 
 ```java
 @Property
