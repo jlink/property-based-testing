@@ -1,5 +1,6 @@
 package how_to_specify_it.bst;
 
+import java.util.AbstractMap.*;
 import java.util.*;
 
 public class BST<K extends Comparable<K>, V> {
@@ -17,21 +18,51 @@ public class BST<K extends Comparable<K>, V> {
 		return null;
 	}
 
-	private BST(BST<K, V> left, Map.Entry<K, V> entry, BST<K, V> right) {
+	private final BST<K, V> left;
+	private final Map.Entry<K, V> entry;
+	private final BST<K, V> right;
 
+	private BST(BST<K, V> left, Map.Entry<K, V> entry, BST<K, V> right) {
+		this.left = left;
+		this.entry = entry;
+		this.right = right;
+	}
+
+	public Optional<BST<K, V>> left() {
+		return Optional.of(left);
+	}
+
+	public Optional<BST<K, V>> right() {
+		return Optional.of(right);
 	}
 
 	public boolean isEmpty() {
-		return false;
+		return entry == null;
+	}
+
+	public int size() {
+		if (entry != null) {
+			return 1;
+		}
+		return 0;
 	}
 
 	//	find ::Ord k ⇒k →BST k v →Maybe v
 	public Optional<V> find(K key) {
+		if (entry == null) {
+			return Optional.empty();
+		}
+		if (entry.getKey().compareTo(key) == 0) {
+			return Optional.of(entry.getValue());
+		}
 		return Optional.empty();
 	}
 
 	//	insert :: Ord k ⇒ k → v → BST k v → BST k v
 	public BST<K, V> insert(K key, V value) {
+		if (entry == null) {
+			return new BST<>(left, new SimpleImmutableEntry<>(key, value), right);
+		}
 		return this;
 	}
 
@@ -50,7 +81,4 @@ public class BST<K extends Comparable<K>, V> {
 		return Collections.emptyList();
 	}
 
-	public int size() {
-		return 0;
-	}
 }

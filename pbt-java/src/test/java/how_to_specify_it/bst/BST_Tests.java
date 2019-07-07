@@ -17,7 +17,6 @@ class BST_Tests {
 	}
 
 	@Example
-	@Disabled
 	void an_inserted_value_can_be_found() {
 		BST<Integer, String> updated = bst.insert(3, "three");
 		assertThat(updated.isEmpty()).isFalse();
