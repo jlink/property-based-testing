@@ -28,7 +28,14 @@ class BST_Tests {
 	}
 
 	@Example
-	@Disabled
+	void a_replaced_value_can_be_found() {
+		BST<Integer, String> first = bst.insert(3, "three");
+		BST<Integer, String> updated = first.insert(3, "drei");
+		assertThat(updated.find(3).get()).isEqualTo("drei");
+		assertThat(first.find(3).get()).isEqualTo("three");
+	}
+
+	@Example
 	void three_inserted_values_can_be_found() {
 		BST<Integer, String> updated =
 				bst.insert(10, "ten")
@@ -42,6 +49,42 @@ class BST_Tests {
 		assertThat(updated.find(20)).isPresent();
 
 		assertThat(bst.isEmpty()).isTrue();
+	}
+
+	@Example
+	void filled_with_same_values_in_same_order_are_equal() {
+		BST<Integer, String> first =
+				bst.insert(10, "ten")
+				   .insert(1, "one")
+				   .insert(20, "twenty");
+
+		BST<Integer, String> second =
+				bst.insert(10, "ten")
+				   .insert(1, "one")
+				   .insert(20, "twenty");
+
+		assertThat(first.equals(second)).isTrue();
+		assertThat(second.equals(first)).isTrue();
+
+		BST<Integer, String> differentOrder =
+				bst.insert(1, "one")
+				   .insert(10, "ten")
+				   .insert(20, "twenty");
+		assertThat(first.equals(differentOrder)).isFalse();
+		assertThat(differentOrder.equals(first)).isFalse();
+	}
+
+	@Example
+	void toString_contains_all_keys_with_values() {
+		BST<Integer, String> updated =
+				bst.insert(10, "ten")
+				   .insert(1, "one")
+				   .insert(20, "twenty");
+
+		String toString = updated.toString();
+		assertThat(toString).contains("10=ten");
+		assertThat(toString).contains("1=one");
+		assertThat(toString).contains("20=twenty");
 	}
 
 	@Example

@@ -41,10 +41,10 @@ public class BST<K extends Comparable<K>, V> {
 	}
 
 	public int size() {
-		if (entry != null) {
-			return 1;
+		if (entry == null) {
+			return 0;
 		}
-		return 0;
+		return 1 + getLeft().size() + getRight().size();
 	}
 
 	//	find ::Ord k ⇒k →BST k v →Maybe v
@@ -55,7 +55,13 @@ public class BST<K extends Comparable<K>, V> {
 		if (entry.getKey().compareTo(key) == 0) {
 			return Optional.of(entry.getValue());
 		}
-		return Optional.empty();
+		if (entry.getKey().compareTo(key) > 0) {
+			return getLeft().find(key);
+		}
+		if (entry.getKey().compareTo(key) < 0) {
+			return getRight().find(key);
+		}
+		throw new RuntimeException("Should never get here");
 	}
 
 	//	insert :: Ord k ⇒ k → v → BST k v → BST k v
@@ -63,7 +69,24 @@ public class BST<K extends Comparable<K>, V> {
 		if (entry == null) {
 			return new BST<>(left, new SimpleImmutableEntry<>(key, value), right);
 		}
+		if (entry.getKey().compareTo(key) == 0) {
+			return new BST<>(left, new SimpleImmutableEntry<>(key, value), right);
+		}
+		if (entry.getKey().compareTo(key) > 0) {
+			return new BST<>(getLeft().insert(key, value), entry, right);
+		}
+		if (entry.getKey().compareTo(key) < 0) {
+			return new BST<>(left, entry, getRight().insert(key, value));
+		}
 		return this;
+	}
+
+	private BST<K, V> getRight() {
+		return this.right == null ? NIL : this.right;
+	}
+
+	private BST<K, V> getLeft() {
+		return this.left == null ? NIL : this.left;
 	}
 
 	//	delete::Ord k ⇒k →BST k v →BST k v
@@ -81,4 +104,46 @@ public class BST<K extends Comparable<K>, V> {
 		return Collections.emptyList();
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		BST<?, ?> bst = (BST<?, ?>) o;
+		if (!Objects.equals(left, bst.left)) return false;
+		if (!Objects.equals(entry, bst.entry)) return false;
+		return Objects.equals(right, bst.right);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = left != null ? left.hashCode() : 0;
+		result = 31 * result + (entry != null ? entry.hashCode() : 0);
+		result = 31 * result + (right != null ? right.hashCode() : 0);
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return toIndentedString(0);
+	}
+
+	private String toIndentedString(int indent) {
+		if (entry == null) {
+			return "NIL";
+		}
+		String leftString =
+				left == null ? "NIL" : left.toIndentedString(indent + 1);
+		String rightString =
+				right == null ? "NIL" : right.toIndentedString(indent + 1);
+		String indentation = String.join("", Collections.nCopies(indent, "       "));
+		return String.format(
+				"%s%n%sleft:  %s%n%sright: %s",
+				entry.toString(),
+				indentation,
+				leftString,
+				indentation,
+				rightString
+		);
+	}
 }
