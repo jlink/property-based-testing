@@ -7,15 +7,17 @@ import net.jqwik.api.*;
 class BST_Properties {
 
 	@Property(tries = 1000)
-	void checkGenerator(@ForAll("trees") BST<Integer, Integer> bst) {
+	boolean checkGenerator(@ForAll("trees") BST<Integer, Integer> bst) {
 		String criterion =
 				bst.size() == 0 ? "empty" :
-								   bst.size() <= 10 ? "<= 10" :
-										   bst.size() <= 100 ? "<= 100" :
-												   bst.size() <= 1000 ? "<= 1000" : "> 1000";
+						bst.size() <= 10 ? "<= 10" :
+								bst.size() <= 100 ? "<= 100" :
+										bst.size() <= 1000 ? "<= 1000" : "> 1000";
 		Statistics.collect(criterion);
 		//System.out.println(bst.size());
 		//System.out.println(bst);
+
+		return BSTValidity.isValid(bst);
 	}
 
 	@Provide
@@ -34,4 +36,5 @@ class BST_Properties {
 			});
 		});
 	}
+
 }

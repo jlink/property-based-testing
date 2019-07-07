@@ -36,6 +36,14 @@ public class BST<K extends Comparable<K>, V> {
 		this.right = right;
 	}
 
+	public K key() {
+		return entry == null ? null : entry.getKey();
+	}
+
+	public V value() {
+		return entry == null ? null : entry.getValue();
+	}
+
 	public Optional<BST<K, V>> left() {
 		if (getLeft() == NIL)
 			return Optional.empty();
@@ -46,6 +54,10 @@ public class BST<K extends Comparable<K>, V> {
 		if (getRight() == NIL)
 			return Optional.empty();
 		return Optional.of(right);
+	}
+
+	public boolean isLeaf() {
+		return getLeft() == NIL && getRight() == NIL;
 	}
 
 	public boolean isEmpty() {
@@ -122,10 +134,6 @@ public class BST<K extends Comparable<K>, V> {
 			}
 			return right.insert(left.entry);
 		}
-	}
-
-	private boolean isLeaf() {
-		return getLeft() == NIL && getRight() == NIL;
 	}
 
 	//	keys ::BSTkv→[k]

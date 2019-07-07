@@ -150,9 +150,12 @@ public class BST<K extends Comparable<K>, V> {
     public static <K extends Comparable<K>, V> BST<K, V> nil();
     public static <K extends Comparable<K>, V> BST<K, V> union(BST<K, V> bst1, BST<K, V> bst2);
        
+    public K key();
+    public V value();
     public Optional<BST<K, V>> left();
     public Optional<BST<K, V>> right();
     public boolean isEmpty();
+    public boolean isLeaf();
     public int size();
        
     public Optional<V> find(K key);
@@ -191,7 +194,7 @@ Arbitrary<BST<Integer, Integer>> bsts() {
 }
 ```
 
-_Generators_ have the type `Arbitrary` in _jqwik_, the are usually fed
+_Generators_ have type `Arbitrary` in _jqwik_; they are usually fed
 to properties through methods annotated with `@Provide`. 
 Shrinking behaviour is also automatically derived.
 
@@ -200,3 +203,37 @@ Shrinking behaviour is also automatically derived.
 Strictly speaking this would not necessary for _jqwik_ since the framework
 can randomly choose any type that's compatible with the generic type
 definition. To be closer to the original version I went with `Integer` as well.
+
+> ## 4 Approaches to Writing Properties
+> ### 4.1 Validity Testing
+>
+> Like many data-structures, binary search trees satisfy an important invariant— and so we can write properties to test that the invariant is preserved.
+>
+> In this case the invariant is captured by the 
+> [following function](https://github.com/jlink/property-based-testing/blob/master/pbt-java/src/test/java/how_to_specify_it/bst/BSTValidity.java#L8):
+
+```java
+boolean isValid(BST bst) {
+    if (bst.isLeaf()) {
+        return true;
+    }
+    return isValid(bst.left()) 
+             && isValid(bst.right())
+             && keys(bst.left()).allMatch(k -> k.compareTo(bst.key()) < 0)
+             && keys(bst.right()).allMatch(k -> k.compareTo(bst.key()) > 0);
+}
+```
+I left out the generic types and the code of two subfunctions. 
+
+> That is, all the keys in a left subtree must be less than the key in the node, and all the keys in the right subtree must be greater.
+>
+> This definition is obviously correct, but also inefficient: it is quadratic in the size of the tree in the worst case. A more efficient definition would exploit the validity of the left and right subtrees, and compare only the last key in the left subtree, and the first key in the right subtree, against the key in a Branch node. But the equivalence of these two definitions depends on reasoning, and we prefer to avoid reasoning that is not checked by tests—if it turns out to be wrong, or is invalidated by later changes to the code, then tests using the more efficient definition might fail to detect some bugs. Testing that two definitions are equivalent would require testing a property such as
+
+```java
+@Property
+boolean valid_and_fastValid_are_equivalent(@ForAll("trees") BST bst) {
+	return valid(bst) == fastValid(bst);
+}
+``` 
+
+> and to do so, we would need a generator that can produce both valid and invalid trees, so this is not a straightforward extension. We prefer, therefore, to use the obvious-but-inefficient definition, at least initially.
