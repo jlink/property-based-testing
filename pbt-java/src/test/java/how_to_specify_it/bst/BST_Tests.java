@@ -82,18 +82,36 @@ class BST_Tests {
 				   .insert(20, "twenty");
 
 		String toString = updated.toString();
+		System.out.println(toString);
 		assertThat(toString).contains("10=ten");
 		assertThat(toString).contains("1=one");
 		assertThat(toString).contains("20=twenty");
 	}
 
 	@Example
-	@Disabled
 	void a_deleted_value_can_no_longer_be_found() {
-		BST<Integer, String> updated1 = bst.insert(3, "three");
-		BST<Integer, String> updated2 = updated1.delete(3);
-		assertThat(updated2.find(3)).isNotPresent();
-		assertThat(updated1.find(3)).isPresent();
+		BST<Integer, String> ten = bst.insert(10, "ten");
+		assertThat(ten.delete(10).find(10)).isNotPresent();
+
+		BST<Integer, String> ten_one = ten.insert(1, "one");
+		assertThat(ten_one.delete(10).find(10)).isNotPresent();
+
+		BST<Integer, String> ten_one_twenty = ten_one.insert(20, "twenty");
+
+		BST<Integer, String> deleted1 = ten_one_twenty.delete(1);
+		assertThat(deleted1.find(1)).isNotPresent();
+		assertThat(deleted1.find(10)).isPresent();
+		assertThat(deleted1.find(20)).isPresent();
+
+		BST<Integer, String> deleted20 = ten_one_twenty.delete(20);
+		assertThat(deleted20.find(20)).isNotPresent();
+		assertThat(deleted20.find(1)).isPresent();
+		assertThat(deleted20.find(10)).isPresent();
+
+		BST<Integer, String> deleted10 = ten_one_twenty.delete(10);
+		assertThat(deleted10.find(10)).isNotPresent();
+		assertThat(deleted10.find(1)).isPresent();
+		assertThat(deleted10.find(20)).isPresent();
 	}
 
 	@Example

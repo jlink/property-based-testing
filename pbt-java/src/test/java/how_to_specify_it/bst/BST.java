@@ -5,7 +5,7 @@ import java.util.*;
 
 public class BST<K extends Comparable<K>, V> {
 
-	private static final BST NIL = new BST<>(null, null, null);
+	private static final BST NIL = new BST<>();
 
 	//	nil :: BST k v
 	public static <K extends Comparable<K>, V> BST<K, V> nil() {
@@ -22,6 +22,10 @@ public class BST<K extends Comparable<K>, V> {
 	private final Map.Entry<K, V> entry;
 	private final BST<K, V> right;
 
+	private BST() {
+		this(nil(), null, nil());
+	}
+
 	private BST(BST<K, V> left, Map.Entry<K, V> entry, BST<K, V> right) {
 		this.left = left;
 		this.entry = entry;
@@ -29,10 +33,14 @@ public class BST<K extends Comparable<K>, V> {
 	}
 
 	public Optional<BST<K, V>> left() {
+		if (getLeft() == NIL)
+			return Optional.empty();
 		return Optional.of(left);
 	}
 
 	public Optional<BST<K, V>> right() {
+		if (getRight() == NIL)
+			return Optional.empty();
 		return Optional.of(right);
 	}
 
@@ -52,33 +60,32 @@ public class BST<K extends Comparable<K>, V> {
 		if (entry == null) {
 			return Optional.empty();
 		}
-		if (entry.getKey().compareTo(key) == 0) {
-			return Optional.of(entry.getValue());
-		}
 		if (entry.getKey().compareTo(key) > 0) {
 			return getLeft().find(key);
 		}
 		if (entry.getKey().compareTo(key) < 0) {
 			return getRight().find(key);
 		}
-		throw new RuntimeException("Should never get here");
+		return Optional.of(entry.getValue());
 	}
 
 	//	insert :: Ord k ⇒ k → v → BST k v → BST k v
 	public BST<K, V> insert(K key, V value) {
-		if (entry == null) {
-			return new BST<>(left, new SimpleImmutableEntry<>(key, value), right);
+		SimpleImmutableEntry<K, V> newEntry = new SimpleImmutableEntry<>(key, value);
+		return insert(newEntry);
+	}
+
+	private BST<K, V> insert(Map.Entry<K, V> newEntry) {
+		if (this.entry == null) {
+			return new BST<>(left, newEntry, right);
 		}
-		if (entry.getKey().compareTo(key) == 0) {
-			return new BST<>(left, new SimpleImmutableEntry<>(key, value), right);
+		if (this.entry.getKey().compareTo(newEntry.getKey()) > 0) {
+			return new BST<>(getLeft().insert(newEntry), this.entry, right);
 		}
-		if (entry.getKey().compareTo(key) > 0) {
-			return new BST<>(getLeft().insert(key, value), entry, right);
+		if (this.entry.getKey().compareTo(newEntry.getKey()) < 0) {
+			return new BST<>(left, this.entry, getRight().insert(newEntry));
 		}
-		if (entry.getKey().compareTo(key) < 0) {
-			return new BST<>(left, entry, getRight().insert(key, value));
-		}
-		return this;
+		return new BST<>(left, newEntry, right);
 	}
 
 	private BST<K, V> getRight() {
@@ -91,7 +98,30 @@ public class BST<K extends Comparable<K>, V> {
 
 	//	delete::Ord k ⇒k →BST k v →BST k v
 	public BST<K, V> delete(K key) {
-		return this;
+		if (entry == null) {
+			return this;
+		}
+		if (entry.getKey().compareTo(key) > 0) {
+			return new BST<>(getLeft().delete(key), entry, right);
+		}
+		if (entry.getKey().compareTo(key) < 0) {
+			return new BST<>(left, entry, getRight().delete(key));
+		}
+		if (isLeaf()) {
+			return NIL;
+		} else {
+			if (getLeft() == NIL) {
+				return right;
+			}
+			if (getRight() == NIL) {
+				return left;
+			}
+			return right.insert(left.entry);
+		}
+	}
+
+	private boolean isLeaf() {
+		return getLeft() == NIL && getRight() == NIL;
 	}
 
 	//	keys ::BSTkv→[k]
@@ -117,9 +147,9 @@ public class BST<K extends Comparable<K>, V> {
 
 	@Override
 	public int hashCode() {
-		int result = left != null ? left.hashCode() : 0;
+		int result = getLeft().hashCode();
 		result = 31 * result + (entry != null ? entry.hashCode() : 0);
-		result = 31 * result + (right != null ? right.hashCode() : 0);
+		result = 31 * result + getRight().hashCode();
 		return result;
 	}
 
@@ -132,10 +162,8 @@ public class BST<K extends Comparable<K>, V> {
 		if (entry == null) {
 			return "NIL";
 		}
-		String leftString =
-				left == null ? "NIL" : left.toIndentedString(indent + 1);
-		String rightString =
-				right == null ? "NIL" : right.toIndentedString(indent + 1);
+		String leftString = getLeft().toIndentedString(indent + 1);
+		String rightString = getRight().toIndentedString(indent + 1);
 		String indentation = String.join("", Collections.nCopies(indent, "       "));
 		return String.format(
 				"%s%n%sleft:  %s%n%sright: %s",
