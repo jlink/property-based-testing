@@ -1,23 +1,27 @@
 # How to Specify it! in Java!
 
 A couple of days ago [John Hughes](https://twitter.com/rjmh), 
-one of the most prominent proponents of Property-based Testing, 
+the most prominent proponent of Property-based Testing, 
 published [_How to Specify it!_](https://www.dropbox.com/s/tx2b84kae4bw1p4/paper.pdf).
 In this paper he presents 
 "five generic approaches to writing \[...\] specifications" a.k.a. properties.
 
 Throughout the paper he uses [QuickCheck in Haskell](http://hackage.haskell.org/package/QuickCheck)
-as tool and language of choice. Since many of my readers are not familiar with Haskell
-I want to translate the examples into Java using [jqwik](https://jqwik.net)
+as tool and language of choice. Since some of my readers are not familiar with Haskell
+I want to transfer the examples into Java using [jqwik](https://jqwik.net)
 as property testing library. 
 [John was kind enough](https://twitter.com/rjmh/status/1147034204439490560) 
 to allow me to use _his text_ enriched by my examples. John's original
-text is set as a quotation. I'll sometimes leave out a few words or 
+text is formatted 
+
+> as a quotation. 
+
+I'll sometimes leave out a few words or 
 sentences that do not fit the Java context. 
 I also replaced _QuickCheck_ with _jqwik_ in those places where applicable. 
 
-Where necessary I will also add a few sentences of my own
-to explain differences between the original and my code.
+Where necessary I will add a few sentences of my own
+to explain differences between the original and my translated version.
 
 
 > ## 1 Introduction
@@ -132,7 +136,7 @@ checks = 2                    | # of not rejected calls
 sample = [[0, -1]]
 ```
 
-Here the `sample` line shows the value of `aList` for which the test failed (0, -1).
+Here the `sample` line shows the value of `aList` for which the test failed: (0, -1).
 
 > Interestingly, the counterexample _jqwik_ reports for this property is always (0, -1) or (0, 1). These are not the random counterexamples that _jqwik_ finds first; they are the result of shrinking the random counterexamples via a systematic greedy search for a simpler failing test. Shrinking lists tries to remove elements, and numbers shrink towards zero; the reason we see these two counterexamples is that xs must contain at least two different elements to falsify the property, and 0 and 1/-1 are the smallest pair of different integers. Shrinking is one of the most useful features of property-based testing, resulting in counterexamples which are usually easy to debug, because every part of the counterexample is relevant to the failure.
 >
@@ -142,7 +146,7 @@ Here the `sample` line shows the value of `aList` for which the test failed (0, 
 >
 > The code we shall develop properties for is an implementation of finite maps (from keys to values) as binary search trees. 
 
-Here's the interface of class 
+Here's the public interface of class 
 [`BST`](https://github.com/jlink/property-based-testing/blob/master/pbt-java/src/test/java/how_to_specify_it/bst/BST.java):
 
 ```java
@@ -169,7 +173,7 @@ public class BST<K extends Comparable<K>, V> {
 The method names were chosen to resemble the Haskell version as much as possible. 
 Moreover, the implementation follows a pattern rather unusual in Java: 
 Every instance of a `BST` is immutable, i.e. the changing methods - `insert`, `delete` and `union` - return a new instance of `BST`. 
-The initial empty instance can be accessed through `BST.nil()`.
+An empty instance can be accessed through `BST.nil()`.
 
 > The operations we will test are those that create trees (nil, insert, delete and union), and that find the value associated with a key in the tree. We will also use auxiliary operations: toList, which returns a sorted list of the key-value pairs in the tree, and keys which is defined in terms of it. The implementation itself is standard, and is not included here.
 >
@@ -200,9 +204,9 @@ Shrinking behaviour is also automatically derived.
 
 > We need to fix an instance type for testing; for the time being, we choose to let both keys and values be integers. `Integer` is usually an acceptably good choice as an instance for testing polymorphic properties, although we will return to this choice later.
 
-Strictly speaking this would not necessary for _jqwik_ since the framework
+Strictly speaking this would not be necessary for _jqwik_ since the framework
 can randomly choose any type that's compatible with the generic type
-definition. To be closer to the original version I went with `Integer` as well.
+definition. To be closer to the original version I went with `Integer` nonetheless.
 
 > ## 4 Approaches to Writing Properties
 > ### 4.1 Validity Testing
