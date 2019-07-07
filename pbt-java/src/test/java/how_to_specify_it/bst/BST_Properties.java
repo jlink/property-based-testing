@@ -4,20 +4,44 @@ import java.util.*;
 
 import net.jqwik.api.*;
 
+import static how_to_specify_it.bst.BSTValidity.*;
+
 class BST_Properties {
 
-	@Property(tries = 1000)
-	boolean checkGenerator(@ForAll("trees") BST<Integer, Integer> bst) {
-		String criterion =
-				bst.size() == 0 ? "empty" :
-						bst.size() <= 10 ? "<= 10" :
-								bst.size() <= 100 ? "<= 100" :
-										bst.size() <= 1000 ? "<= 1000" : "> 1000";
-		Statistics.collect(criterion);
-		//System.out.println(bst.size());
-		//System.out.println(bst);
+	@Property
+	boolean arbitrary_valid(@ForAll("trees") BST<Integer, Integer> bst) {
+		return isValid(bst);
+	}
 
-		return BSTValidity.isValid(bst);
+	@Example
+	boolean nil_valid() {
+		BST<?, ?> nil = BST.nil();
+		return isValid(nil);
+	}
+
+	@Property
+	boolean insert_valid(
+			@ForAll("trees") BST<Integer, Integer> bst,
+			@ForAll Integer key
+	) {
+		return isValid(bst.insert(key, 42));
+	}
+
+	@Property
+	boolean delete_valid(
+			@ForAll("trees") BST<Integer, Integer> bst,
+			@ForAll Integer key
+	) {
+		// Assume.that(isValid(bst));
+		return isValid(bst.delete(key));
+	}
+
+	@Property
+	boolean union_valid(
+			@ForAll("trees") BST<Integer, Integer> bst,
+			@ForAll("trees") BST<Integer, Integer> other
+	) {
+		return isValid(BST.union(bst, other));
 	}
 
 	@Provide

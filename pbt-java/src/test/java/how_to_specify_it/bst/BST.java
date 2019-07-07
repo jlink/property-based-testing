@@ -101,6 +101,8 @@ public class BST<K extends Comparable<K>, V> {
 		if (this.entry.getKey().compareTo(newEntry.getKey()) < 0) {
 			return new BST<>(left, this.entry, getRight().insert(newEntry));
 		}
+		// bug(2):
+		// return new BST<>(left, this.entry, getRight().insert(newEntry));
 		return new BST<>(left, newEntry, right);
 	}
 
