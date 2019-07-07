@@ -165,8 +165,11 @@ public class BST<K extends Comparable<K>, V> {
 
 	@Override
 	public int hashCode() {
+		if (entry == null) {
+			return 0;
+		}
 		int result = getLeft().hashCode();
-		result = 31 * result + (entry != null ? entry.hashCode() : 0);
+		result = 31 * result + entry.hashCode();
 		result = 31 * result + getRight().hashCode();
 		return result;
 	}

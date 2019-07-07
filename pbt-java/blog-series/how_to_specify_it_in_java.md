@@ -137,3 +137,66 @@ Here the `sample` line shows the value of `aList` for which the test failed (0, 
 > Interestingly, the counterexample _jqwik_ reports for this property is always (0, -1) or (0, 1). These are not the random counterexamples that _jqwik_ finds first; they are the result of shrinking the random counterexamples via a systematic greedy search for a simpler failing test. Shrinking lists tries to remove elements, and numbers shrink towards zero; the reason we see these two counterexamples is that xs must contain at least two different elements to falsify the property, and 0 and 1/-1 are the smallest pair of different integers. Shrinking is one of the most useful features of property-based testing, resulting in counterexamples which are usually easy to debug, because every part of the counterexample is relevant to the failure.
 >
 > Now we have seen the benefits of property-based testing — random generation of very many test cases, and shrinking of counterexamples to minimal failing tests — and the major pitfall: the temptation to replicate the implementation in the tests, incurring high costs for little benefit. In the remainder of this paper, we present systematic ways to define properties without falling into this trap. We will (largely) ignore the question of how to generate effective test cases—that are good at reaching buggy behaviour in the implementation under test — because in the absence of good properties, good generators are of little value.
+
+> ## 3 Our Running Example: Binary Search Trees
+>
+> The code we shall develop properties for is an implementation of finite maps (from keys to values) as binary search trees. 
+
+Here's the interface of class 
+[`BST`](https://github.com/jlink/property-based-testing/blob/master/pbt-java/src/test/java/how_to_specify_it/bst/BST.java):
+
+```java
+public class BST<K extends Comparable<K>, V> {
+    public static <K extends Comparable<K>, V> BST<K, V> nil();
+    public static <K extends Comparable<K>, V> BST<K, V> union(BST<K, V> bst1, BST<K, V> bst2);
+       
+    public Optional<BST<K, V>> left();
+    public Optional<BST<K, V>> right();
+    public boolean isEmpty();
+    public int size();
+       
+    public Optional<V> find(K key);
+    public BST<K, V> insert(K key, V value);
+    public BST<K, V> delete(K key);
+    public List<K> keys();
+    public List<Map.Entry<K, V>> toList();
+}
+```
+
+The method names were chosen to resemble the Haskell version as much as possible. 
+Moreover, the implementation follows a pattern rather unusual in Java: 
+Every instance of a `BST` is immutable, i.e. the changing methods - `insert`, `delete` and `union` - return a new instance of `BST`. 
+The initial empty instance can be accessed through `BST.nil()`.
+
+> The operations we will test are those that create trees (nil, insert, delete and union), and that find the value associated with a key in the tree. We will also use auxiliary operations: toList, which returns a sorted list of the key-value pairs in the tree, and keys which is defined in terms of it. The implementation itself is standard, and is not included here.
+>
+> Before writing properties of binary search trees, we must define a generator: 
+
+```java
+@Provide
+Arbitrary<BST<Integer, Integer>> bsts() {
+    Arbitrary<List<Integer>> keys = Arbitraries.integers().list();
+    return keys.flatMap(keyList -> {
+        Arbitrary<List<Integer>> values = Arbitraries.integers().list().ofSize(keyList.size());
+        return values.map(valuesList -> {
+            BST<Integer, Integer> bst = BST.nil();
+            for (int i = 0; i < keyList.size(); i++) {
+                Integer key = keyList.get(i);
+                Integer value = valuesList.get(i);
+                bst = bst.insert(key, value);
+            }
+            return bst;
+        });
+    });
+}
+```
+
+_Generators_ have the type `Arbitrary` in _jqwik_, the are usually fed
+to properties through methods annotated with `@Provide`. 
+Shrinking behaviour is also automatically derived.
+
+> We need to fix an instance type for testing; for the time being, we choose to let both keys and values be integers. `Integer` is usually an acceptably good choice as an instance for testing polymorphic properties, although we will return to this choice later.
+
+Strictly speaking this would not necessary for _jqwik_ since the framework
+can randomly choose any type that's compatible with the generic type
+definition. To be closer to the original version I went with `Integer` as well.
