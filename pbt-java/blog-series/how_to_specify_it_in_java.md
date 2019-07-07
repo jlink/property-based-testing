@@ -280,14 +280,16 @@ AssertionFailedError: Property [BST Properties:insert valid] falsified with samp
 left:  NIL
 right: 0=0
        left:  NIL
-       right: NIL, 0]
+       right: NIL, 
+0]
        
 AssertionFailedError: Property [BST Properties:delete valid] falsified with sample 
 [0=0
 left:  NIL
 right: 0=0
        left:  NIL
-       right: NIL, -1]   
+       right: NIL, 
+-1]   
        
 AssertionFailedError: Property [BST Properties:union valid] falsified with sample 
 [2=0
