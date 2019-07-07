@@ -330,9 +330,9 @@ boolean arbitrary_valid(@ForAll("trees") BST<Integer, Integer> bst) {
 
 At this point 
 [in the original paper](https://www.dropbox.com/s/tx2b84kae4bw1p4/paper.pdf)
-there is almost a page dealing with problems in shrinking that lead
-to invalid shrunk data. However, this problem does not occur in _jqwik's_
-implementation so I leave those sections out. In general, _jqwik_ supports
+there is almost a full page discussing problems in shrinking that lead
+to invalid shrunk data. However, this is not an issue in _jqwik's_
+implementation. In general, _jqwik_ supports
 [integrated shrinking](https://jqwik.net/docs/current/user-guide.html#integrated-shrinking);
 thereby all preconditions added during data generation will also be
 preserved while shrinking. 
