@@ -232,7 +232,7 @@ I left out the generic types and the code of two subfunctions.
 ```java
 @Property
 boolean valid_and_fastValid_are_equivalent(@ForAll("trees") BST bst) {
-	return valid(bst) == fastValid(bst);
+    return valid(bst) == fastValid(bst);
 }
 ``` 
 
