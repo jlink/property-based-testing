@@ -1,6 +1,5 @@
 package how_to_specify_it.bst;
 
-import java.util.*;
 import java.util.AbstractMap.*;
 
 import net.jqwik.api.*;
@@ -14,19 +13,40 @@ class BST_Tests {
 	@Example
 	void new_bst_is_empty() {
 		assertThat(bst.isEmpty()).isTrue();
+		assertThat(bst.size()).isEqualTo(0);
 	}
 
 	@Example
+	@Disabled
 	void an_inserted_value_can_be_found() {
 		BST<Integer, String> updated = bst.insert(3, "three");
 		assertThat(updated.isEmpty()).isFalse();
 		assertThat(updated.find(3)).isPresent();
 		assertThat(updated.find(3).get()).isEqualTo("three");
+		assertThat(updated.size()).isEqualTo(1);
 
 		assertThat(bst.isEmpty()).isTrue();
 	}
 
 	@Example
+	@Disabled
+	void three_inserted_values_can_be_found() {
+		BST<Integer, String> updated =
+				bst.insert(10, "ten")
+				   .insert(1, "one")
+				   .insert(20, "twenty");
+
+		assertThat(updated.isEmpty()).isFalse();
+		assertThat(updated.size()).isEqualTo(3);
+		assertThat(updated.find(1)).isPresent();
+		assertThat(updated.find(10)).isPresent();
+		assertThat(updated.find(20)).isPresent();
+
+		assertThat(bst.isEmpty()).isTrue();
+	}
+
+	@Example
+	@Disabled
 	void a_deleted_value_can_no_longer_be_found() {
 		BST<Integer, String> updated1 = bst.insert(3, "three");
 		BST<Integer, String> updated2 = updated1.delete(3);
@@ -35,6 +55,7 @@ class BST_Tests {
 	}
 
 	@Example
+	@Disabled
 	void keys_returns_set_of_inserted_keys() {
 		BST<Integer, String> updated =
 				bst.insert(1, "one")
@@ -45,6 +66,7 @@ class BST_Tests {
 	}
 
 	@Example
+	@Disabled
 	void toList_returns_key_value_pairs() {
 		BST<Integer, String> updated =
 				bst.insert(1, "one")
@@ -59,6 +81,7 @@ class BST_Tests {
 	}
 
 	@Example
+	@Disabled
 	void union_of_two_bsts_contains_keys_of_both() {
 		BST<Integer, String> one =
 				bst.insert(1, "one")
