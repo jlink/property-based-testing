@@ -115,25 +115,23 @@ class BST_Tests {
 	}
 
 	@Example
-	@Disabled
 	void keys_returns_set_of_inserted_keys() {
 		BST<Integer, String> updated =
 				bst.insert(1, "one")
 				   .insert(2, "two")
 				   .insert(3, "three");
 
-		assertThat(updated.keys()).containsExactly(1, 2, 3);
+		assertThat(updated.keys()).containsExactlyInAnyOrder(1, 2, 3);
 	}
 
 	@Example
-	@Disabled
 	void toList_returns_key_value_pairs() {
 		BST<Integer, String> updated =
 				bst.insert(1, "one")
 				   .insert(2, "two")
 				   .insert(3, "three");
 
-		assertThat(updated.toList()).containsExactly(
+		assertThat(updated.toList()).containsExactlyInAnyOrder(
 				new SimpleEntry<>(1, "one"),
 				new SimpleEntry<>(2, "two"),
 				new SimpleEntry<>(3, "three")
@@ -141,7 +139,6 @@ class BST_Tests {
 	}
 
 	@Example
-	@Disabled
 	void union_of_two_bsts_contains_keys_of_both() {
 		BST<Integer, String> one =
 				bst.insert(1, "one")
@@ -155,7 +152,7 @@ class BST_Tests {
 
 		BST<Integer, String> union = BST.union(one, two);
 
-		assertThat(union.toList()).containsExactly(
+		assertThat(union.toList()).containsExactlyInAnyOrder(
 				new SimpleEntry<>(1, "one"),
 				new SimpleEntry<>(2, "two"),
 				new SimpleEntry<>(3, "three"),

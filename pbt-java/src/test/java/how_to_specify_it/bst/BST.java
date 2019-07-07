@@ -15,7 +15,11 @@ public class BST<K extends Comparable<K>, V> {
 
 	//	union :: Ord k ⇒ BST k v → BST k v → BST k v
 	public static <K extends Comparable<K>, V> BST<K, V> union(BST<K, V> bst1, BST<K, V> bst2) {
-		return null;
+		BST<K, V> union = bst2;
+		for (Map.Entry<K, V> entry : bst1.toList()) {
+			union = union.insert(entry);
+		}
+		return union;
 	}
 
 	private final BST<K, V> left;
@@ -126,12 +130,26 @@ public class BST<K extends Comparable<K>, V> {
 
 	//	keys ::BSTkv→[k]
 	public List<K> keys() {
-		return Collections.emptyList();
+		if (entry == null) {
+			return Collections.emptyList();
+		}
+		List<K> keys = new ArrayList<>();
+		keys.add(entry.getKey());
+		keys.addAll(getLeft().keys());
+		keys.addAll(getRight().keys());
+		return keys;
 	}
 
 	//	toList :: BST k v → [ (k , v ) ]
 	public List<Map.Entry<K, V>> toList() {
-		return Collections.emptyList();
+		if (entry == null) {
+			return Collections.emptyList();
+		}
+		List<Map.Entry<K, V>> entries = new ArrayList<>();
+		entries.add(entry);
+		entries.addAll(getLeft().toList());
+		entries.addAll(getRight().toList());
+		return entries;
 	}
 
 	@Override
