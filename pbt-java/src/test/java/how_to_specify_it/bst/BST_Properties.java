@@ -52,6 +52,8 @@ class BST_Properties {
 		Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
 				Combinators.combine(keys, values).as(Tuple::of).list();
 
+		// This could be implemented as streaming and reducing
+		// but probably less understandable
 		return keysAndValues.map(keyValueList -> {
 			BST<Integer, Integer> bst = BST.nil();
 			for (Tuple2<Integer, Integer> kv : keyValueList) {
