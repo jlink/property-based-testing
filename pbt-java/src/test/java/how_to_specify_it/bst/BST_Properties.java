@@ -5,7 +5,7 @@ import java.util.*;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
 
-import static how_to_specify_it.bst.BSTValidity.*;
+import static how_to_specify_it.bst.BSTUtils.*;
 
 class BST_Properties {
 
@@ -125,7 +125,40 @@ class BST_Properties {
 				return bst.equals(bst.insert(key, found.get()));
 			}
 		}
+	}
 
+	@Group
+	class Metamorphic {
+
+		//prop InsertInsert (k, v) (k′, v′) t =
+		//  insert k v (insert k′ v′ t) === insert k′ v′ (insert k v t)
+		@Property
+		@Disabled
+		boolean insert_insert1(
+				@ForAll Integer key1, @ForAll Integer value1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return bst.insert(key1, value1).insert(key2, value2)
+					  .equals(bst.insert(key2, value2).insert(key1, value1));
+		}
+
+		// prop InsertInsert (k, v) (k′, v′) t = insert k v (insert k′ v′ t)
+		//   ===
+		//   if k ≡ k′ then insert k v t else insert k′ v′ (insert k v t)
+		@Property(afterFailure = AfterFailureMode.SAMPLE_ONLY)
+		boolean insert_insert(
+				@ForAll Integer key1, @ForAll Integer value1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			BST<Integer, Integer> inserted = bst.insert(key1, value1).insert(key2, value2);
+			BST<Integer, Integer> expected =
+					key1.equals(key2)
+							? bst.insert(key2, value2)
+							: bst.insert(key2, value2).insert(key1, value1);
+			return equivalent(inserted, expected);
+		}
 	}
 
 	@Provide

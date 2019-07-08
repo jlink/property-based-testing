@@ -438,3 +438,89 @@ boolean insert_delete_complete(
     }
 }
 ```
+
+> ## 4.3 Metamorphic Properties
+>
+> Metamorphic testing is a successful approach to the oracle problem in many contexts. The basic idea is this: even if the expected result of a function call such as `tree.insert(k, v)` may be difficult to predict, we may still be able to express an expected relationship between this result, and the result of a related call. For example, if we insert an additional key into `tree` before calling `insert(k, v)`, we might expect the additional key to be inserted into the result also.
+>
+> Formalizing this intuition, we might define the property
+
+```java
+@Property
+boolean insert_insert(
+        @ForAll Integer key1, @ForAll Integer value1,
+        @ForAll Integer key2, @ForAll Integer value2,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    return bst.insert(key1, value1).insert(key2, value2)
+            .equals(bst.insert(key2, value2).insert(key1, value1));
+}
+```
+
+> Informally, we expect the effect of inserting `key1` `value1` into t before calling `insert(key2,value2)`, to be that they are also inserted into the result. A metamorphic property (almost) always relates two calls to the function under test: in this case, the function under test is insert, and the two calls are `bst.insert(key2, value2)` and `bst.insert(key1, value1).insert(key2, value2)`. The latter is constructed by modifying the argument, in this case also using insert, and the property expresses an expected relationship between the values of the two calls. Metamorphic testing is a fruitful source of property ideas, since if we are given O(n) operations to test, each of which can also be used as a modifier, then there are potentially O(n2) properties that we can define.
+>
+> However, the property above is not true: testing it yields:
+
+```
+org.opentest4j.AssertionFailedError: Property [Metamorphic:insert insert] falsified with sample [0, 0, 0, 1, NIL]
+
+tries = 3                     | # of calls to property
+checks = 3                    | # of not rejected calls
+sample = [0, 0, 0, 1, NIL]
+```
+
+> This is not surprising. The property states that the order of insertions does not matter, while the failing test case inserts the same key twice with different values — of course the order of insertion matters in this case, because “the last insertion wins”. A first stab at a metamorphic property may often require correction; _jqwik_ is good at showing us what it is that needs fixing. We just need to consider two equal keys as a special case:
+
+```java
+@Property
+boolean insert_insert(
+        @ForAll Integer key1, @ForAll Integer value1,
+        @ForAll Integer key2, @ForAll Integer value2,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    BST<Integer, Integer> inserted = bst.insert(key1, value1).insert(key2, value2);
+    BST<Integer, Integer> expected =
+            key1.equals(key2)
+                    ? bst.insert(key2, value2)
+                    : bst.insert(key2, value2).insert(key1, value1);
+    return inserted.equals(expected);
+}
+```
+
+> Unfortunately, this property still fails:
+
+```
+org.opentest4j.AssertionFailedError: Property [Metamorphic:insert insert] falsified with sample [0, 0, -1, 0, NIL]
+
+tries = 2                     | # of calls to property
+checks = 2                    | # of not rejected calls
+sample = [0, 0, -1, 0, NIL]
+```
+
+> Inspecting the two resulting trees, we can see that changing the order of insertion results in trees with different shapes, but containing the same keys and values. Arguably this does not matter: we should not care what shape of tree each operation returns, provided it contains the right information. To make our property pass, we must make this idea explicit. We therefore define an equivalence relation on trees that is true if they have the same contents,
+
+```java
+boolean equivalent(BST bst1, BST bst2) {
+    return new HashSet<>(bst1.toList()).equals(new HashSet(bst2.toList());
+}
+```
+
+> and re-express the property in terms of this equivalence:
+
+```java
+@Property
+boolean insert_insert(
+        @ForAll Integer key1, @ForAll Integer value1,
+        @ForAll Integer key2, @ForAll Integer value2,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    BST<Integer, Integer> inserted = bst.insert(key1, value1).insert(key2, value2);
+    BST<Integer, Integer> expected =
+            key1.equals(key2)
+                    ? bst.insert(key2, value2)
+                    : bst.insert(key2, value2).insert(key1, value1);
+    return equivalent(inserted, expected);
+}
+```
+
+> Now, at last, the property passes. (We discuss why we need both this equivalence, and structural equality on trees, in section 6).

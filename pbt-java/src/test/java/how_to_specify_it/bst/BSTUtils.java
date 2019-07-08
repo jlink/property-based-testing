@@ -3,7 +3,7 @@ package how_to_specify_it.bst;
 import java.util.*;
 import java.util.stream.*;
 
-class BSTValidity {
+class BSTUtils {
 
 	public static <K extends Comparable<K>, V> boolean isValid(BST<K, V> bst) {
 		if (bst.isLeaf()) {
@@ -21,7 +21,11 @@ class BSTValidity {
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private static <K extends Comparable<K>, V> boolean isValid(Optional<BST<K, V>> optionalBST) {
-		return optionalBST.map(BSTValidity::isValid).orElse(true);
+		return optionalBST.map(BSTUtils::isValid).orElse(true);
+	}
+
+	public static boolean equivalent(BST bst1, BST bst2) {
+		return new HashSet<>(bst1.toList()).equals(new HashSet(bst2.toList()));
 	}
 
 }
