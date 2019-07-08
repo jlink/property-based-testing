@@ -14,75 +14,118 @@ class BST_Properties {
 		return isValid(bst);
 	}
 
-	@Example
-	boolean nil_valid() {
-		BST<?, ?> nil = BST.nil();
-		return isValid(nil);
-	}
+	@Group
+	class Validity {
+		@Example
+		boolean nil_valid() {
+			BST<?, ?> nil = BST.nil();
+			return isValid(nil);
+		}
 
-	@Property
-	boolean insert_valid(
-			@ForAll("trees") BST<Integer, Integer> bst,
-			@ForAll Integer key
-	) {
-		return isValid(bst.insert(key, 42));
-	}
+		@Property
+		boolean insert_valid(
+				@ForAll("trees") BST<Integer, Integer> bst,
+				@ForAll Integer key
+		) {
+			return isValid(bst.insert(key, 42));
+		}
 
-	@Property
-	boolean delete_valid(
-			@ForAll("trees") BST<Integer, Integer> bst,
-			@ForAll Integer key
-	) {
-		// Assume.that(isValid(bst));
-		return isValid(bst.delete(key));
-	}
+		@Property
+		boolean delete_valid(
+				@ForAll("trees") BST<Integer, Integer> bst,
+				@ForAll Integer key
+		) {
+			// Assume.that(isValid(bst));
+			return isValid(bst.delete(key));
+		}
 
-	@Property
-	boolean union_valid(
-			@ForAll("trees") BST<Integer, Integer> bst,
-			@ForAll("trees") BST<Integer, Integer> other
-	) {
-		return isValid(BST.union(bst, other));
-	}
-
-	@Property
-	boolean insert_post(
-			@ForAll Integer key, @ForAll Integer value,
-			@ForAll("trees") BST<Integer, Integer> bst,
-			@ForAll Integer otherKey
-	) {
-		// Statistics.collect(key.equals(otherKey));
-
-		Optional<Integer> found = bst.insert(key, value).find(otherKey);
-		if (otherKey.equals(key)) {
-			return found.map(v -> v.equals(value)).orElse(false);
-		} else {
-			return found.equals(bst.find(otherKey));
+		@Property
+		boolean union_valid(
+				@ForAll("trees") BST<Integer, Integer> bst,
+				@ForAll("trees") BST<Integer, Integer> other
+		) {
+			return isValid(BST.union(bst, other));
 		}
 	}
 
-	@Property
-	boolean insert_post_same_key(
-			@ForAll Integer key, @ForAll Integer value,
-			@ForAll("trees") BST<Integer, Integer> bst
-	) {
-		return insert_post(key, value, bst, key);
-	}
+	@Group
+	class Postconditions {
 
-	@Property
-	boolean union_post(
-			@ForAll("trees") BST<Integer, Integer> left,
-			@ForAll("trees") BST<Integer, Integer> right,
-			@ForAll Integer key
-	) {
-		// boolean keyInLeft = left.find(key).isPresent();
-		// boolean keyInRight = right.find(key).isPresent();
-		// Statistics.collect(keyInLeft, keyInRight);
+		// prop_InsertPost k v t k′ =
+		//   find k′ (insert k v t) === if k ≡ k′ then Just v else find k′ t
+		@Property
+		boolean insert_post(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst,
+				@ForAll Integer otherKey
+		) {
+			// Statistics.collect(key.equals(otherKey));
 
-		BST<Integer, Integer> union = BST.union(left, right);
-		Integer previousValue = left.find(key).orElse(right.find(key).orElse(null));
-		Integer unionValue = union.find(key).orElse(null);
-		return Objects.equals(unionValue, previousValue);
+			Optional<Integer> found = bst.insert(key, value).find(otherKey);
+			if (otherKey.equals(key)) {
+				return found.map(v -> v.equals(value)).orElse(false);
+			} else {
+				return found.equals(bst.find(otherKey));
+			}
+		}
+
+		@Property
+		boolean insert_post_same_key(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return insert_post(key, value, bst, key);
+		}
+
+		// prop_UnionPost t t′ k = find k (union t t′) === (find k t <|> find k t′)
+		@Property
+		boolean union_post(
+				@ForAll("trees") BST<Integer, Integer> left,
+				@ForAll("trees") BST<Integer, Integer> right,
+				@ForAll Integer key
+		) {
+			// boolean keyInLeft = left.find(key).isPresent();
+			// boolean keyInRight = right.find(key).isPresent();
+			// Statistics.collect(keyInLeft, keyInRight);
+
+			BST<Integer, Integer> union = BST.union(left, right);
+			Integer previousValue = left.find(key).orElse(right.find(key).orElse(null));
+			Integer unionValue = union.find(key).orElse(null);
+			return Objects.equals(unionValue, previousValue);
+		}
+
+		@Property
+		boolean find_post_present(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return bst.insert(key, value).find(key).equals(Optional.of(value));
+		}
+
+		@Property
+		boolean find_post_absent(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return bst.delete(key).find(key).equals(Optional.empty());
+		}
+
+		// prop_InsertDeleteComplete k t = case find k t of
+		//   Nothing → t === delete k t
+		//   Just v →t ===insert k v t
+		@Property
+		boolean insert_delete_complete(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			Optional<Integer> found = bst.find(key);
+			if (!found.isPresent()) {
+				return bst.equals(bst.delete(key));
+			} else {
+				return bst.equals(bst.insert(key, found.get()));
+			}
+		}
+
 	}
 
 	@Provide

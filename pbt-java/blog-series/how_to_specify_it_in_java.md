@@ -397,3 +397,44 @@ boolean union_post(
     return Objects.equals(unionValue, previousValue);
 }
 ```
+
+> Postconditions are not always as easy to write. For example, consider a postcondition for find. The return value is either Nothing, in case the key is not found in the tree, or Just v, in the case where it is present with value v. So it seems that, to write a postcondition for find, we need to be able to determine whether a given key is present in a tree, and if so, with what associated value. But this is exactly what find does! So it seems we are in the awkward situation discussed in the introduction: in order to test find, we need to reimplement it.
+>
+> We can finesse this problem using a very powerful and general idea, that of constructing a test case whose outcome is easy to predict. In this case, we know that a tree must contain a key k, if we have just inserted it. Likewise, we know that a tree cannot contain a key k, if we have just deleted it. Thus we can write two postconditions for find, covering the two cases:
+
+```java
+@Property
+boolean find_post_present(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    return bst.insert(key, value).find(key).equals(Optional.of(value));
+}
+
+@Property
+boolean find_post_absent(
+        @ForAll Integer key,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    return bst.delete(key).find(key).equals(Optional.empty());
+}
+```
+
+> But there is a risk, when we write properties in this form, that we are only testing very special cases. Can we be certain that every tree, containing key `k` with value `v`, can be expressed in the form `tree.insert(k, v)`? Can we be certain that every tree not containing `k` can be expressed in the form `tree.delete(k)`? If not, then the postconditions we wrote for find may be less effective tests than we think.
+>
+> Fortunately, for this data structure, every tree can be expressed in one of these two forms, because inserting a key that is already present, or deleting one that is not, is a no-op. We express this as another property to test:
+
+```java
+@Property
+boolean insert_delete_complete(
+        @ForAll Integer key,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    Optional<Integer> found = bst.find(key);
+    if (!found.isPresent()) {
+        return bst.equals(bst.delete(key));
+    } else {
+        return bst.equals(bst.insert(key, found.get()));
+    }
+}
+```

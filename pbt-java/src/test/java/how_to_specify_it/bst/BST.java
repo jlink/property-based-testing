@@ -168,9 +168,9 @@ public class BST<K extends Comparable<K>, V> {
 		if (o == null || getClass() != o.getClass()) return false;
 
 		BST<?, ?> bst = (BST<?, ?>) o;
-		if (!Objects.equals(left, bst.left)) return false;
+		if (!Objects.equals(getLeft(), bst.getLeft())) return false;
 		if (!Objects.equals(entry, bst.entry)) return false;
-		return Objects.equals(right, bst.right);
+		return Objects.equals(getRight(), bst.getRight());
 	}
 
 	@Override
