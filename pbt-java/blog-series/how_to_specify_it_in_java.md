@@ -524,3 +524,23 @@ boolean insert_insert(
 ```
 
 > Now, at last, the property passes. (We discuss why we need both this equivalence, and structural equality on trees, in section 6).
+>
+> There is a different way to address the first problem — that the order of insertions does matter, when inserting the same key twice. That is to require the keys to be different, via a precondition:
+
+```java
+@Property
+boolean insert_insert_weak(
+        @ForAll Integer key1, @ForAll Integer value1,
+        @ForAll Integer key2, @ForAll Integer value2,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    Assume.that(!key1.equals(key2));
+    
+    return equivalent(
+            bst.insert(key1, value1).insert(key2, value2),
+            bst.insert(key2, value2).insert(key1, value1)
+    );
+}
+```
+
+> This lets us keep the property in a simpler form, but is weaker, since it no longer captures that “the last insert wins”. We will return to this point later.

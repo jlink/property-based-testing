@@ -146,7 +146,7 @@ class BST_Properties {
 		// prop InsertInsert (k, v) (k′, v′) t = insert k v (insert k′ v′ t)
 		//   ===
 		//   if k ≡ k′ then insert k v t else insert k′ v′ (insert k v t)
-		@Property(afterFailure = AfterFailureMode.SAMPLE_ONLY)
+		@Property
 		boolean insert_insert(
 				@ForAll Integer key1, @ForAll Integer value1,
 				@ForAll Integer key2, @ForAll Integer value2,
@@ -158,6 +158,19 @@ class BST_Properties {
 							? bst.insert(key2, value2)
 							: bst.insert(key2, value2).insert(key1, value1);
 			return equivalent(inserted, expected);
+		}
+
+		@Property
+		boolean insert_insert_weak(
+				@ForAll Integer key1, @ForAll Integer value1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			Assume.that(!key1.equals(key2));
+			return equivalent(
+					bst.insert(key1, value1).insert(key2, value2),
+					bst.insert(key2, value2).insert(key1, value1)
+			);
 		}
 	}
 
