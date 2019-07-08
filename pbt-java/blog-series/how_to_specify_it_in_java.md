@@ -349,3 +349,51 @@ preserved while shrinking.
 > Validity properties are important to test, whenever a datatype has an invariant, but they are far from sufficient by themselves. Consider this: if every function returning a BST were defined to return nil in every case, then all the properties written so far would pass. insert could be defined to delete the key instead, or union could be defined to implement set difference — as long as the invariant is preserved, the properties will still pass. Thus we must move on to properties that better capture the intended behaviour of each operation.
 
 > ### 4.2 Postconditions
+>
+> A postcondition is a property that should be True after a call, or (equivalently, for a pure function) True of its result. Thus we can define properties by asking ourselves “What should be True after calling f ?”. For example, after calling insert, then we should be able to find the key just inserted, and any previously inserted keys with unchanged values.
+
+```java
+@Property
+boolean insert_post(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst,
+        @ForAll Integer otherKey
+) {
+    Optional<Integer> found = bst.insert(key, value).find(otherKey);
+    if (otherKey.equals(key)) {
+        return found.map(v -> v.equals(value)).orElse(false);
+    } else {
+        return found.equals(bst.find(otherKey));
+    }
+}
+```
+
+> One may wonder whether it is best to parameterize this property on two different keys, or just on one: after all, for the type chosen, k and k′ are equal in only around 3.3% of tests, so most test effort is devoted to checking that other keys than the one inserted are preserved. However, using the same key for k and k′ would weaken the property drastically — for example, an implementation of insert that discarded the original tree entirely would still pass. Moreover, nothing hinders us from defining and testing a specialized property:
+
+```java
+@Property
+boolean insert_post_same_key(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    return insert_post(key, value, bst, key);
+}
+```
+
+> Testing this property devotes all test effort to the case of finding a newly inserted key, but does not require us to replicate the logic in the more general postcondition.
+>
+> We can write similar postconditions for delete and union; writing the property for union forces us to specify that union is left-biased (since union of finite maps cannot be commutative).
+
+```java
+@Property
+boolean union_post(
+        @ForAll("trees") BST<Integer, Integer> left,
+        @ForAll("trees") BST<Integer, Integer> right,
+        @ForAll Integer key
+) {
+    BST<Integer, Integer> union = BST.union(left, right);
+    Integer previousValue = left.find(key).orElse(right.find(key).orElse(null));
+    Integer unionValue = union.find(key).orElse(null);
+    return Objects.equals(unionValue, previousValue);
+}
+```

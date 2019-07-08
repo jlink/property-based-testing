@@ -45,6 +45,46 @@ class BST_Properties {
 		return isValid(BST.union(bst, other));
 	}
 
+	@Property
+	boolean insert_post(
+			@ForAll Integer key, @ForAll Integer value,
+			@ForAll("trees") BST<Integer, Integer> bst,
+			@ForAll Integer otherKey
+	) {
+		// Statistics.collect(key.equals(otherKey));
+
+		Optional<Integer> found = bst.insert(key, value).find(otherKey);
+		if (otherKey.equals(key)) {
+			return found.map(v -> v.equals(value)).orElse(false);
+		} else {
+			return found.equals(bst.find(otherKey));
+		}
+	}
+
+	@Property
+	boolean insert_post_same_key(
+			@ForAll Integer key, @ForAll Integer value,
+			@ForAll("trees") BST<Integer, Integer> bst
+	) {
+		return insert_post(key, value, bst, key);
+	}
+
+	@Property
+	boolean union_post(
+			@ForAll("trees") BST<Integer, Integer> left,
+			@ForAll("trees") BST<Integer, Integer> right,
+			@ForAll Integer key
+	) {
+		// boolean keyInLeft = left.find(key).isPresent();
+		// boolean keyInRight = right.find(key).isPresent();
+		// Statistics.collect(keyInLeft, keyInRight);
+
+		BST<Integer, Integer> union = BST.union(left, right);
+		Integer previousValue = left.find(key).orElse(right.find(key).orElse(null));
+		Integer unionValue = union.find(key).orElse(null);
+		return Objects.equals(unionValue, previousValue);
+	}
+
 	@Provide
 	Arbitrary<BST<Integer, Integer>> trees() {
 		Arbitrary<Integer> keys = Arbitraries.integers();
