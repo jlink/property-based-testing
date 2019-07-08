@@ -53,7 +53,7 @@ class BST_Properties {
 				Combinators.combine(keys, values).as(Tuple::of).list();
 
 		// This could be implemented as streaming and reducing
-		// but probably less understandable
+		// but that'd probably be less understandable
 		return keysAndValues.map(keyValueList -> {
 			BST<Integer, Integer> bst = BST.nil();
 			for (Tuple2<Integer, Integer> kv : keyValueList) {
