@@ -172,11 +172,138 @@ class BST_Properties {
 					bst.insert(key2, value2).insert(key1, value1)
 			);
 		}
+
+		// prop InsertDelete (k,v) k′ t =
+		//   insert k v (delete k′ t)
+		//   􏰂equivalent
+		//   if k ≡ k′ then insert k v t else delete k′ (insert k v t)
+		@Property
+		boolean insert_delete(
+				@ForAll Integer key1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			BST<Integer, Integer> deleted = bst.delete(key1).insert(key2, value2);
+			BST<Integer, Integer> expected =
+					key1.equals(key2)
+							? bst.insert(key2, value2)
+							: bst.insert(key2, value2).delete(key1);
+			return equivalent(deleted, expected);
+		}
+
+		// prop InsertUnion (k, v) t t′ =
+		//   insert k v (union t t′) 􏰂
+		//   equivalent
+		//   union (insert k v t) t′
+		@Property
+		boolean insert_union(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			BST<Integer, Integer> unionInsert = BST.union(bst1, bst2).insert(key, value);
+			BST<Integer, Integer> insertUnion = BST.union(bst1.insert(key, value), bst2);
+			return equivalent(unionInsert, insertUnion);
+		}
+	}
+
+	@Group
+	class Equivalence {
+
+		// prop InsertPreservesEquiv k v t t′ =
+		//   t _equivalent_ t′ =⇒ insert k v t _equivalent_ insert k v t′
+		@Property
+		@Disabled("Does not generate enough examples with assumption fulfilled")
+		boolean insert_preserves_equivalence_exhausted(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			Assume.that(equivalent(bst1, bst2));
+			return equivalent(
+					bst1.insert(key, value),
+					bst2.insert(key, value)
+			);
+		}
+
+		// prop InsertPreservesEquiv k v (t :􏰂: t′) = insert k v t 􏰂 insert k v t′
+		@Property
+		boolean insert_preserves_equivalence(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+		) {
+			return equivalent(
+					bsts.get1().insert(key, value),
+					bsts.get2().insert(key, value)
+			);
+		}
+
+		// prop DeletePreservesEquiv k (t :􏰂: t′) = delete k t 􏰂 delete k t′
+		@Property
+		boolean delete_preserves_equivalence(
+				@ForAll Integer key,
+				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+		) {
+			return equivalent(
+					bsts.get1().delete(key),
+					bsts.get2().delete(key)
+			);
+		}
+
+		// prop UnionPreservesEquiv (t1 :􏰂: t1′) (t2 :􏰂: t2′) = union t1 t2 􏰂 union t1′ t2′
+		@Property
+		boolean union_preserves_equivalence(
+				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts1,
+				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts2
+		) {
+			return equivalent(
+					BST.union(bsts1.get1(), bsts2.get1()),
+					BST.union(bsts1.get2(), bsts2.get2())
+			);
+		}
+
+		// prop FindPreservesEquiv k (t :􏰂: t′) = find k t === find k t′
+		@Property
+		boolean find_preserves_equivalence(
+				@ForAll Integer key,
+				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+		) {
+			return bsts.get1().find(key).equals(bsts.get2().find(key));
+		}
+
+		// prop Equivs (t :􏰂:t′)=t 􏰂t′
+		@Property
+		boolean equivalent_trees_are_equivalent(
+				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+		) {
+			return equivalent(bsts.get1(), bsts.get2());
+		}
+
+		@Provide
+		Arbitrary<Tuple2<BST, BST>> equivalentTrees() {
+			Arbitrary<Integer> keys = Arbitraries.integers().unique();
+			Arbitrary<Integer> values = Arbitraries.integers();
+			Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
+					Combinators.combine(keys, values).as(Tuple::of).list();
+
+			return keysAndValues.map(keyValueList -> {
+				BST<Integer, Integer> bst1 = BST.nil();
+				for (Tuple2<Integer, Integer> kv : keyValueList) {
+					bst1 = bst1.insert(kv.get1(), kv.get2());
+				}
+				Collections.shuffle(keyValueList);
+				BST<Integer, Integer> bst2 = BST.nil();
+				for (Tuple2<Integer, Integer> kv : keyValueList) {
+					bst2 = bst2.insert(kv.get1(), kv.get2());
+				}
+				return Tuple.of(bst1, bst2);
+			});
+		}
 	}
 
 	@Provide
 	Arbitrary<BST<Integer, Integer>> trees() {
-		Arbitrary<Integer> keys = Arbitraries.integers();
+		Arbitrary<Integer> keys = Arbitraries.integers().unique();
 		Arbitrary<Integer> values = Arbitraries.integers();
 		Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
 				Combinators.combine(keys, values).as(Tuple::of).list();
@@ -191,5 +318,6 @@ class BST_Properties {
 			return bst;
 		});
 	}
+
 }
 

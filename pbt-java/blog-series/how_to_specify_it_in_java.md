@@ -188,7 +188,7 @@ import net.jqwik.api.Tuple.*;
 
 @Provide
 Arbitrary<BST<Integer, Integer>> trees() {
-    Arbitrary<Integer> keys = Arbitraries.integers();
+    Arbitrary<Integer> keys = Arbitraries.integers().unique();
     Arbitrary<Integer> values = Arbitraries.integers();
     Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
             Combinators.combine(keys, values).as(Tuple::of).list();
@@ -549,3 +549,144 @@ boolean insert_insert_weak(
 ```
 
 > This lets us keep the property in a simpler form, but is weaker, since it no longer captures that “the last insert wins”. We will return to this point later.
+>
+> We can go on to define further metamorphic properties for insert, with different modifiers — delete and union:
+
+```java
+@Property
+boolean insert_delete(
+        @ForAll Integer key1,
+        @ForAll Integer key2, @ForAll Integer value2,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    BST<Integer, Integer> deleted = bst.delete(key1).insert(key2, value2);
+    BST<Integer, Integer> expected =
+            key1.equals(key2)
+                    ? bst.insert(key2, value2)
+                    : bst.insert(key2, value2).delete(key1);
+    return equivalent(deleted, expected);
+}
+
+@Property
+boolean insert_union(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst1,
+        @ForAll("trees") BST<Integer, Integer> bst2
+) {
+    BST<Integer, Integer> unionInsert = BST.union(bst1, bst2).insert(key, value);
+    BST<Integer, Integer> insertUnion = BST.union(bst1.insert(key, value), bst2);
+    return equivalent(unionInsert, insertUnion);
+}
+```
+
+> and, in a similar way, metamorphic properties for the other functions in the API under test. We derived sixteen different properties in this way, which are listed in Appendix A. The trickiest case is union, which as a binary operation, can have either argument modified — or both. We also found that some properties could be motivated in more than one way. For example, property `insert_union` (above) can be motivated as a metamorphic test for insert, in which the argument is modified by union, or as a metamorphic test for union, in which the argument is modified by insert. Likewise, the metamorphic tests we wrote for find replicated the postconditions we wrote above for insert, delete and union. We do not see this as a problem: that there is more than one way to motivate a property does not make it any less useful, or any harder to come up with!
+>
+> ### Preservation of Equivalence
+>
+> Now that we have an equivalence relation on trees, we may wonder whether the operations under test preserve it. For example, we might try to test whether insert preserves equivalence as follows:
+
+```java
+@Property
+boolean insert_preserves_equivalence(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst1,
+        @ForAll("trees") BST<Integer, Integer> bst2
+) {
+    Assume.that(equivalent(bst1, bst2));
+    return equivalent(
+            bst1.insert(key, value),
+            bst2.insert(key, value)
+    );
+}
+```
+
+> This kind of property is important, since many of our metamorphic properties only allow us to conclude that two expressions are equivalent; to use these conclusions in further reasoning, we need to know that equivalence is preserved by each operation.
+>
+> Unfortunately, testing the property above does not work; it is very, very unlikely that two randomly generated trees `bst1` and `bst2` will be equivalent, and thus almost all generated tests are discarded.
+
+Running the property above with _jqwik_ will fail with the following 
+error message:
+
+```
+org.opentest4j.AssertionFailedError: Property [Equivalence:insert preserves equivalence] exhausted after [1000] tries and [1000] rejections
+
+tries = 1000                  | # of calls to property
+checks = 0                    | # of not rejected calls
+```
+
+> To test this kind of property, we need to generate equivalent pairs of trees together. We can do so be defining a type of equivalent pairs, with a custom generator:
+
+```java
+@Provide
+Arbitrary<Tuple2<BST, BST>> equivalentTrees() {
+    Arbitrary<Integer> keys = Arbitraries.integers().unique();
+    Arbitrary<Integer> values = Arbitraries.integers();
+    Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
+            Combinators.combine(keys, values).as(Tuple::of).list();
+
+    return keysAndValues.map(keyValueList -> {
+        BST<Integer, Integer> bst1 = BST.nil();
+        for (Tuple2<Integer, Integer> kv : keyValueList) {
+            bst1 = bst1.insert(kv.get1(), kv.get2());
+        }
+        Collections.shuffle(keyValueList);
+        BST<Integer, Integer> bst2 = BST.nil();
+        for (Tuple2<Integer, Integer> kv : keyValueList) {
+            bst2 = bst2.insert(kv.get1(), kv.get2());
+        }
+        return Tuple.of(bst1, bst2);
+    });
+}
+```
+
+> This generator constructs two equivalent trees by inserting the same list of keys and values in two different orders. The properties using this type are shown below, along with properties to test the new generator:
+
+```java
+@Property
+boolean insert_preserves_equivalence(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+) {
+    return equivalent(
+            bsts.get1().insert(key, value),
+            bsts.get2().insert(key, value)
+    );
+}
+
+@Property
+boolean delete_preserves_equivalence(
+        @ForAll Integer key,
+        @ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+) {
+    return equivalent(
+            bsts.get1().delete(key),
+            bsts.get2().delete(key)
+    );
+}
+
+@Property
+boolean union_preserves_equivalence(
+        @ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts1,
+        @ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts2
+) {
+    return equivalent(
+            BST.union(bsts1.get1(), bsts2.get1()),
+            BST.union(bsts1.get2(), bsts2.get2())
+    );
+}
+
+@Property
+boolean find_preserves_equivalence(
+        @ForAll Integer key,
+        @ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+) {
+    return bsts.get1().find(key).equals(bsts.get2().find(key));
+}
+
+@Property
+boolean equivalent_trees_are_equivalent(
+        @ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
+) {
+    return equivalent(bsts.get1(), bsts.get2());
+}
+```

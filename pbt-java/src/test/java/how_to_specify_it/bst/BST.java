@@ -1,9 +1,10 @@
 package how_to_specify_it.bst;
 
+import java.io.*;
 import java.util.AbstractMap.*;
 import java.util.*;
 
-public class BST<K extends Comparable<K>, V> {
+public class BST<K extends Comparable<K>, V> implements Serializable {
 
 	private static final BST NIL = new BST<>();
 
@@ -91,19 +92,25 @@ public class BST<K extends Comparable<K>, V> {
 		return insert(newEntry);
 	}
 
+	@SuppressWarnings("unchecked")
 	private BST<K, V> insert(Map.Entry<K, V> newEntry) {
+		BST<K, V> branch = new BST<>(NIL, newEntry, NIL);
+		return insert(branch);
+	}
+
+	private BST<K, V> insert(BST<K, V> branch) {
 		if (this.entry == null) {
-			return new BST<>(left, newEntry, right);
+			return branch;
 		}
-		if (this.entry.getKey().compareTo(newEntry.getKey()) > 0) {
-			return new BST<>(getLeft().insert(newEntry), this.entry, right);
+		if (this.entry.getKey().compareTo(branch.entry.getKey()) > 0) {
+			return new BST<>(getLeft().insert(branch), this.entry, right);
 		}
-		if (this.entry.getKey().compareTo(newEntry.getKey()) < 0) {
-			return new BST<>(left, this.entry, getRight().insert(newEntry));
+		if (this.entry.getKey().compareTo(branch.entry.getKey()) < 0) {
+			return new BST<>(left, this.entry, getRight().insert(branch));
 		}
 		// bug(2):
-		// return new BST<>(left, this.entry, getRight().insert(newEntry));
-		return new BST<>(left, newEntry, right);
+		// return new BST<>(left, branch.entry, getRight().insert(branch));
+		return new BST<>(left, branch.entry, right);
 	}
 
 	private BST<K, V> getRight() {
@@ -134,7 +141,7 @@ public class BST<K extends Comparable<K>, V> {
 			if (getRight() == NIL) {
 				return left;
 			}
-			return right.insert(left.entry);
+			return right.insert(left);
 		}
 	}
 
