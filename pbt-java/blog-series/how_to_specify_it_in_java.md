@@ -28,13 +28,17 @@ to explain differences between the original and my translated version.
 >
 > Searching for “property-based testing” on Youtube results in a lot of hits. Most of the top 100 consist of talks recorded at developer conferences and meetings, where (mostly) other people than this author present ideas, tools and methods for property-based testing, or applications that make use of it. Clearly, property-based testing is an idea whose time has come. But clearly, it is also poorly understood, requiring explanation over and over again!
 >
-> We have found that many developers trying property-based testing for the first time find it difficult to identify properties to write — and find the simple examples in tutorials difficult to generalize. This is known as the oracle problem, and it is common to all approaches that use test case generation.
+> We have found that many developers trying property-based testing for the first time find it difficult to identify properties to write — and find the simple examples in tutorials difficult to generalize. 
+> This is known as the [oracle problem](http://www0.cs.ucl.ac.uk/staff/m.harman/tse-oracle.pdf), 
+> and it is common to all approaches that use test case generation.
 >
 > In this paper, therefore, we take a simple — but non-trivial — example of a purely functional data structure, and present five different approaches to writing properties, along with the pitfalls of each to keep in mind. We compare and contrast their effectiveness with the help of eight buggy implementations. We hope that the concrete advice presented here will enable readers to side-step the “where do I start?” question, and quickly derive the benefits that property-based testing has to offer.
 
 > ## 2 A Primer in Property-Based Testing 
 >
-> Property-based testing is an approach to random testing pioneered by QuickCheck in Haskell. There is no precise definition of the term: indeed, MacIver [writes](https://hypothesis.works/articles/what-is-property-based-testing/):
+> Property-based testing is an approach to random testing pioneered by 
+> [QuickCheck in Haskell](http://users.cs.northwestern.edu/~robby/courses/395-495-2009-fall/quick.pdf). 
+> There is no precise definition of the term: indeed, MacIver [writes](https://hypothesis.works/articles/what-is-property-based-testing/):
 > > ‘Historically the definition of property-based testing has been “The thing that QuickCheck does”.’
 > The basic idea has been reimplemented many times — Wikipedia currently lists more than 50 implementations, in 36 different programming languages3, of all programming paradigms. These implementations vary in quality and features, but the ideas in this paper should be relevant to a user of any of them.
 >
@@ -441,7 +445,8 @@ boolean insert_delete_complete(
 
 > ## 4.3 Metamorphic Properties
 >
-> Metamorphic testing is a successful approach to the oracle problem in many contexts. The basic idea is this: even if the expected result of a function call such as `tree.insert(k, v)` may be difficult to predict, we may still be able to express an expected relationship between this result, and the result of a related call. For example, if we insert an additional key into `tree` before calling `insert(k, v)`, we might expect the additional key to be inserted into the result also.
+> [Metamorphic testing](http://www.cs.hku.hk/research/techreps/document/TR-2017-04.pdf) 
+> is a successful approach to the oracle problem in many contexts. The basic idea is this: even if the expected result of a function call such as `tree.insert(k, v)` may be difficult to predict, we may still be able to express an expected relationship between this result, and the result of a related call. For example, if we insert an additional key into `tree` before calling `insert(k, v)`, we might expect the additional key to be inserted into the result also.
 >
 > Formalizing this intuition, we might define the property
 
