@@ -1,6 +1,7 @@
 package how_to_specify_it.bst;
 
 import java.util.*;
+import java.util.Map.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
@@ -298,6 +299,59 @@ class BST_Properties {
 				}
 				return Tuple.of(bst1, bst2);
 			});
+		}
+	}
+
+	@Group
+	class Inductive_Testing {
+
+		// prop_UnionNil1 t = union nil t === t
+		@Property
+		boolean union_nil1(@ForAll("trees") BST<Integer, Integer> bst) {
+			return BST.union(bst, BST.nil()).equals(bst);
+		}
+
+		// prop_UnionInsert t t′ (k, v) =
+		//   union (insert k v t) t′ 􏰂 insert k v (union t t′)
+		@Property
+		boolean union_insert(
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2,
+				@ForAll Integer key, @ForAll Integer value
+		) {
+			return equivalent(
+					BST.union(bst1.insert(key, value), bst2),
+					BST.union(bst1, bst2).insert(key, value)
+			);
+		}
+
+		// prop_InsertComplete t = t === foldl (flip $ uncurry insert) nil (insertions t)
+		@Property
+		boolean insert_complete(@ForAll("trees") BST<Integer, Integer> bst) {
+			List<Entry<Integer, Integer>> insertions = insertions(bst);
+			BST<Integer, Integer> newBst = BST.nil();
+			for (Entry<Integer, Integer> insertion : insertions) {
+				newBst = newBst.insert(insertion.getKey(), insertion.getValue());
+			}
+			return bst.equals(newBst);
+		}
+
+		// prop InsertCompleteForDelete k t = prop InsertComplete (delete k t)
+		@Property
+		boolean insert_complete_for_delete(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return insert_complete(bst.delete(key));
+		}
+
+		// prop InsertCompleteForUnion t t′ = prop InsertComplete (union t t′)
+		@Property
+		boolean insert_complete_for_union(
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			return insert_complete(BST.union(bst1, bst2));
 		}
 	}
 

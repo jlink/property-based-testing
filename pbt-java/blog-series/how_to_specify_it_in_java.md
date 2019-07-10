@@ -690,3 +690,83 @@ boolean equivalent_trees_are_equivalent(
     return equivalent(bsts.get1(), bsts.get2());
 }
 ```
+
+> ## 4.4 Inductive Testing
+>
+> Metamorphic properties do not, in general, completely specify the behaviour of the code under test. However, in some cases, a subset of metamorphic properties does form a complete specification. Consider, for example, the following two properties of union:
+
+```java
+    @Property
+    boolean union_nil1(@ForAll("trees") BST<Integer, Integer> bst) {
+        return BST.union(bst, BST.nil()).equals(bst);
+    }
+
+    @Property
+    boolean union_insert(
+            @ForAll("trees") BST<Integer, Integer> bst1,
+            @ForAll("trees") BST<Integer, Integer> bst2,
+            @ForAll Integer key, @ForAll Integer value
+    ) {
+        return equivalent(
+                BST.union(bst1.insert(key, value), bst2),
+                BST.union(bst1, bst2).insert(key, value)
+        );
+    }
+```
+
+> We can argue that these two properties characterize the behaviour of union precisely (up to equivalence of trees), by induction on the size of union’s first argument. This idea is due to Claessen.
+>
+> However, there is a hidden assumption in the argument above — namely, that any non-empty tree `bst` can be expressed in the form `bst2.insert(key, value)`, for some smaller tree `bst2`, or equivalently, that any tree can be constructed using insertions only. There is no reason to believe this a priori — it might be that some tree shapes can only be constructed by delete or union. So, to confirm that these two properties uniquely characterize union, we must test this assumption.
+> 
+> One way to do so is to define a function that maps a tree to a list of insertions that recreate it. It is sufficient to insert the key in each node before the keys in its subtrees:
+
+```java
+List<Entry<K, V>> insertions(BST<K, V> bst) {
+    if (bst.isLeaf()) {
+        return Collections.emptyList();
+    }
+    List<Entry<K, V>> insertions = new ArrayList<>();
+    insertions.add(bst.entry);
+    bst.left().ifPresent(left -> insertions.addAll(insertions(left)));
+    bst.right().ifPresent(right -> insertions.addAll(insertions(right)));
+    return insertions;
+}
+```
+
+> Now we can write a property to check that every tree can be reconstructed from its list of insertions:
+
+```java
+@Property
+boolean insert_complete(@ForAll("trees") BST<Integer, Integer> bst) {
+    List<Entry<Integer, Integer>> insertions = insertions(bst);
+    BST<Integer, Integer> newBst = BST.nil();
+    for (Entry<Integer, Integer> insertion : insertions) {
+        newBst = newBst.insert(insertion.getKey(), insertion.getValue());
+    }
+    return bst.equals(newBst);
+}
+```
+
+> However, this is not sufficient! Recall that the generator we are using, defined in section 3, generates a tree by performing a list of insertions! It is clear that any such tree can be built using only insert, and so the property above can never fail, but what we need to know is that the same is true of trees returned by delete and union! We must thus define additional properties to test this:
+
+```java
+@Property
+boolean insert_complete_for_delete(
+        @ForAll Integer key,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    return insert_complete(bst.delete(key));
+}
+
+@Property
+boolean insert_complete_for_union(
+        @ForAll("trees") BST<Integer, Integer> bst1,
+        @ForAll("trees") BST<Integer, Integer> bst2
+) {
+    return insert_complete(BST.union(bst1, bst2));
+}
+```
+
+> Together, these properties also justify our choice of generator — they show that we really can generate any tree constructable using the tree API. If we could not demonstrate that trees returned by delete and union can also be constructed using insert, then we could define a more complex generator for trees that uses all the API operations, rather than just insert — a workable approach, but considerably trickier, and harder to tune for a good distribution of test data.
+>           
+> Finally, we note that in these completeness properties, it is vital to check structural equality between trees, and not just equivalence. The whole point is to show that delete and union cannot construct otherwise unreachable shapes of trees, which might provoke bugs in the implementation.

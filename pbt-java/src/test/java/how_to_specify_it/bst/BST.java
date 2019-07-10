@@ -24,7 +24,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	}
 
 	private final BST<K, V> left;
-	private final Map.Entry<K, V> entry;
+	final Map.Entry<K, V> entry;
 	private final BST<K, V> right;
 
 	private BST() {
@@ -46,19 +46,19 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	}
 
 	public Optional<BST<K, V>> left() {
-		if (getLeft() == NIL)
+		if (getLeft().isLeaf())
 			return Optional.empty();
 		return Optional.of(left);
 	}
 
 	public Optional<BST<K, V>> right() {
-		if (getRight() == NIL)
+		if (getRight().isLeaf())
 			return Optional.empty();
 		return Optional.of(right);
 	}
 
 	public boolean isLeaf() {
-		return getLeft() == NIL && getRight() == NIL;
+		return entry == null;
 	}
 
 	public boolean isEmpty() {
@@ -66,7 +66,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	}
 
 	public int size() {
-		if (entry == null) {
+		if (isLeaf()) {
 			return 0;
 		}
 		return 1 + getLeft().size() + getRight().size();
@@ -74,7 +74,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 
 	//	find ::Ord k ⇒k →BST k v →Maybe v
 	public Optional<V> find(K key) {
-		if (entry == null) {
+		if (isLeaf()) {
 			return Optional.empty();
 		}
 		if (entry.getKey().compareTo(key) > 0) {
@@ -99,7 +99,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	}
 
 	private BST<K, V> insert(BST<K, V> branch) {
-		if (this.entry == null) {
+		if (isLeaf()) {
 			return branch;
 		}
 		if (this.entry.getKey().compareTo(branch.entry.getKey()) > 0) {
@@ -123,7 +123,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 
 	//	delete::Ord k ⇒k →BST k v →BST k v
 	public BST<K, V> delete(K key) {
-		if (entry == null) {
+		if (isLeaf()) {
 			return this;
 		}
 		if (entry.getKey().compareTo(key) > 0) {
@@ -132,17 +132,13 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 		if (entry.getKey().compareTo(key) < 0) {
 			return new BST<>(left, entry, getRight().delete(key));
 		}
-		if (isLeaf()) {
-			return NIL;
-		} else {
-			if (getLeft() == NIL) {
-				return right;
-			}
-			if (getRight() == NIL) {
-				return left;
-			}
-			return right.insert(left);
+		if (getLeft().isLeaf()) {
+			return right;
 		}
+		if (getRight().isLeaf()) {
+			return left;
+		}
+		return right.insert(getLeft());
 	}
 
 	//	keys ::BSTkv→[k]
