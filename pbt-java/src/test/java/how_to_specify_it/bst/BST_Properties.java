@@ -130,7 +130,7 @@ class BST_Properties {
 	@Group
 	class Metamorphic {
 
-		//prop InsertInsert (k, v) (k′, v′) t =
+		//prop_InsertInsert (k, v) (k′, v′) t =
 		//  insert k v (insert k′ v′ t) === insert k′ v′ (insert k v t)
 		@Property
 		@Disabled
@@ -143,7 +143,7 @@ class BST_Properties {
 					  .equals(bst.insert(key2, value2).insert(key1, value1));
 		}
 
-		// prop InsertInsert (k, v) (k′, v′) t = insert k v (insert k′ v′ t)
+		// prop_InsertInsert (k, v) (k′, v′) t = insert k v (insert k′ v′ t)
 		//   ===
 		//   if k ≡ k′ then insert k v t else insert k′ v′ (insert k v t)
 		@Property
@@ -173,7 +173,7 @@ class BST_Properties {
 			);
 		}
 
-		// prop InsertDelete (k,v) k′ t =
+		// prop_InsertDelete (k,v) k′ t =
 		//   insert k v (delete k′ t)
 		//   􏰂equivalent
 		//   if k ≡ k′ then insert k v t else delete k′ (insert k v t)
@@ -191,7 +191,7 @@ class BST_Properties {
 			return equivalent(deleted, expected);
 		}
 
-		// prop InsertUnion (k, v) t t′ =
+		// prop_InsertUnion (k, v) t t′ =
 		//   insert k v (union t t′) 􏰂
 		//   equivalent
 		//   union (insert k v t) t′
@@ -210,7 +210,7 @@ class BST_Properties {
 	@Group
 	class Equivalence {
 
-		// prop InsertPreservesEquiv k v t t′ =
+		// prop_InsertPreservesEquiv k v t t′ =
 		//   t _equivalent_ t′ =⇒ insert k v t _equivalent_ insert k v t′
 		@Property
 		@Disabled("Does not generate enough examples with assumption fulfilled")
@@ -226,7 +226,7 @@ class BST_Properties {
 			);
 		}
 
-		// prop InsertPreservesEquiv k v (t :􏰂: t′) = insert k v t 􏰂 insert k v t′
+		// prop_InsertPreservesEquiv k v (t :􏰂: t′) = insert k v t 􏰂 insert k v t′
 		@Property
 		boolean insert_preserves_equivalence(
 				@ForAll Integer key, @ForAll Integer value,
@@ -238,7 +238,7 @@ class BST_Properties {
 			);
 		}
 
-		// prop DeletePreservesEquiv k (t :􏰂: t′) = delete k t 􏰂 delete k t′
+		// prop_DeletePreservesEquiv k (t :􏰂: t′) = delete k t 􏰂 delete k t′
 		@Property
 		boolean delete_preserves_equivalence(
 				@ForAll Integer key,
@@ -250,7 +250,7 @@ class BST_Properties {
 			);
 		}
 
-		// prop UnionPreservesEquiv (t1 :􏰂: t1′) (t2 :􏰂: t2′) = union t1 t2 􏰂 union t1′ t2′
+		// prop_UnionPreservesEquiv (t1 :􏰂: t1′) (t2 :􏰂: t2′) = union t1 t2 􏰂 union t1′ t2′
 		@Property
 		boolean union_preserves_equivalence(
 				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts1,
@@ -262,7 +262,7 @@ class BST_Properties {
 			);
 		}
 
-		// prop FindPreservesEquiv k (t :􏰂: t′) = find k t === find k t′
+		// prop_FindPreservesEquiv k (t :􏰂: t′) = find k t === find k t′
 		@Property
 		boolean find_preserves_equivalence(
 				@ForAll Integer key,
@@ -271,7 +271,7 @@ class BST_Properties {
 			return bsts.get1().find(key).equals(bsts.get2().find(key));
 		}
 
-		// prop Equivs (t :􏰂:t′)=t 􏰂t′
+		// prop_Equivs (t :􏰂:t′)=t 􏰂t′
 		@Property
 		boolean equivalent_trees_are_equivalent(
 				@ForAll("equivalentTrees") Tuple2<BST<Integer, Integer>, BST<Integer, Integer>> bsts
