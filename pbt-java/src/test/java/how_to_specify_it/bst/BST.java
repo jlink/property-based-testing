@@ -189,22 +189,15 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 
 	@Override
 	public String toString() {
-		return toIndentedString(0);
-	}
-
-	private String toIndentedString(int indent) {
-		if (entry == null) {
+		if (isLeaf()) {
 			return "NIL";
 		}
-		String leftString = getLeft().toIndentedString(indent + 1);
-		String rightString = getRight().toIndentedString(indent + 1);
-		String indentation = String.join("", Collections.nCopies(indent, "       "));
+		String leftString = getLeft().isLeaf() ? "" : " left: " + getLeft().toString();
+		String rightString = getRight().isLeaf() ? "" : " right: " + getRight().toString();
 		return String.format(
-				"%s%n%sleft:  %s%n%sright: %s",
+				"[%s%s%s]",
 				entry.toString(),
-				indentation,
 				leftString,
-				indentation,
 				rightString
 		);
 	}
