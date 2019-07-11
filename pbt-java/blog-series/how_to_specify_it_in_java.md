@@ -984,4 +984,19 @@ boolean unique(@ForAll int x, @ForAll int y) {
 }
 ```
 
-If we were to choose x and y uniformly from the entire range of 64-bit integers, then QuickCheck would never be able to falsify it, in practice. If we use _jqwik_’s built-in Int generator, then the property fails in around 0.2% of cases. Using the Key generator we have just defined, the property fails in 1% of cases. The choice of generator should be made on the basis of how important collisions are as test cases.
+If we were to choose x and y uniformly from the entire range of 32-bit integers, then _jqwik_ would never be able to falsify it, in practice. If we use _jqwik_’s built-in Int generator, then the property fails in around 0.2% of cases. Using the `keys` generator we have just defined, the property fails in 1% of cases. The choice of generator should be made on the basis of how important collisions are as test cases.
+
+> ## 5 Bug Hunting
+> 
+> To evaluate the properties we have written, we created eight buggy implementations of binary search trees, with bugs ranging from subtle to blatant. These implementations are listed here:
+
+|Bug #|Description|
+|:---:|-----------|
+|1    |_insert_ discards the existing tree, returning a single-node tree just containing the newly inserted value.|
+|2    |_insert_ fails to recognize and update an existing key, inserting a duplicate entry instead.|
+|3    |_insert_ fails to update an existing key, leaving the tree unchanged instead.|
+|4    |_delete_ fails to rebuild the tree above the key being deleted, returning only the remainder of the tree from that point on (an easy mistake for those used to imperative programming to make).|
+|5    |Key comparisons reversed in _delete_; only works correctly at the root of the tree.|
+|6    |_union_ wrongly assumes that all the keys in the first argument precede those in the second.|
+|7    |_union_ wrongly assumes that if the key at the root of `bst1` is smaller than the key at the root of `bst2`, then all the keys in `bst1` will be smaller than the key at the root of `bst2`.|
+|8    |_union_ works correctly, except that when both trees contain the same key, the left argument does not always take priority.|

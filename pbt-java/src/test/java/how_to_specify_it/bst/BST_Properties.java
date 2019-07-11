@@ -191,6 +191,19 @@ class BST_Properties {
 			return equivalent(deleted, expected);
 		}
 
+		@Property
+		boolean insert_delete_weak(
+				@ForAll Integer key1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			Assume.that(!key1.equals(key2));
+			return equivalent(
+					bst.delete(key1).insert(key2, value2),
+					bst.insert(key2, value2).delete(key1)
+			);
+		}
+
 		// prop_InsertUnion (k, v) t t′ =
 		//   insert k v (union t t′) 􏰂
 		//   equivalent
@@ -205,13 +218,175 @@ class BST_Properties {
 			BST<Integer, Integer> insertUnion = BST.union(bst1.insert(key, value), bst2);
 			return equivalent(unionInsert, insertUnion);
 		}
+
+		// prop_DeleteInsertWeak k (k′, v′) t = k ̸≡ k′ =⇒ delete k (insert k′ v′ t) 􏰂 insert k′ v′ (delete k t)
+		@Property
+		boolean delete_insert_weak(
+				@ForAll Integer key1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			Assume.that(!key1.equals(key2));
+			return equivalent(
+					bst.insert(key2, value2).delete(key1),
+					bst.delete(key1).insert(key2, value2)
+			);
+		}
+
+		// prop_DeleteNil k = delete k nil === (nil :: Tree)
+		@Property
+		boolean delete_nil(@ForAll Integer key) {
+			BST<Integer, Integer> nil = BST.nil();
+			return nil.delete(key).equals(nil);
+		}
+
+		// prop_DeleteInsert k (k′, v′) t = delete k (insert k′ v′ t)
+		//   􏰂if k ≡ k′ then delete k t else insert k′ v′ (delete k t)
+		@Property
+		boolean delete_insert(
+				@ForAll Integer key1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			BST<Integer, Integer> inserted = bst.insert(key2, value2).delete(key1);
+			BST<Integer, Integer> expected =
+					key1.equals(key2)
+							? bst.delete(key1)
+							: bst.delete(key1).insert(key2, value2);
+			return equivalent(inserted, expected);
+		}
+
+		// prop_DeleteDelete k k′ t = delete k (delete k′ t) =eqv=􏰂 delete k′ (delete k t)
+		@Property
+		boolean delete_delete(
+				@ForAll Integer key1,
+				@ForAll Integer key2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return equivalent(
+					bst.delete(key2).delete(key1),
+					bst.delete(key1).delete(key2)
+			);
+		}
+
+		// prop_DeleteUnion k t t′ =
+		//   delete k (union t t′) 􏰂=eqv= union (delete k t) (delete k t′)
+		@Property
+		boolean delete_union(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			return equivalent(
+					BST.union(bst1, bst2).delete(key),
+					BST.union(bst1.delete(key), bst2.delete(key))
+			);
+		}
+
+		// prop_UnionNil1 t = union nil t === t
+		@Property
+		boolean union_nil1(@ForAll("trees") BST<Integer, Integer> bst) {
+			return BST.union(bst, BST.nil()).equals(bst);
+		}
+
+		// prop_UnionNil2 t = union t nil === t
+		@Property
+		boolean union_nil2(@ForAll("trees") BST<Integer, Integer> bst) {
+			return BST.union(BST.nil(), bst).equals(bst);
+		}
+
+		// prop_UnionDeleteInsert t t′ (k,v) =
+		//   union (delete k t) (insert k v t′) 􏰂 =eqv= insert k v (union t t′)
+		@Property
+		boolean union_delete_insert(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			return equivalent(
+					BST.union(bst1.delete(key), bst2.insert(key, value)),
+					BST.union(bst1, bst2).insert(key, value)
+			);
+		}
+
+		// prop_UnionUnionIdem t = union t t 􏰂=eqv= t
+		@Property
+		boolean union_union_idem(@ForAll("trees") BST<Integer, Integer> bst) {
+			return BST.union(bst, bst).equals(bst);
+		}
+
+		// prop_UnionUnionAssoc t1 t2 t3 =
+		//   union (union t1 t2 ) t3 === union t1 (union t2 t3 )
+		@Property
+		boolean union_union_assoc(
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2,
+				@ForAll("trees") BST<Integer, Integer> bst3
+		) {
+			BST<Integer, Integer> left = BST.union(BST.union(bst1, bst2), bst3);
+			BST<Integer, Integer> right = BST.union(bst1, BST.union(bst2, bst3));
+			return left.equals(right);
+		}
+
+		// prop_FindNil k = find k (nil :: Tree) === Nothing
+		@Property
+		boolean find_nil(@ForAll Integer key) {
+			BST<Integer, Integer> nil = BST.nil();
+			return nil.find(key).equals(Optional.empty());
+		}
+
+		// prop_FindInsert k (k′, v′) t =
+		//   find k (insert k′ v′ t) === if k ≡ k′ then Just v′ else find k t
+		@Property
+		boolean find_insert(
+				@ForAll Integer key1,
+				@ForAll Integer key2, @ForAll Integer value2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			Optional<Integer> found = bst.insert(key2, value2).find(key1);
+			Optional<Integer> expected =
+					key1.equals(key2)
+							? Optional.of(value2)
+							: bst.find(key1);
+			return found.equals(expected);
+		}
+
+		// prop_FindDelete k k′ t =
+		//   find k (delete k′ t) === if k ≡ k′ then Nothing else find k t
+		@Property
+		boolean find_delete(
+				@ForAll Integer key1,
+				@ForAll Integer key2,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			Optional<Integer> found = bst.delete(key2).find(key1);
+			Optional<Integer> expected =
+					key1.equals(key2)
+							? Optional.empty()
+							: bst.find(key1);
+			return found.equals(expected);
+		}
+
+		// prop_FindUnion k t t′ = find k (union t t′) === (find k t <|> find k t′)
+		@Property
+		boolean find_union(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			Optional<Integer> found = BST.union(bst1, bst2).find(key);
+			Optional<Integer> expected = bst1.find(key).isPresent() ?
+												 bst1.find(key) : bst2.find(key);
+			return found.equals(expected);
+		}
+
 	}
 
 	@Group
 	class Equivalence {
 
 		// prop_InsertPreservesEquiv k v t t′ =
-		//   t _equivalent_ t′ =⇒ insert k v t _equivalent_ insert k v t′
+		//   t =eqv= t′ =⇒ insert k v t =eqv= insert k v t′
 		@Property
 		@Disabled("Does not generate enough examples with assumption fulfilled")
 		boolean insert_preserves_equivalence_exhausted(
@@ -335,7 +510,7 @@ class BST_Properties {
 			return bst.equals(newBst);
 		}
 
-		// prop InsertCompleteForDelete k t = prop InsertComplete (delete k t)
+		// prop_InsertCompleteForDelete k t = prop_InsertComplete (delete k t)
 		@Property
 		boolean insert_complete_for_delete(
 				@ForAll Integer key,
@@ -344,7 +519,7 @@ class BST_Properties {
 			return insert_complete(bst.delete(key));
 		}
 
-		// prop InsertCompleteForUnion t t′ = prop InsertComplete (union t t′)
+		// prop_InsertCompleteForUnion t t′ = prop_InsertComplete (union t t′)
 		@Property
 		boolean insert_complete_for_union(
 				@ForAll("trees") BST<Integer, Integer> bst1,
