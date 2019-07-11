@@ -1,16 +1,13 @@
 package how_to_specify_it.bst;
 
-import java.util.*;
 import java.util.AbstractMap.*;
+import java.util.*;
 import java.util.Map.*;
-
-import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
 
 import static how_to_specify_it.bst.BSTUtils.*;
-import static org.assertj.core.api.Assertions.*;
 
 class BST_Properties {
 
@@ -369,9 +366,9 @@ class BST_Properties {
 				@ForAll Integer key, @ForAll Integer value,
 				@ForAll("trees") BST<Integer, Integer> bst
 		) {
-			List<Entry<Integer, Integer>> insertedList = bst.toList();
-			insertedList.add(new SimpleImmutableEntry<>(key, value));
-			return bst.insert(key, value).toList().equals(insertedList);
+			List<Entry<Integer, Integer>> model = bst.toList();
+			model.add(new SimpleImmutableEntry<>(key, value));
+			return bst.insert(key, value).toList().equals(model);
 		}
 
 		// prop_InsertModel k v t =
@@ -381,16 +378,71 @@ class BST_Properties {
 				@ForAll Integer key, @ForAll Integer value,
 				@ForAll("trees") BST<Integer, Integer> bst
 		) {
-			List<Entry<Integer, Integer>> insertedEntries = bst.toList();
-			insertedEntries.removeIf(entry -> entry.getKey().equals(key));
-			insertedEntries.add(new SimpleImmutableEntry<>(key, value));
+			List<Entry<Integer, Integer>> model = removeKey(bst.toList(), key);
+			model.add(new SimpleImmutableEntry<>(key, value));
 			List<Entry<Integer, Integer>> entries = bst.insert(key, value).toList();
-			return equalsIgnoreOrder(entries, insertedEntries);
+			return equalsIgnoreOrder(entries, model);
+		}
+
+		private List<Entry<Integer, Integer>> removeKey(
+				List<Entry<Integer, Integer>> model, @ForAll Integer key
+		) {
+			model.removeIf(entry -> entry.getKey().equals(key));
+			return model;
+		}
+
+		// prop_NilModel = toList (nil :: Tree) === [ ]
+		@Example
+		boolean nil_model() {
+			return BST.nil().toList().isEmpty();
+		}
+
+		// prop_DeleteModel k t = toList (delete k t) === deleteKey k (toList t)
+		@Property
+		boolean delete_model(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			List<Entry<Integer, Integer>> model = removeKey(bst.toList(), key);
+			List<Entry<Integer, Integer>> entries = bst.delete(key).toList();
+			return equalsIgnoreOrder(entries, model);
+		}
+
+		// prop_UnionModel t t′ =
+		//   toList (union t t′) === L.sort (L.unionBy ((≡) ‘on‘ fst) (toList t) (toList t′))
+		@Property
+		boolean union_model(
+				@ForAll("trees") BST<Integer, Integer> bst1,
+				@ForAll("trees") BST<Integer, Integer> bst2
+		) {
+			List<Entry<Integer, Integer>> bst2Model = bst2.toList();
+			for (Entry<Integer, Integer> entry : bst1.toList()) {
+				bst2Model = removeKey(bst2Model, entry.getKey());
+			}
+			List<Entry<Integer, Integer>> model = bst1.toList();
+			model.addAll(bst2Model);
+			List<Entry<Integer, Integer>> entries = BST.union(bst1, bst2).toList();
+			return equalsIgnoreOrder(entries, model);
+		}
+
+		// prop_FindModel k t = find k t === L.lookup k (toList t)
+		@Property
+		boolean find_model(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			List<Entry<Integer, Integer>> model = bst.toList();
+			Optional<Integer> expectedFindResult =
+					model.stream()
+						 .filter(entry -> entry.getKey().equals(key))
+						 .map(Entry::getValue)
+						 .findFirst();
+			return bst.find(key).equals(expectedFindResult);
 		}
 
 		private boolean equalsIgnoreOrder(List<Entry<Integer, Integer>> list1, List<Entry<Integer, Integer>> list2) {
-			Collections.sort(list1, Comparator.comparing(Entry::getKey));
-			Collections.sort(list2, Comparator.comparing(Entry::getKey));
+			list1.sort(Comparator.comparing(Entry::getKey));
+			list2.sort(Comparator.comparing(Entry::getKey));
 			return list1.equals(list2);
 		}
 

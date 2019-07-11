@@ -775,16 +775,15 @@ boolean insert_complete_for_union(
 >
 > In 1972, Hoare published [an approach to proving the correctness of data representations](https://link.springer.com/article/10.1007%2FBF00289507), by relating them to abstract data using an abstraction function. Hoare defines a concrete and abstract implementation for each operation, and then proves that diagrams such as this one commute:
 
-<pre>
+<pre style="font-family: monospace">
                   abstraction
              t ---------------> kvs
              |                  |
  insert k v  |                  | abstract insert k v
              |                  |
              v                  v             
-             t′---------------> kvs ′
+             t′---------------> kvs′
                   abstraction
-
 </pre>
 
 > It follows that any sequence of concrete operations behaves in the same way as the same sequence of abstract ones.
@@ -797,9 +796,9 @@ boolean insert_model(
         @Forll Integer key, @ForAll Integer value,
         @ForAll("trees") BST<Integer, Integer> bst
 ) {
-    List<Entry<Integer, Integer>> insertedList = bst.toList();
-    insertedList.add(new SimpleImmutableEntry<>(key, value));
-    return bst.insert(key, value).toList().equals(insertedList);
+    List<Entry<Integer, Integer>> model = bst.toList();
+    model.add(new SimpleImmutableEntry<>(key, value));
+    return bst.insert(key, value).toList().equals(model);
 }
 ```
 
@@ -821,16 +820,63 @@ boolean insert_model(
         @ForAll Integer key, @ForAll Integer value,
         @ForAll("trees") BST<Integer, Integer> bst
 ) {
-    List<Entry<Integer, Integer>> insertedEntries = bst.toList();
-    insertedEntries.removeIf(entry -> entry.getKey().equals(key));
-    insertedEntries.add(new SimpleImmutableEntry<>(key, value));
+    List<Entry<Integer, Integer>> model = removeKey(bst.toList(), key);
+    model.add(new SimpleImmutableEntry<>(key, value));
     List<Entry<Integer, Integer>> entries = bst.insert(key, value).toList();
-    return equalsIgnoreOrder(entries, insertedEntries);
+    return equalsIgnoreOrder(entries, model);
 }
 ```
 
 The Java version also required to make testing for equivalence of entry
 lists ignore the order of entries. I'm not sure why that isn't creating
-problems with Haskell and Quickcheck.
+problems with Haskell and Quickcheck. 
+
+Here's the rest of the model based properties:
+
+```java
+@Example
+boolean nil_model() {
+    return BST.nil().toList().isEmpty();
+}
+
+@Property
+boolean delete_model(
+        @ForAll Integer key,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    List<Entry<Integer, Integer>> model = removeKey(bst.toList(), key);
+    List<Entry<Integer, Integer>> entries = bst.delete(key).toList();
+    return equalsIgnoreOrder(entries, model);
+}
+
+@Property
+boolean union_model(
+        @ForAll("trees") BST<Integer, Integer> bst1,
+        @ForAll("trees") BST<Integer, Integer> bst2
+) {
+    List<Entry<Integer, Integer>> bst2Model = bst2.toList();
+    for (Entry<Integer, Integer> entry : bst1.toList()) {
+        bst2Model = removeKey(bst2Model, entry.getKey());
+    }
+    List<Entry<Integer, Integer>> model = bst1.toList();
+    model.addAll(bst2Model);
+    List<Entry<Integer, Integer>> entries = BST.union(bst1, bst2).toList();
+    return equalsIgnoreOrder(entries, model);
+}
+
+@Property
+boolean find_model(
+        @ForAll Integer key,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    List<Entry<Integer, Integer>> model = bst.toList();
+    Optional<Integer> expectedFindResult =
+            model.stream()
+                 .filter(entry -> entry.getKey().equals(key))
+                 .map(Entry::getValue)
+                 .findFirst();
+    return bst.find(key).equals(expectedFindResult);
+}
+```
 
 
