@@ -4,10 +4,13 @@ import java.util.*;
 import java.util.AbstractMap.*;
 import java.util.Map.*;
 
+import org.assertj.core.api.*;
+
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
 
 import static how_to_specify_it.bst.BSTUtils.*;
+import static org.assertj.core.api.Assertions.*;
 
 class BST_Properties {
 
@@ -369,6 +372,26 @@ class BST_Properties {
 			List<Entry<Integer, Integer>> insertedList = bst.toList();
 			insertedList.add(new SimpleImmutableEntry<>(key, value));
 			return bst.insert(key, value).toList().equals(insertedList);
+		}
+
+		// prop_InsertModel k v t =
+		//  toList (insert k v t ) === L.insert (k , v ) (deleteKey k $ toList t )
+		@Property
+		boolean insert_model(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			List<Entry<Integer, Integer>> insertedEntries = bst.toList();
+			insertedEntries.removeIf(entry -> entry.getKey().equals(key));
+			insertedEntries.add(new SimpleImmutableEntry<>(key, value));
+			List<Entry<Integer, Integer>> entries = bst.insert(key, value).toList();
+			return equalsIgnoreOrder(entries, insertedEntries);
+		}
+
+		private boolean equalsIgnoreOrder(List<Entry<Integer, Integer>> list1, List<Entry<Integer, Integer>> list2) {
+			Collections.sort(list1, Comparator.comparing(Entry::getKey));
+			Collections.sort(list2, Comparator.comparing(Entry::getKey));
+			return list1.equals(list2);
 		}
 
 	}

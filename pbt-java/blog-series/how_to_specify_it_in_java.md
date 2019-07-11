@@ -793,9 +793,8 @@ boolean insert_complete_for_union(
 
 ```java
 @Property
-@Disabled("Duplicate keys are not considered")
-boolean insert_model_naive(
-        @ForAll Integer key, @ForAll Integer value,
+boolean insert_model(
+        @Forll Integer key, @ForAll Integer value,
         @ForAll("trees") BST<Integer, Integer> bst
 ) {
     List<Entry<Integer, Integer>> insertedList = bst.toList();
@@ -815,3 +814,23 @@ sample = [0, 0, [0=0]]
 ```
 
 > The problem is that the insertion function in Data.List may create duplicate elements, but insert for trees does not. So it is not quite the correct abstract implementation; we can correct this by deleting the key if it is initially present:
+
+```java
+@Property
+boolean insert_model(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    List<Entry<Integer, Integer>> insertedEntries = bst.toList();
+    insertedEntries.removeIf(entry -> entry.getKey().equals(key));
+    insertedEntries.add(new SimpleImmutableEntry<>(key, value));
+    List<Entry<Integer, Integer>> entries = bst.insert(key, value).toList();
+    return equalsIgnoreOrder(entries, insertedEntries);
+}
+```
+
+The Java version also required to make testing for equivalence of entry
+lists ignore the order of entries. I'm not sure why that isn't creating
+problems with Haskell and Quickcheck.
+
+
