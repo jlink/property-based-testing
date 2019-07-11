@@ -1000,3 +1000,68 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 |6    |_union_ wrongly assumes that all the keys in the first argument precede those in the second.|
 |7    |_union_ wrongly assumes that if the key at the root of `bst1` is smaller than the key at the root of `bst2`, then all the keys in `bst1` will be smaller than the key at the root of `bst2`.|
 |8    |_union_ works correctly, except that when both trees contain the same key, the left argument does not always take priority.|
+
+> The results of testing each property for each buggy version are:
+
+|  Validity Properties |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|`arbitrary valid`     |
+|`nil valid`           |
+|`insert valid`        |
+|`delete valid`        |
+|`union valid`         |
+
+|  Postconditions        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|:-----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert post`           |
+|`delete post`           |
+|`find post present`     |
+|`find post absent`      |
+|`insert delete complete`|
+|`insert post same key`  |
+|`union post`            |
+
+|Metamorphic Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert insert weak`  |
+|`insert insert`       |
+|`insert delete weak`  |
+|`insert delete`       |
+|`insert union`        |
+|`delete nil`          |
+|`delete insert weak`  |
+|`delete insert`       |
+|`delete delete`       |
+|`delete union`        |
+|`union nil1`          |
+|`union nil2`          |
+|`union delete insert` |
+|`union union idem`    |
+|`union union assoc`   |
+|`find nil`            |
+|`find insert`         |
+|`find delete`         |
+|`find union`          |
+
+
+|Equivalence Properties        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|:-----------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert preserves equivalence`|
+|`delete preserves equivalence`|
+|`union preserves equivalence` |
+|`find preserves equivalence`  |
+
+|Insert Completeness         |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|:---------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert complete`           |
+|`insert complete for union` |
+|`insert complete for delete`|
+
+
+|Model-based Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|`nil model`           |
+|`insert model`        |
+|`delete model`        |
+|`union model`         |
+|`find model`          |

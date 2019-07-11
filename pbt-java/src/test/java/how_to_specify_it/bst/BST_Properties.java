@@ -11,13 +11,13 @@ import static how_to_specify_it.bst.BSTUtils.*;
 
 class BST_Properties {
 
-	@Property
-	boolean arbitrary_valid(@ForAll("trees") BST<Integer, Integer> bst) {
-		return isValid(bst);
-	}
-
 	@Group
 	class Validity {
+		@Property
+		boolean arbitrary_valid(@ForAll("trees") BST<Integer, Integer> bst) {
+			return isValid(bst);
+		}
+
 		@Example
 		boolean nil_valid() {
 			BST<?, ?> nil = BST.nil();
@@ -67,6 +67,14 @@ class BST_Properties {
 			} else {
 				return found.equals(bst.find(otherKey));
 			}
+		}
+
+		@Property
+		boolean delete_post(
+				@ForAll Integer key,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			return bst.delete(key).find(key).equals(Optional.empty());
 		}
 
 		@Property
@@ -477,7 +485,7 @@ class BST_Properties {
 	}
 
 	@Group
-	class Inductive_Testing {
+	class Completeness_Testing {
 
 		// prop_UnionNil1 t = union nil t === t
 		@Property
