@@ -770,3 +770,48 @@ boolean insert_complete_for_union(
 > Together, these properties also justify our choice of generator — they show that we really can generate any tree constructable using the tree API. If we could not demonstrate that trees returned by delete and union can also be constructed using insert, then we could define a more complex generator for trees that uses all the API operations, rather than just insert — a workable approach, but considerably trickier, and harder to tune for a good distribution of test data.
 >           
 > Finally, we note that in these completeness properties, it is vital to check structural equality between trees, and not just equivalence. The whole point is to show that delete and union cannot construct otherwise unreachable shapes of trees, which might provoke bugs in the implementation.
+
+> ## 4.5 Model-based Properties
+>
+> In 1972, Hoare published [an approach to proving the correctness of data representations](https://link.springer.com/article/10.1007%2FBF00289507), by relating them to abstract data using an abstraction function. Hoare defines a concrete and abstract implementation for each operation, and then proves that diagrams such as this one commute:
+
+<pre>
+                  abstraction
+             t ---------------> kvs
+             |                  |
+ insert k v  |                  | abstract insert k v
+             |                  |
+             v                  v             
+             t′---------------> kvs ′
+                  abstraction
+
+</pre>
+
+> It follows that any sequence of concrete operations behaves in the same way as the same sequence of abstract ones.
+>
+> We can use the same idea for testing. In this case we will use ordered lists of key-value pairs as the abstract implementation, which means we can use toList as the abstraction function. Since `java.util.List` already provides an insertion function for ordered lists, it is tempting to define
+
+```java
+@Property
+@Disabled("Duplicate keys are not considered")
+boolean insert_model_naive(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    List<Entry<Integer, Integer>> insertedList = bst.toList();
+    insertedList.add(new SimpleImmutableEntry<>(key, value));
+    return bst.insert(key, value).toList().equals(insertedList);
+}
+```
+
+> However, this property fails:
+
+```
+org.opentest4j.AssertionFailedError: Property [Model Based Properties:insert model] falsified with sample [0, 0, [0=0]]
+
+tries = 2                     | # of calls to property
+checks = 2                    | # of not rejected calls
+sample = [0, 0, [0=0]]
+```
+
+> The problem is that the insertion function in Data.List may create duplicate elements, but insert for trees does not. So it is not quite the correct abstract implementation; we can correct this by deleting the key if it is initially present:

@@ -144,7 +144,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	//	keys ::BSTkv→[k]
 	public List<K> keys() {
 		if (entry == null) {
-			return Collections.emptyList();
+			return new ArrayList<>();
 		}
 		List<K> keys = new ArrayList<>();
 		keys.add(entry.getKey());
@@ -156,7 +156,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	//	toList :: BST k v → [ (k , v ) ]
 	public List<Map.Entry<K, V>> toList() {
 		if (entry == null) {
-			return Collections.emptyList();
+			return new ArrayList<>();
 		}
 		List<Map.Entry<K, V>> entries = new ArrayList<>();
 		entries.add(entry);

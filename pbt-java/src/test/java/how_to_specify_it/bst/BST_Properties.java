@@ -1,6 +1,7 @@
 package how_to_specify_it.bst;
 
 import java.util.*;
+import java.util.AbstractMap.*;
 import java.util.Map.*;
 
 import net.jqwik.api.*;
@@ -353,6 +354,23 @@ class BST_Properties {
 		) {
 			return insert_complete(BST.union(bst1, bst2));
 		}
+	}
+
+	@Group
+	class Model_Based_Properties {
+
+		// prop_InsertModel k v t = toList (insert k v t) === L.insert (k, v) (toList t)
+		@Property
+		@Disabled("Duplicate keys are not considered")
+		boolean insert_model_naive(
+				@ForAll Integer key, @ForAll Integer value,
+				@ForAll("trees") BST<Integer, Integer> bst
+		) {
+			List<Entry<Integer, Integer>> insertedList = bst.toList();
+			insertedList.add(new SimpleImmutableEntry<>(key, value));
+			return bst.insert(key, value).toList().equals(insertedList);
+		}
+
 	}
 
 	@Provide
