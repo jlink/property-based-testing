@@ -61,8 +61,6 @@ class BST_Properties {
 				@ForAll("trees") BST<Integer, Integer> bst,
 				@ForAll Integer otherKey
 		) {
-			// Statistics.collect(key.equals(otherKey));
-
 			Optional<Integer> found = bst.insert(key, value).find(otherKey);
 			if (otherKey.equals(key)) {
 				return found.map(v -> v.equals(value)).orElse(false);
@@ -448,12 +446,44 @@ class BST_Properties {
 
 	}
 
+	// prop_Measure k t =
+	//   label (if k ∈ keys t then "present" else "absent") $ label
+	//     (if t ≡ nil then "empty" else
+	//       if keys t ≡ [k] then "just k" else
+	//       if (all (􏰁 k) (keys t)) then "at start" else if (all (􏰀 k) (keys t)) then "at end" else "middle") $
+	//   True
+	@Property(tries = 1_000_000)
+	@Disabled("takes very long")
+	void measure(
+			@ForAll("keys") Integer key,
+			@ForAll("trees") BST<Integer, Integer> bst
+	) {
+		List<Integer> keys = bst.keys();
+		String frequency = keys.contains(key) ? "present" : "absent";
+		Statistics.label("frequency").collect(frequency);
+
+		String position =
+				bst.isLeaf() ? "empty"
+						: keys.equals(Collections.singletonList(key)) ? "just key"
+								  : keys.get(0).equals(key) ? "at start"
+											: keys.get(keys.size() - 1).equals(key) ? "at end"
+													  : "middle";
+		Statistics.label("position").collect(position);
+	}
+
+	@Property(afterFailure = AfterFailureMode.RANDOM_SEED)
+	@Disabled("supposed to fail")
+	boolean unique(@ForAll("keys") int x, @ForAll("keys") int y) {
+		//Statistics.collect(x == y);
+		return x != y;
+	}
+
 	@Provide
 	Arbitrary<BST<Integer, Integer>> trees() {
-		Arbitrary<Integer> keys = Arbitraries.integers().unique();
+		Arbitrary<Integer> keys = keys();
 		Arbitrary<Integer> values = Arbitraries.integers();
 		Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
-				Combinators.combine(keys, values).as(Tuple::of).list();
+				Combinators.combine(keys, values).as(Tuple::of).list().ofMaxSize(200);
 
 		// This could be implemented as streaming and reducing
 		// but that'd probably be less understandable
@@ -464,6 +494,11 @@ class BST_Properties {
 			}
 			return bst;
 		});
+	}
+
+	@Provide
+	Arbitrary<Integer> keys() {
+		return Arbitraries.integers().between(0, 200).unique();
 	}
 
 }

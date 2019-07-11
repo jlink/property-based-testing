@@ -879,4 +879,109 @@ boolean find_model(
 }
 ```
 
+> ## 4.6 A Note on Generation
+>
+> Throughout this paper, we have used integers as test data, for both keys and values. This is generally an acceptable choice, although not necessarily ideal. It is useful to measure the distribution of test data, to judge whether or not tests are likely to find bugs efficiently. In this case, many properties refer to one or more keys, and a tree, generated independently. We may therefore wonder, how often does such a key actually occur in an independently generated tree?
+>
+> To find out, we can define a property just for measurement. We measure not only how often k appears in t, but also where among the keys of t it appears:
 
+```java
+@Property(tries = 1_000_000)
+void measure(
+        @ForAll Integer key,
+        @ForAll("trees") BST<Integer, Integer> bst
+) {
+    List<Integer> keys = bst.keys();
+    String frequency = keys.contains(key) ? "present" : "absent";
+    Statistics.label("frequency").collect(frequency);
+
+    String position =
+            bst.isLeaf() ? "empty"
+            : keys.equals(Collections.singletonList(key)) ? "just key"
+            : keys.get(0).equals(key) ? "at start"
+            : keys.get(keys.size() - 1 ).equals(key) ? "at end"
+            : "middle";
+    Statistics.label("position").collect(position);
+}
+```
+
+> This property never fails, it just collects information about the generated tests, which is reported in tables afterwards. Running a million tests results in
+
+```
+[BST Properties:measure] frequency = 
+    absent  : 89 %
+    present : 11 %
+
+[BST Properties:measure] position = 
+    middle   : 98.18 %
+    empty    : 1.36 %
+    at end   : 0.24 %
+    at start : 0.21 %
+    just key : 0.0 %
+```
+
+> From the second table, we can see that `key` appears at the beginning or end of the keys in bst about 0.2% of the time for each case, while it appears somewhere in the middle of the sequences of keys 98% of the time. This looks quite reasonable. On the other hand, in almost 90% of tests, key is not found in the tree at all!
+
+The actual numbers for Quickcheck are better in the sense that the various positions occur more frequently: 10% beginning or end, 75% in the middle and 80% key not in tree.
+
+For some of the properties we defined, this will result in quite inefficient testing. For example, consider the postcondition for insert:
+
+```java
+@Property
+boolean insert_post(
+        @ForAll Integer key, @ForAll Integer value,
+        @ForAll("trees") BST<Integer, Integer> bst,
+        @ForAll Integer otherKey
+) {
+    Optional<Integer> found = bst.insert(key, value).find(otherKey);
+    if (otherKey.equals(key)) {
+        return found.map(v -> v.equals(value)).orElse(false);
+    } else {
+        return found.equals(bst.find(otherKey));
+    }
+}
+``` 
+
+> In almost 80% of tests `otherKey` will not be present in `bst`, and since `otherKey` is rarely equal to `key`, then in most of these cases both sides of the equation will be `Optional.empty()`. In effect, we spend most of our effort testing that inserting `key` does not insert an unrelated key `otherKey` into the tree! While this would be a serious bug if it occurred, it seems disproportionate to devote so much test effort to this kind of case.
+>
+> More reasonable would be to divide our test effort roughly equally between cases in which the given key does occur in the random tree, and cases in which it does not. We can achieve this by changing the generation of keys. If we choose keys from a smaller set, then we will generate equal keys more often. 
+
+For example, we might choose keys out of a smaller set of integers
+between 0 and 200:
+
+```java
+@Provide
+Arbitrary<Integer> keys() {
+    return Arbitraries.integers().between(0, 200).unique();
+}
+```
+
+This requires to both use this function the `trees()` generator method and changing the annotation of key values to `@ForAll("keys") Integer`.
+I also had to change the maximum number of keys in a generated tree to 200
+because otherwise the tree generator would run out of keys.
+
+> Testing property `measure` using this type for keys results in the following, much better, distribution:
+
+```
+[BST Properties:measure] frequency = 
+    present : 52 %
+    absent  : 48 %
+
+[BST Properties:measure] position = 
+    middle   : 97.17 %
+    empty    : 1.48 %
+    at end   : 0.67 %
+    at start : 0.67 %
+    just key : 0.0 %
+```
+
+> This example illustrates that “collisions” (that is, cases in which we randomly choose the same value in two places) can be important test cases. Indeed, consider the following (obviously false) property:
+
+```java
+@Property
+boolean unique(@ForAll int x, @ForAll int y) {
+    return x != y;
+}
+```
+
+If we were to choose x and y uniformly from the entire range of 64-bit integers, then QuickCheck would never be able to falsify it, in practice. If we use _jqwik_’s built-in Int generator, then the property fails in around 0.2% of cases. Using the Key generator we have just defined, the property fails in 1% of cases. The choice of generator should be made on the basis of how important collisions are as test cases.
