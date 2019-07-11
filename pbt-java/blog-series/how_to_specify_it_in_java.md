@@ -1065,3 +1065,5 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 |`delete model`        |
 |`union model`         |
 |`find model`          |
+
+> We make the following observations.
