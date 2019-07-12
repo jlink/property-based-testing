@@ -1104,6 +1104,28 @@ QuickCheck found a bug where _jqwik_ did not; `Xo` has the opposite meaning. The
 All in all, however, the results are quite similar and suggest the same
 conclusions.
 
+> ### 5.2 Bug finding performance
+
+The following section is the original text without any changes because
+I haven't replicated the statistical analysis.
+
+> Hitherto we have discussed which properties can find bugs, given enough testing time. But it also matters how quickly a property can find a bug. We measured the mean time to failure across seven of the eight bugs (omitting bug #2), for every failing postcondition, (non-weak) metamorphic property, and model-based property. Each mean-time-to-failure was measured by testing the property 1,000 times with different random seeds, and taking the mean number of tests needed to provoke the failure. The results are summarized below:
+>
+> |Property type|Min|Max|Mean|
+> |-------------|---|---|----|
+> |Postcondition|7.1|245|77  |
+> |Metamorphic  |2.4|714|56  | 
+> |Model-based  |3.1|9.8|5.8 |
+>
+> In this example model-based properties find bugs far faster than postconditions or metamorphic properties, while metamorphic properties find bugs a little faster than postconditions on average, but their mean time to failure varies more.
+> 
+> Digging a little deeper, for the same bug in union, `prop_UnionPost` fails after 50 tests on average, while `prop_UnionModel` fails after only 8.4 tests, even though they are logically equivalent. The reason is that after computing a union that is affected by the bug, the model-based property checks that the model of the result is correct — which requires every key and value to be correct. The post-condition, on the other hand, checks that a random key has the correct value in the result. Thus `prop_UnionPost` may exercise the bug many times without detecting it. Each model-based test may take a little longer to run, because it validates the result of union more thoroughly, but this is not significant compared to the enormous difference in the number of tests required to find the bug.
+>
+> ### Lessons
+> 
+
+
+
 ## Bug Hunting with Unit Tests
 
 |Failing Unit Tests|#1 |#2 |#3 |#4 |#5 |#8 |
