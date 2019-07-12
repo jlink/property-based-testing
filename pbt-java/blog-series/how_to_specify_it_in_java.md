@@ -1095,13 +1095,13 @@ As you can see in the table there is a bit of difference between the
 QuickCheck results and the properties run with _jqwik_: `Ox` means that
 QuickCheck found a bug where _jqwik_ did not; `Xo` has the opposite meaning. There are several potential causes for the differences:
 
-- The bugs are only described in prose. Thus my implementation are probably different than those done by the original authors.
-- Data generation differs between QuickCheck and _jqwik_ which leads
-  to more or less collisions.
-- Some of the properties are not fully specified in the original
-  paper. My interpretation might be different.
+- The bugs are only described in prose. Thus my implementations are probably different than those done by the original authors.
+- Data generation differs between QuickCheck and _jqwik_ which can lead
+  to more or less collisions and thus to better or worse bug detection.
+- Some of the properties are not fully specified in the
+  paper. My interpretation of the property's name might be different.
   
-All in all, however, the results are quite similar and suggest the same
+All in all, however, the results are quite alike and suggest similar
 conclusions.
 
 > ### 5.2 Bug finding performance
