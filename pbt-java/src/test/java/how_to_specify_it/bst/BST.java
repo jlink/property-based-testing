@@ -130,10 +130,14 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 		if (isLeaf()) {
 			return this;
 		}
-		if (entry.getKey().compareTo(key) > 0) {
+		// bug(5)
+		if (entry.getKey().compareTo(key) < 0) {
+		// if (entry.getKey().compareTo(key) > 0) {
 			return new BST<>(getLeft().delete(key), entry, right);
 		}
-		if (entry.getKey().compareTo(key) < 0) {
+		// bug(5)
+		if (entry.getKey().compareTo(key) > 0) {
+		//if (entry.getKey().compareTo(key) < 0) {
 			return new BST<>(left, entry, getRight().delete(key));
 		}
 		if (getLeft().isLeaf()) {
