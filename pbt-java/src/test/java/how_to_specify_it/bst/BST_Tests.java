@@ -160,4 +160,10 @@ class BST_Tests {
 				new SimpleEntry<>(5, "five")
 		);
 	}
+
+	@Example
+	void insert_twice_still_valid() {
+		BST<Integer, String> one = bst.insert(1, "one").insert(1, "two");
+		assertThat(BSTUtils.isValid(one)).isTrue();
+	}
 }

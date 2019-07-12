@@ -1015,20 +1015,20 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 
 |  Postconditions        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:-----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert post`           | X | Ox|
+|`insert post`           | X | X |
 |`delete post`           |   | Ox|
-|`find post present`     |   | Ox|
+|`find post present`     |   | X |
 |`find post absent`      |   | Ox|
 |`insert delete complete`|   | X |
-|`insert post same key`  |   |   |
-|`union post`            |   |   |
+|`insert post same key`  |   | Xo|
+|`union post`            |   | Xo|
 
 |Metamorphic Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |`insert insert weak`  | X |   |
-|`insert insert`       | X | Ox|
+|`insert insert`       | X | X |
 |`insert delete weak`  |   |   |
-|`insert delete`       |   | Ox|
+|`insert delete`       |   | X |
 |`insert union`        |   | Ox|
 |`delete nil`          |   |   |
 |`delete insert weak`  |   |   |
@@ -1050,7 +1050,7 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 |:-----------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |`insert preserves equivalence`|   |   |
 |`delete preserves equivalence`| X |   |
-|`union preserves equivalence` | X | Xo|
+|`union preserves equivalence` | X |   |
 |`find preserves equivalence`  | X |   |
 
 |Insert Completeness         |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |

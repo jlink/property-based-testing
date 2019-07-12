@@ -62,11 +62,9 @@ class BST_Properties {
 				@ForAll Integer otherKey
 		) {
 			Optional<Integer> found = bst.insert(key, value).find(otherKey);
-			if (otherKey.equals(key)) {
-				return found.map(v -> v.equals(value)).orElse(false);
-			} else {
-				return found.equals(bst.find(otherKey));
-			}
+			Optional<Integer> expected =
+					otherKey.equals(key) ? Optional.of(value) : bst.find(otherKey);
+			return found.equals(expected);
 		}
 
 		@Property
