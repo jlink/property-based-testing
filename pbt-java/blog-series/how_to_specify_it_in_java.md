@@ -1003,76 +1003,80 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 |7    |_union_ wrongly assumes that if the key at the root of `bst1` is smaller than the key at the root of `bst2`, then all the keys in `bst1` will be smaller than the key at the root of `bst2`.|
 |8    |_union_ works correctly, except that when both trees contain the same key, the left argument does not always take priority.|
 
+In my bug hunting attempts I left out bugs #6 and #7 because the
+implementation of union they assume is completely different from what I 
+had actually implemented. That's why the tables below are missing #6 and #7.
+
 > The results of testing each property for each buggy version are:
 
-|  Validity Properties |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`arbitrary valid`     |   | Ox|   |   |
-|`nil valid`           |   |   |   |   |
-|`insert valid`        |   | X |   |   |
-|`delete valid`        |   | Ox|   |   |
-|`union valid`         |   | X |   |   |
+|  Validity Properties |#1 |#2 |#3 |#4 |#5 |#8 |
+|----------------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|`arbitrary valid`     |   | Ox|   |   |   |   |
+|`nil valid`           |   |   |   |   |   |   |
+|`insert valid`        |   | X |   |   |   |   |
+|`delete valid`        |   | Ox|   |   |   |   |
+|`union valid`         |   | X |   |   |   |   |
 
-|  Postconditions        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|:-----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert post`           | X | X | X |   |   |
-|`delete post`           |   | Ox|   | Ox| X |
-|`find post present`     |   | X | X |   |   |
-|`find post absent`      |   | Ox|   |   | X |
-|`insert delete complete`|   | X |   | X |   |
-|`insert post same key`  |   | Xo|   |   |   |
-|`union post`            |   | Xo| Xo|   |   |
+|  Postconditions        |#1 |#2 |#3 |#4 |#5 |#8 |
+|:-----------------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert post`           | X | X | X |   |   |   |
+|`delete post`           |   | Ox|   | Ox| X |   |
+|`find post present`     |   | X | X |   |   |   |
+|`find post absent`      |   | Ox|   |   | X |   |
+|`insert delete complete`|   | X |   | X |   |   |
+|`insert post same key`  |   | Xo|   |   |   |   |
+|`union post`            |   | Xo| Xo|   |   | X |
 
-|Metamorphic Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert insert weak`  | X |   |   |   |   |
-|`insert insert`       | X | X | X |   |   |
-|`insert delete weak`  |   |   |   | X |   |
-|`insert delete`       |   | X | X | X |   |
-|`insert union`        |   | Ox| Ox|   |   |
-|`delete nil`          |   |   |   |   |   |
-|`delete insert weak`  |   |   |   | X |   |
-|`delete insert`       | X | X |   | X | X |
-|`delete delete`       |   |   |   | X | Ox|
-|`delete union`        | X | X |   | X | X |
-|`union nil1`          |   |   |   |   |   |
-|`union nil2`          |   |   |   |   |   |
-|`union delete insert` | X | X | X | X | X |
-|`union union idem`    |   | Xo|   |   |   |
-|`union union assoc`   |   |   |   |   |   |
-|`find nil`            |   |   |   |   |   |
-|`find insert`         | X | X | X |   |   |
-|`find delete`         |   |   |   | X | X |
-|`find union`          | Xo| Xo|   |   |   |
-
-
-|Equivalence Properties        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|:-----------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert preserves equivalence`|   |   |   |   |   |
-|`delete preserves equivalence`| X |   |   | X | X |
-|`union preserves equivalence` | X |   |   |   |   |
-|`find preserves equivalence`  | X |   |   |   |   |
-
-|Insert Completeness         |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|:---------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert complete`           |   |   |   |   |   |
-|`insert complete for union` | Ox|   |   |   |   |
-|`insert complete for delete`|   |   |   |   |   |
+|Metamorphic Properties|#1 |#2 |#3 |#4 |#5 |#8 |
+|:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert insert weak`  | X |   |   |   |   |   |
+|`insert insert`       | X | X | X |   |   |   |
+|`insert delete weak`  |   |   |   | X |   |   |
+|`insert delete`       |   | X | X | X |   |   |
+|`insert union`        |   | Ox| Ox|   |   | X |
+|`delete nil`          |   |   |   |   |   |   |
+|`delete insert weak`  |   |   |   | X |   |   |
+|`delete insert`       | X | X |   | X | X |   |
+|`delete delete`       |   |   |   | X | Ox|   |
+|`delete union`        | X | X |   | X | X | Ox|
+|`union nil1`          |   |   |   |   |   |   |
+|`union nil2`          |   |   |   |   |   |   |
+|`union delete insert` | X | X | X | X | X | Ox|
+|`union union idem`    |   | Xo|   |   |   |   |
+|`union union assoc`   |   |   |   |   |   | Ox|
+|`find nil`            |   |   |   |   |   |   |
+|`find insert`         | X | X | X |   |   |   |
+|`find delete`         |   |   |   | X | X |   |
+|`find union`          | Xo| Xo|   |   |   | X |
 
 
-|Model-based Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`nil model`           |   |   |   |   |   |
-|`insert model`        | X | X | X |   |   |
-|`delete model`        |   |   |   | X | X |
-|`union model`         | X | X | Xo|   |   |
-|`find model`          |   |   |   |   |   |
+|Equivalence Properties        |#1 |#2 |#3 |#4 |#5 |#8 |
+|:-----------------------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert preserves equivalence`|   |   |   |   |   |   |
+|`delete preserves equivalence`| X |   |   | X | X |   |
+|`union preserves equivalence` | X |   |   |   |   | Ox|
+|`find preserves equivalence`  | X |   |   |   |   |   |
+
+|Insert Completeness         |#1 |#2 |#3 |#4 |#5 |#8 |
+|:---------------------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|`insert complete`           |   |   |   |   |   |   |
+|`insert complete for union` | Ox|   |   |   |   |   |
+|`insert complete for delete`|   |   |   |   |   |   |
+
+
+|Model-based Properties|#1 |#2 |#3 |#4 |#5 |#8 |
+|:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|`nil model`           |   |   |   |   |   |   |
+|`insert model`        | X | X | X |   |   |   |
+|`delete model`        |   |   |   | X | X |   |
+|`union model`         | X | X | Xo|   |   | X |
+|`find model`          |   |   |   |   |   |   |
 
 > We make the following observations.
 
 
 ## Bug Hunting with Unit Tests
 
-|Failing Unit Tests|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
-|:-----------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|count             | 7 | 3 | 2 | 1 | 1 |
+|Failing Unit Tests|#1 |#2 |#3 |#4 |#5 |#8 |
+|:-----------------|:-:|:-:|:-:|:-:|:-:|:-:|
+|count             | 7 | 3 | 2 | 1 | 1 | 1 |

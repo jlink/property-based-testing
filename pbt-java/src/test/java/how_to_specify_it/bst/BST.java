@@ -16,6 +16,11 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 
 	//	union :: Ord k ⇒ BST k v → BST k v → BST k v
 	public static <K extends Comparable<K>, V> BST<K, V> union(BST<K, V> bst1, BST<K, V> bst2) {
+		// bug(8)
+		// BST<K, V> union = bst1;
+		// for (Map.Entry<K, V> entry : bst2.toList()) {
+		// 	union = union.insert(entry);
+		// }
 		BST<K, V> union = bst2;
 		for (Map.Entry<K, V> entry : bst1.toList()) {
 			union = union.insert(entry);
@@ -131,13 +136,13 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 			return this;
 		}
 		// bug(5)
-		if (entry.getKey().compareTo(key) < 0) {
-		// if (entry.getKey().compareTo(key) > 0) {
+		// if (entry.getKey().compareTo(key) < 0) {
+		if (entry.getKey().compareTo(key) > 0) {
 			return new BST<>(getLeft().delete(key), entry, right);
 		}
 		// bug(5)
-		if (entry.getKey().compareTo(key) > 0) {
-		//if (entry.getKey().compareTo(key) < 0) {
+		// if (entry.getKey().compareTo(key) > 0) {
+		if (entry.getKey().compareTo(key) < 0) {
 			return new BST<>(left, entry, getRight().delete(key));
 		}
 		if (getLeft().isLeaf()) {
