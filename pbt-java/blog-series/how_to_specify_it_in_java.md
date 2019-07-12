@@ -1015,57 +1015,64 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 
 |  Postconditions        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:-----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert post`           | X | X | X |
-|`delete post`           |   | Ox|   |
-|`find post present`     |   | X | X |
-|`find post absent`      |   | Ox|   |
-|`insert delete complete`|   | X |   |
-|`insert post same key`  |   | Xo|   |
-|`union post`            |   | Xo| Xo|
+|`insert post`           | X | X | X |   |
+|`delete post`           |   | Ox|   | Ox|
+|`find post present`     |   | X | X |   |
+|`find post absent`      |   | Ox|   |   |
+|`insert delete complete`|   | X |   | X |
+|`insert post same key`  |   | Xo|   |   |
+|`union post`            |   | Xo| Xo|   |
 
 |Metamorphic Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert insert weak`  | X |   |   |
-|`insert insert`       | X | X | X |
-|`insert delete weak`  |   |   |   |
-|`insert delete`       |   | X | X |
-|`insert union`        |   | Ox| Ox|
-|`delete nil`          |   |   |   |
-|`delete insert weak`  |   |   |   |
-|`delete insert`       | X | X |   |
-|`delete delete`       |   |   |   |
-|`delete union`        | X | X |   |
-|`union nil1`          |   |   |   |
-|`union nil2`          |   |   |   |
-|`union delete insert` | X | X | X |
-|`union union idem`    |   | Xo|   |
-|`union union assoc`   |   |   |   |
-|`find nil`            |   |   |   |
-|`find insert`         | X | X | X |
-|`find delete`         |   |   |   |
-|`find union`          | Xo| Xo|   |
+|`insert insert weak`  | X |   |   |   |
+|`insert insert`       | X | X | X |   |
+|`insert delete weak`  |   |   |   | X |
+|`insert delete`       |   | X | X | X |
+|`insert union`        |   | Ox| Ox|   |
+|`delete nil`          |   |   |   |   |
+|`delete insert weak`  |   |   |   | X |
+|`delete insert`       | X | X |   | X |
+|`delete delete`       |   |   |   | X |
+|`delete union`        | X | X |   | X |
+|`union nil1`          |   |   |   |   |
+|`union nil2`          |   |   |   |   |
+|`union delete insert` | X | X | X | X |
+|`union union idem`    |   | Xo|   |   |
+|`union union assoc`   |   |   |   |   |
+|`find nil`            |   |   |   |   |
+|`find insert`         | X | X | X |   |
+|`find delete`         |   |   |   | X |
+|`find union`          | Xo| Xo|   |   |
 
 
 |Equivalence Properties        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:-----------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert preserves equivalence`|   |   |   |
-|`delete preserves equivalence`| X |   |   |
-|`union preserves equivalence` | X |   |   |
-|`find preserves equivalence`  | X |   |   |
+|`insert preserves equivalence`|   |   |   |   |
+|`delete preserves equivalence`| X |   |   | X |
+|`union preserves equivalence` | X |   |   |   |
+|`find preserves equivalence`  | X |   |   |   |
 
 |Insert Completeness         |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert complete`           |   |   |   |
-|`insert complete for union` | Ox|   |   |
-|`insert complete for delete`|   |   |   |
+|`insert complete`           |   |   |   |   |
+|`insert complete for union` | Ox|   |   |   |
+|`insert complete for delete`|   |   |   |   |
 
 
 |Model-based Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`nil model`           |   |   |   |
-|`insert model`        | X | X | X |
-|`delete model`        |   |   |   |
-|`union model`         | X | X | Xo|
-|`find model`          |   |   |   |
+|`nil model`           |   |   |   |   |
+|`insert model`        | X | X | X |   |
+|`delete model`        |   |   |   | X |
+|`union model`         | X | X | Xo|   |
+|`find model`          |   |   |   |   |
 
 > We make the following observations.
+
+
+## Bug Hunting with Unit Tests
+
+|Failing Unit Tests|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
+|:-----------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|count             | 7 | 3 | 2 | 1 |

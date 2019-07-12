@@ -145,6 +145,26 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 		return right.insert(getLeft());
 	}
 
+	//	bug(4)
+	// public BST<K, V> delete(K key) {
+	// 	if (isLeaf()) {
+	// 		return this;
+	// 	}
+	// 	if (entry.getKey().compareTo(key) > 0) {
+	// 		return getLeft().delete(key);
+	// 	}
+	// 	if (entry.getKey().compareTo(key) < 0) {
+	// 		return getRight().delete(key);
+	// 	}
+	// 	if (getLeft().isLeaf()) {
+	// 		return right;
+	// 	}
+	// 	if (getRight().isLeaf()) {
+	// 		return left;
+	// 	}
+	// 	return right.insert(getLeft());
+	// }
+
 	//	keys ::BSTkv→[k]
 	public List<K> keys() {
 		if (entry == null) {
