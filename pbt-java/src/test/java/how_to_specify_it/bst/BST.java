@@ -111,7 +111,7 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 			return new BST<>(left, this.entry, getRight().insert(branch));
 		}
 		// bug(2):
-		// return new BST<>(left, branch.entry, getRight().insert(branch));
+		// return new BST<>(getLeft().insert(branch), branch.entry, right);
 		return new BST<>(left, branch.entry, right);
 	}
 

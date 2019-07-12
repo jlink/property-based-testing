@@ -1007,65 +1007,65 @@ If we were to choose x and y uniformly from the entire range of 32-bit integers,
 
 |  Validity Properties |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`arbitrary valid`     |   |
-|`nil valid`           |   |
-|`insert valid`        |   |
-|`delete valid`        |   |
-|`union valid`         |   |
+|`arbitrary valid`     |   | Ox|
+|`nil valid`           |   |   |
+|`insert valid`        |   | X |
+|`delete valid`        |   | Ox|
+|`union valid`         |   | X |
 
 |  Postconditions        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:-----------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert post`           | X |
-|`delete post`           |   |
-|`find post present`     |   |
-|`find post absent`      |   |
-|`insert delete complete`|   |
-|`insert post same key`  |   |
-|`union post`            |   |
+|`insert post`           | X | Ox|
+|`delete post`           |   | Ox|
+|`find post present`     |   | Ox|
+|`find post absent`      |   | Ox|
+|`insert delete complete`|   | X |
+|`insert post same key`  |   |   |
+|`union post`            |   |   |
 
 |Metamorphic Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert insert weak`  | X |
-|`insert insert`       | X |
-|`insert delete weak`  |   |
-|`insert delete`       |   |
-|`insert union`        |   |
-|`delete nil`          |   |
-|`delete insert weak`  |   |
-|`delete insert`       | X |
-|`delete delete`       |   |
-|`delete union`        | X |
-|`union nil1`          |   |
-|`union nil2`          |   |
-|`union delete insert` | X |
-|`union union idem`    |   |
-|`union union assoc`   |   |
-|`find nil`            |   |
-|`find insert`         | X |
-|`find delete`         |   |
-|`find union`          | Xo|
+|`insert insert weak`  | X |   |
+|`insert insert`       | X | Ox|
+|`insert delete weak`  |   |   |
+|`insert delete`       |   | Ox|
+|`insert union`        |   | Ox|
+|`delete nil`          |   |   |
+|`delete insert weak`  |   |   |
+|`delete insert`       | X | X |
+|`delete delete`       |   |   |
+|`delete union`        | X | X |
+|`union nil1`          |   |   |
+|`union nil2`          |   |   |
+|`union delete insert` | X | X |
+|`union union idem`    |   | Xo|
+|`union union assoc`   |   |   |
+|`find nil`            |   |   |
+|`find insert`         | X | X |
+|`find delete`         |   |   |
+|`find union`          | Xo| Xo|
 
 
 |Equivalence Properties        |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:-----------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert preserves equivalence`|   |
-|`delete preserves equivalence`| X |
-|`union preserves equivalence` | X |
-|`find preserves equivalence`  | X |
+|`insert preserves equivalence`|   |   |
+|`delete preserves equivalence`| X |   |
+|`union preserves equivalence` | X | Xo|
+|`find preserves equivalence`  | X |   |
 
 |Insert Completeness         |#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`insert complete`           |   |
-|`insert complete for union` | Ox|
-|`insert complete for delete`|   |
+|`insert complete`           |   |   |
+|`insert complete for union` | Ox|   |
+|`insert complete for delete`|   |   |
 
 
 |Model-based Properties|#1 |#2 |#3 |#4 |#5 |#6 |#7 |#8 |
 |:---------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|`nil model`           |   |
-|`insert model`        | X |
-|`delete model`        |   |
-|`union model`         | X |
-|`find model`          |   |
+|`nil model`           |   |   |
+|`insert model`        | X | X |
+|`delete model`        |   |   |
+|`union model`         | X | X |
+|`find model`          |   |   |
 
 > We make the following observations.
