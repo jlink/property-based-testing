@@ -646,12 +646,17 @@ class BST_Properties {
 		Statistics.label("frequency").collect(frequency);
 
 		String position =
-				bst.isLeaf() ? "empty"
-						: keys.equals(Collections.singletonList(key)) ? "just key"
-								  : keys.get(0).equals(key) ? "at start"
-											: keys.get(keys.size() - 1).equals(key) ? "at end"
-													  : "middle";
+				bst.isLeaf() ? "empty" :
+						keys.equals(Collections.singletonList(key)) ? "just key" :
+						keys.get(0).equals(key) ? "at start" :
+						keys.get(keys.size() - 1).equals(key) ? "at end" :
+						"middle";
 		Statistics.label("position").collect(position);
+
+		//		String size = bst.isEmpty() ? "empty" :
+		//				bst.size() < 10 ? "< 10" :
+		//				bst.size() < 100 ? "10 >= x < 100" : ">= 100";
+		//		Statistics.label("size").collect(size);
 	}
 
 	@Property(afterFailure = AfterFailureMode.RANDOM_SEED)
@@ -666,7 +671,7 @@ class BST_Properties {
 		Arbitrary<Integer> keys = keys();
 		Arbitrary<Integer> values = Arbitraries.integers();
 		Arbitrary<List<Tuple2<Integer, Integer>>> keysAndValues =
-				Combinators.combine(keys, values).as(Tuple::of).list().ofMaxSize(200);
+				Combinators.combine(keys, values).as(Tuple::of).list();
 
 		// This could be implemented as streaming and reducing
 		// but that'd probably be less understandable
@@ -681,7 +686,10 @@ class BST_Properties {
 
 	@Provide
 	Arbitrary<Integer> keys() {
-		return Arbitraries.integers().between(0, 200).unique();
+		return Arbitraries.oneOf(
+				Arbitraries.integers().between(0, 50),
+				Arbitraries.integers()
+		).unique();
 	}
 
 }

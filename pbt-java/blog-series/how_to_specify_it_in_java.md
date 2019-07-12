@@ -944,34 +944,36 @@ boolean insert_post(
 
 > In almost 80% of tests `otherKey` will not be present in `bst`, and since `otherKey` is rarely equal to `key`, then in most of these cases both sides of the equation will be `Optional.empty()`. In effect, we spend most of our effort testing that inserting `key` does not insert an unrelated key `otherKey` into the tree! While this would be a serious bug if it occurred, it seems disproportionate to devote so much test effort to this kind of case.
 >
-> More reasonable would be to divide our test effort roughly equally between cases in which the given key does occur in the random tree, and cases in which it does not. We can achieve this by changing the generation of keys. If we choose keys from a smaller set, then we will generate equal keys more often. 
+> More reasonable would be to divide our test effort roughly equally between cases in which the given key does occur in the random tree, and cases in which it does not. We can achieve this by changing the generation of keys.  
 
-For example, we might choose keys out of a smaller set of integers
-between 0 and 200:
+For example, we can give keys between 0 and 50 an additional
+chance of being chosen which will raise the probability that
+a number is both in the generated tree and the generated single key:
 
 ```java
 @Provide
 Arbitrary<Integer> keys() {
-    return Arbitraries.integers().between(0, 200).unique();
+    return Arbitraries.oneOf(
+            Arbitraries.integers().between(0, 50),
+            Arbitraries.integers()
+    ).unique();
 }
 ```
 
 This requires to both use this function the `trees()` generator method and changing the annotation of key values to `@ForAll("keys") Integer`.
-I also had to change the maximum number of keys in a generated tree to 200
-because otherwise the tree generator would run out of keys.
 
 > Testing property `measure` using this type for keys results in the following, much better, distribution:
 
 ```
 [BST Properties:measure] frequency = 
-    present : 52 %
-    absent  : 48 %
+    present : 58 %
+    absent  : 42 %
 
 [BST Properties:measure] position = 
-    middle   : 97.17 %
-    empty    : 1.48 %
-    at end   : 0.67 %
-    at start : 0.67 %
+    middle   : 97.75 %
+    empty    : 1.39 %
+    at start : 0.72 %
+    at end   : 0.13 %
     just key : 0.0 %
 ```
 
