@@ -1073,7 +1073,36 @@ had actually implemented. That's why the tables below are missing #6 and #7.
 |`find model`          |   |   |   |   |   |   |
 
 > We make the following observations.
+>
+> ### 5.1 Bug finding effectiveness
+> 
+> Validity properties miss many bugs (five of six), as do “preservation of equivalence” and “completeness of insertion” properties. In contrast, every bug is found by at least one postcondition, metamorphic property, and model-based property.
+>
+> Invalid test data provokes false positives. Bug #2, which causes invalid trees to be generated as test cases, causes many properties that do not use insert to fail. This is why property `arbitrary_valid` is so important — when it fails, we need not waste time debugging false positives in properties unrelated to the bug. Because of these false positives, we ignore bug #2 in the rest of this discussion.
 
+In the _jqwik_ implementation bug #2 does not make generated trees invalid
+since duplicate keys are not used to begin with.
+
+> Model-based properties are effective at finding bugs; each property tests just one operation, and finds every bug in that operation. In fact, the model-based properties together form a complete specification of the code, and so should be expected to find every bug.
+>
+> Postconditions are quite effective; each postcondition for a buggy operation finds all the bugs we planted in it, but some postconditions are less effective than we might expect. For example, property `find_post_present` uses both find and insert, so we might expect it to reveal the three bugs in insert, but it reveals only two of them.
+>
+> Metamorphic properties are less effective individually, but powerful in combination. Weak properties miss bugs (compare each line ending in Weak with the line below), because their preconditions to exclude tricky test cases result in tricky bugs escaping detection. But even stronger-looking properties that we might expect to find bugs miss them — property `insert_delete` misses bug #1 in insert, property `delete_insert` misses bug #3 in insert, and so on. Degenerate metamorphic properties involving `nil` are particularly ineffective. Metamorphic properties are essentially an axiomatization of the API under test, and there is no guarantee that this axiomatization is complete, so some bugs might be missed altogether.
+
+### Differences between QuickCheck and _jqwik_ Bug Hunting Results
+
+As you can see in the table there is a bit of difference between the 
+QuickCheck results and the properties run with _jqwik_: `Ox` means that
+QuickCheck found a bug where _jqwik_ did not; `Xo` has the opposite meaning. There are several potential causes for the differences:
+
+- The bugs are only described in prose. Thus my implementation are probably different than those done by the original authors.
+- Data generation differs between QuickCheck and _jqwik_ which leads
+  to more or less collisions.
+- Some of the properties are not fully specified in the original
+  paper. My interpretation might be different.
+  
+All in all, however, the results are quite similar and suggest the same
+conclusions.
 
 ## Bug Hunting with Unit Tests
 
