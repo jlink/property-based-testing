@@ -1123,6 +1123,7 @@ I haven't replicated the statistical analysis.
 >
 > ### Lessons
 > 
+> These results suggest that, if time is limited, then writing model-based properties may offer the best return on investment, in combination with validity properties to ensure we don’t encounter confusing failures caused by invalid data. In situations where the model is complex (and thus expensive) to define, or where the model resembles the implementation so closely that the same bugs are likely in each, then metamorphic properties offer an effective alternative, at the cost of writing many more properties.
 
 
 
