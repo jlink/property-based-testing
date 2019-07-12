@@ -99,6 +99,8 @@ public class BST<K extends Comparable<K>, V> implements Serializable {
 	}
 
 	private BST<K, V> insert(BST<K, V> branch) {
+		// bug(1):
+		// return branch;
 		if (isLeaf()) {
 			return branch;
 		}
