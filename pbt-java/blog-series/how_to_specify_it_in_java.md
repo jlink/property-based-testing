@@ -1121,11 +1121,47 @@ I haven't replicated the statistical analysis.
 > 
 > Digging a little deeper, for the same bug in union, `prop_UnionPost` fails after 50 tests on average, while `prop_UnionModel` fails after only 8.4 tests, even though they are logically equivalent. The reason is that after computing a union that is affected by the bug, the model-based property checks that the model of the result is correct — which requires every key and value to be correct. The post-condition, on the other hand, checks that a random key has the correct value in the result. Thus `prop_UnionPost` may exercise the bug many times without detecting it. Each model-based test may take a little longer to run, because it validates the result of union more thoroughly, but this is not significant compared to the enormous difference in the number of tests required to find the bug.
 >
-> ### Lessons
+> ### 5.3 Lessons
 > 
 > These results suggest that, if time is limited, then writing model-based properties may offer the best return on investment, in combination with validity properties to ensure we don’t encounter confusing failures caused by invalid data. In situations where the model is complex (and thus expensive) to define, or where the model resembles the implementation so closely that the same bugs are likely in each, then metamorphic properties offer an effective alternative, at the cost of writing many more properties.
+>
+> ## 6 Discussion
+> We have discussed a number of different kinds of property that a developer can try to formulate to test an implementation: invariant properties, postconditions, metamorphic properties, inductive properties, and model-based properties. Each kind of property is based on a widely applicable idea, usable in many different settings. When writing metamorphic properties, we discovered the need to define equivalence of data structures, and thus also to define properties that test for preservation of equivalence. We discussed the importance of completeness — our test data generator should be able to generate any test case — and saw how to test this. We saw the importance of testing both our generators and our shrinkers, to ensure that other properties are tested with valid data. We saw how to measure the distribution of test data, to ensure that test effort is well spent.
+>
+> Model-based testing seemed the most effective approach overall, revealing all our bugs with a small number of properties, and generally finding bugs fast. But metamorphic testing was a fertile source of ideas, and was almost as effective at revealing bugs, so is a useful alternative, especially in situations where a model is expensive to construct.
+> 
+> We saw that some properties must use equivalence to compare values, while other properties must use structural equality. Thus, we need two notions of “equality” for the data structures under test. In fact, it is the equivalence which ought to be exported as the equality instance for binary search trees, because structural equality distinguishes representations that ought to be considered equal outside the abstraction barrier of the abstract data type. Yet we need to use structural equality in some properties, and of course, we want to use the derived Eq instance for the representation datatype for this. So we appear to need two Eq instances for the same type! 
 
+In Java this translates to "we need two `equals` methods for the same type".
 
+> The solution to this conundrum is to define two types: a data type of representations with a derived structural equality, which is not exported to clients, and a newtype isomorphic to this datatype, which is exported, with an Eq instance which defines equality to be equivalence. This approach does mean that some properties must be inside the abstraction barrier of the data type, and thus must be placed in the same module as the implementation, which may not be desirable as it mixes test code and implementation code. An alternative is to define an Internals module which exports the representation type, and can be imported by test code, but is not used by client modules.
+
+A direct transfer of this idea would require to wrap the implementing
+class - having a structural equality - within a public type that offers
+equivalence as equality.
+
+> The ideas in this paper are applicable to testing any pure code, but code with side-effects demands a somewhat different approach. In this case, every operation has an implicit “state” argument, and an invisible state result, making properties harder to formulate. Test cases are sequences of operations, to set up the state for each operation under test, and to observe changes made to the state afterwards. Nevertheless, the same ideas can be adapted to this setting; in particular, there are a number of state-machine modelling libraries for property-based testing tools that support a “model-based” approach in a stateful setting. State machine modelling is heavily used at Quviq AB for testing customer software, and an account of some of these examples can be found 
+> [here](https://publications.lib.chalmers.se/records/fulltext/232550/local_232550.pdf).
+
+The code examples in this articles have shown that the pure code approach
+can be used in Java as well. However, the implementation of `BST` with
+its stateless interface is neither memory-efficient nor does it perform 
+exceptionally well.
+Translating the properties
+to stateful data structures would require some copying of in-between 
+states in order to have them ready for later equality and equivalence 
+checking.
+
+> We hope the reader will find the ideas in this paper helpful in developing effective property-based tests in the future.
+
+## Personal Addendum
+
+Understanding the 
+[original paper](https://www.dropbox.com/s/tx2b84kae4bw1p4/paper.pdf)
+and transferring the code to Java taught me a lot about good and 
+efficient properties. As maintainer of [jqwik](https://jqwik.net) I was
+also confronted with weaknesses of the library and chances to improve it.
+Data generation and a few...
 
 ## Bug Hunting with Unit Tests
 
