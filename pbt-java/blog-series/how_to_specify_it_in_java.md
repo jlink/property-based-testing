@@ -22,6 +22,8 @@ I also replaced _QuickCheck_ with _jqwik_ in those places where applicable.
 
 Where necessary I will add a few sentences of my own
 to explain differences between the original and my translated version.
+And of course you can find 
+[all the code on github](https://github.com/jlink/property-based-testing/tree/master/pbt-java/src/test/java/how_to_specify_it).
 
 
 > ## 1 Introduction
