@@ -1185,6 +1185,5 @@ However, when using the unit tests to run them against the bugs from
 |failure count     | 7 | 3 | 2 | 1 | 1 | 1 |
 
 The 11 tests were able to detect each of the bugs. 
-Only _model-based properties_ were equally effective.
 Comparing the efficacy of properties vs unit tests might be an 
 interesting topic for research.
