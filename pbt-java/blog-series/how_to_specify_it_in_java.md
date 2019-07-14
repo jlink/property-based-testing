@@ -11,12 +11,15 @@ as tool and language of choice. Since some of my readers are not familiar with H
 I want to transfer the examples into Java using [jqwik](https://jqwik.net)
 as property testing library. 
 [John was kind enough](https://twitter.com/rjmh/status/1147034204439490560) 
-to allow me to use _his text_ enriched by my examples. John's original
-text is formatted 
+to allow me to use _his text_ enriched by my examples. The paper is published under [CC-BY license](https://creativecommons.org/licenses/by/2.0/) which also holds for my "remix".
+
+### Changes I made to the original text
+
+John's original text is formatted 
 
 > as a quotation. 
 
-### Changes I made to the original text
+whereas my sentences are just normal paragraphs.
 
 I'll sometimes left out a few words or 
 sentences that do not fit the Java context.
