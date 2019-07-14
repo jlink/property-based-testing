@@ -1147,12 +1147,42 @@ equivalence as equality.
 
 The code examples in this articles have shown that the pure code approach
 can be used in Java as well. However, the implementation of `BST` with
-its stateless interface is neither memory-efficient nor does it perform 
-exceptionally well.
+its immutable interface is neither memory-efficient nor does it perform 
+exceptionally well. Immutable data structures are not very common in
+Java but they are not totally unheard of; functional libraries (e.g. 
+[vavr](https://www.vavr.io/)) have them as well as multi-function 
+libraries like [Eclipse Collections](https://www.eclipse.org/collections/). 
+
 Translating the properties
-to stateful data structures would require some copying of in-between 
+to mutable data structures would require some copying of in-between 
 states in order to have them ready for later equality and equivalence 
-checking.
+checking. Consider the translation of metamorphic property `insert_insert`
+to a stateful `java.util.TreeMap`:
+
+```java
+@Property
+boolean insert_insert(
+        @ForAll Integer key1, @ForAll Integer value1,
+        @ForAll Integer key2, @ForAll Integer value2,
+        @ForAll("treeMaps") TreeMap<Integer, Integer> original
+) {
+    TreeMap<Integer, Integer> inserted = new TreeMap<>(original);
+    inserted.put(key1, value1);
+    inserted.put(key2, value2);
+    TreeMap<Integer, Integer> expected = new TreeMap<>(original);
+    expected.put(key2, value2);
+    if (!key1.equals(key2)) {
+        expected.put(key1, value1);
+    }
+    return inserted.equals(expected);
+}
+```
+
+It's more clumsy than the original but very similar in structure.
+If you change the `original` - instead of copying it first - reporting
+of failures might become confusing since reporting will show the state
+of the generated parameter _after_ the property was run, and not as
+we might expect it _before_ execution.
 
 > We hope the reader will find the ideas in this paper helpful in developing effective property-based tests in the future.
 
