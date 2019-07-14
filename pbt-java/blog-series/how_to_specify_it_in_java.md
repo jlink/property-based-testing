@@ -18,7 +18,7 @@ text is formatted
 
 I'll sometimes leave out a few words or 
 sentences that do not fit the Java context. 
-I also replaced _QuickCheck_ with _jqwik_ in those places where applicable. 
+I also replaced some terms like ~~QuickCheck~~ with _jqwik_ where applicable. 
 
 Where necessary I will add a few sentences of my own
 to explain differences between the original and my translated version.
@@ -1208,7 +1208,7 @@ could sometimes get lost. So writing and running the properties
 definitely helped me weed out some of my blunders.
  
 However, when using the unit tests to run them against the bugs from
-[the chapter on bug hunting](#5-bug-hunting) the result was the following:
+[chapter 5 on bug hunting](#5-bug-hunting) the result was the following:
 
 |Failing Unit Tests|#1 |#2 |#3 |#4 |#5 |#8 |
 |:-----------------|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -1216,4 +1216,4 @@ However, when using the unit tests to run them against the bugs from
 
 The 11 tests were able to detect each of the bugs. 
 Comparing the efficacy of properties vs unit tests might be an 
-interesting topic for research.
+interesting topic for further research. I'd be happy to participate!
