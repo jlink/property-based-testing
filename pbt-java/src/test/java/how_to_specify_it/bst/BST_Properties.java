@@ -90,10 +90,6 @@ class BST_Properties {
 				@ForAll("trees") BST<Integer, Integer> right,
 				@ForAll Integer key
 		) {
-			// boolean keyInLeft = left.find(key).isPresent();
-			// boolean keyInRight = right.find(key).isPresent();
-			// Statistics.collect(keyInLeft, keyInRight);
-
 			BST<Integer, Integer> union = BST.union(left, right);
 			Integer previousValue = left.find(key).orElse(right.find(key).orElse(null));
 			Integer unionValue = union.find(key).orElse(null);

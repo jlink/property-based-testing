@@ -16,7 +16,9 @@ text is formatted
 
 > as a quotation. 
 
-I'll sometimes leave out a few words or 
+### Changes I made to the original text
+
+I'll sometimes left out a few words or 
 sentences that do not fit the Java context.
 Additionally I translated Haskell style variable names to longer Java names:
 - `t` became `bst` or `bst1`
@@ -26,12 +28,21 @@ Additionally I translated Haskell style variable names to longer Java names:
 - `v` became `value` or `value1`
 - `v′` became `value2`
  
-I also replaced some terms like ~~QuickCheck~~ with _jqwik_ where applicable. 
+I also replaced some terms like ~~QuickCheck~~ with _jqwik_ where 
+applicable. Moreover, I changed text references to names in code 
+examples to the names used in the Java code.
 
-Where necessary I will add a few sentences of my own
+Where necessary inserted a few sentences of my own
 to explain differences between the original and my translated version.
-And of course you can find 
-[all the code on github](https://github.com/jlink/property-based-testing/tree/master/pbt-java/src/test/java/how_to_specify_it).
+
+I turned the list of references at the end of the paper into links
+pointing to PDF versions of the referenced paper. In the one case
+where I could not find a publicly available PDF I reference the 
+publisher's library entry.
+
+### The Code
+
+You can find [all the code on github](https://github.com/jlink/property-based-testing/tree/master/pbt-java/src/test/java/how_to_specify_it).
 
 
 > ## 1 Introduction
@@ -102,7 +113,7 @@ boolean reverseList(@ForAll List<Integer> aList) {
 
 > but `predictRev` is not easier to write than reverse — it is exactly the same function!
 >
-> This is the most obvious approach to writing properties—to replicate the implementation in the test code — and it is deeply unsatisfying. It is both an expensive approach, because the replica of the implementation may be as complex as the implementation under test, and of low value, because there is a grave risk that misconceptions in the implementation will be replicated in the test code. “Expensive” and “low value” is an unfortunate combination of characteristics for a software testing method, and all too often leads developers to abandon property-based testing altogether.
+> This is the most obvious approach to writing properties — to replicate the implementation in the test code — and it is deeply unsatisfying. It is both an expensive approach, because the replica of the implementation may be as complex as the implementation under test, and of low value, because there is a grave risk that misconceptions in the implementation will be replicated in the test code. “Expensive” and “low value” is an unfortunate combination of characteristics for a software testing method, and all too often leads developers to abandon property-based testing altogether.
 >
 > We can finesse the problem by rewriting the property so that it does not refer to an expected result, instead checking some property of the result. For example, reverse is its own inverse:
 
@@ -116,7 +127,7 @@ boolean reverseTwiceIsOriginal(@ForAll List<Integer> aList) {
 > Now we can pass the property to ~~QuickCheck~~ _jqwik_, to run a series of random tests (by default ~~100~~ 1000):
 
 ```text
-timestamp = 2019-07-06T14:54:35.722, ListReverseProperties:reverseTwiceIsOriginal =
+ListReverseProperties:reverseTwiceIsOriginal =
  
 tries = 1000         | # of calls to property
 checks = 1000        | # of not rejected calls
@@ -154,7 +165,7 @@ Here the `sample` line shows the value of `aList` for which the test failed: (0,
 
 > Interestingly, the counterexample ~~QuickCheck~~ _jqwik_ reports for this property is always (0, -1) or (0, 1). These are not the random counterexamples that ~~QuickCheck~~ _jqwik_ finds first; they are the result of shrinking the random counterexamples via a systematic greedy search for a simpler failing test. Shrinking lists tries to remove elements, and numbers shrink towards zero; the reason we see these two counterexamples is that `aList` must contain at least two different elements to falsify the property, and 0 and 1/-1 are the smallest pair of different integers. Shrinking is one of the most useful features of property-based testing, resulting in counterexamples which are usually easy to debug, because every part of the counterexample is relevant to the failure.
 >
-> Now we have seen the benefits of property-based testing — random generation of very many test cases, and shrinking of counterexamples to minimal failing tests — and the major pitfall: the temptation to replicate the implementation in the tests, incurring high costs for little benefit. In the remainder of this paper, we present systematic ways to define properties without falling into this trap. We will (largely) ignore the question of how to generate effective test cases—that are good at reaching buggy behaviour in the implementation under test — because in the absence of good properties, good generators are of little value.
+> Now we have seen the benefits of property-based testing — random generation of very many test cases, and shrinking of counterexamples to minimal failing tests — and the major pitfall: the temptation to replicate the implementation in the tests, incurring high costs for little benefit. In the remainder of this paper, we present systematic ways to define properties without falling into this trap. We will (largely) ignore the question of how to generate effective test cases — that are good at reaching buggy behaviour in the implementation under test — because in the absence of good properties, good generators are of little value.
 
 > ## 3 Our Running Example: Binary Search Trees
 >
@@ -244,7 +255,7 @@ boolean isValid(BST bst) {
              && keys(bst.right()).allMatch(k -> k.compareTo(bst.key()) > 0);
 }
 ```
-I left out the generic types and the code of two subfunctions. 
+I spare you the clumsy generic Java types and the implementation of method `keys`. 
 
 > That is, all the keys in a left subtree must be less than the key in the node, and all the keys in the right subtree must be greater.
 >
@@ -293,32 +304,35 @@ boolean union_valid(
 }
 ``` 
 
-> However, these properties, by themselves, do not provide good testing for validity. To see why, let us plant a bug in insert, so that it creates duplicate entries when inserting a key that is already present (bug (2) in section 5). Property `insert_valid` fails as it should, but so do `delete_valid` and `union_valid`:
+> However, these properties, by themselves, do not provide good testing for validity. To see why, let us plant a bug in insert, so that it creates duplicate entries when inserting a key that is already present (bug (2) in [section 5](#5-bug-hunting)). Property `insert_valid` fails as it should, but so do `delete_valid` and `union_valid`:
 
 ```
-AssertionFailedError: Property [BST Properties:insert valid] falsified with sample 
-[0=0
-left:  NIL
-right: 0=0
-       left:  NIL
-       right: NIL, 
-0]
+AssertionFailedError: Property [BST Properties:insert valid] 
+    falsified with sample 
+        [0=0
+        left:  NIL
+        right: 0=0
+               left:  NIL
+               right: NIL, 
+        0]
        
-AssertionFailedError: Property [BST Properties:delete valid] falsified with sample 
-[0=0
-left:  NIL
-right: 0=0
-       left:  NIL
-       right: NIL, 
--1]   
+AssertionFailedError: Property [BST Properties:delete valid] 
+    falsified with sample 
+        [0=0
+        left:  NIL
+        right: 0=0
+               left:  NIL
+               right: NIL, 
+        -1]   
        
-AssertionFailedError: Property [BST Properties:union valid] falsified with sample 
-[2=0
-    left:  NIL
-    right: NIL, 
-2=0
-    left:  NIL
-    right: NIL]
+AssertionFailedError: Property [BST Properties:union valid] 
+    falsified with sample 
+        [2=0
+            left:  NIL
+            right: NIL, 
+        2=0
+            left:  NIL
+            right: NIL]
 ``` 
 
 > Thus, at first sight, there is nothing to indicate that the bug is in insert; all of insert, delete and union can return invalid trees! However, delete and union are given invalid trees as inputs in the tests above, and we cannot expect them to return valid trees in this case, so these reported failures are “false positives”.
@@ -345,7 +359,7 @@ boolean arbitrary_valid(@ForAll("trees") BST<Integer, Integer> bst) {
 }
 ```
 
-> which at first sight seems to be testing that all trees are valid, but in fact tests that all trees generated by the Arbitrary instance are valid. If this property fails, then it is the generator that needs to be fixed—there is no point in looking at failures of other properties, as they are likely caused by the failing generator.
+> which at first sight seems to be testing that all trees are valid, but in fact tests that all trees generated by the Arbitrary instance are valid. If this property fails, then it is the generator that needs to be fixed — there is no point in looking at failures of other properties, as they are likely caused by the failing generator.
 > 
 > Usually the generator for a type is intended to fulfill its invariant, but — as in this case — is defined independently. A property such as `arbitrary_valid` is essential to check that these definitions are mutually consistent.
 
@@ -412,9 +426,9 @@ boolean union_post(
 }
 ```
 
-> Postconditions are not always as easy to write. For example, consider a postcondition for find. The return value is either Nothing, in case the key is not found in the tree, or Just v, in the case where it is present with value v. So it seems that, to write a postcondition for find, we need to be able to determine whether a given key is present in a tree, and if so, with what associated value. But this is exactly what find does! So it seems we are in the awkward situation discussed in the introduction: in order to test find, we need to reimplement it.
+> Postconditions are not always as easy to write. For example, consider a postcondition for find. The return value is either `Optional.empty()`, in case the key is not found in the tree, or `Optional.of(v)`, in the case where it is present with value v. So it seems that, to write a postcondition for find, we need to be able to determine whether a given key is present in a tree, and if so, with what associated value. But this is exactly what find does! So it seems we are in the awkward situation discussed in the introduction: in order to test find, we need to reimplement it.
 >
-> We can finesse this problem using a very powerful and general idea, that of constructing a test case whose outcome is easy to predict. In this case, we know that a tree must contain a key k, if we have just inserted it. Likewise, we know that a tree cannot contain a key k, if we have just deleted it. Thus we can write two postconditions for find, covering the two cases:
+> We can finesse this problem using a very powerful and general idea, that of constructing a test case whose outcome is easy to predict. In this case, we know that a tree must contain a key `key`, if we have just inserted it. Likewise, we know that a tree cannot contain a key `key`, if we have just deleted it. Thus we can write two postconditions for find, covering the two cases:
 
 ```java
 @Property
@@ -434,7 +448,7 @@ boolean find_post_absent(
 }
 ```
 
-> But there is a risk, when we write properties in this form, that we are only testing very special cases. Can we be certain that every tree, containing key `k` with value `v`, can be expressed in the form `tree.insert(k, v)`? Can we be certain that every tree not containing `k` can be expressed in the form `tree.delete(k)`? If not, then the postconditions we wrote for find may be less effective tests than we think.
+> But there is a risk, when we write properties in this form, that we are only testing very special cases. Can we be certain that every tree, containing key `key` with value `value`, can be expressed in the form `tree.insert(key, value)`? Can we be certain that every tree not containing `key` can be expressed in the form `tree.delete(key)`? If not, then the postconditions we wrote for find may be less effective tests than we think.
 >
 > Fortunately, for this data structure, every tree can be expressed in one of these two forms, because inserting a key that is already present, or deleting one that is not, is a no-op. We express this as another property to test:
 
@@ -456,7 +470,7 @@ boolean insert_delete_complete(
 > ## 4.3 Metamorphic Properties
 >
 > [Metamorphic testing](http://www.cs.hku.hk/research/techreps/document/TR-2017-04.pdf) 
-> is a successful approach to the oracle problem in many contexts. The basic idea is this: even if the expected result of a function call such as `tree.insert(k, v)` may be difficult to predict, we may still be able to express an expected relationship between this result, and the result of a related call. For example, if we insert an additional key into `tree` before calling `insert(k, v)`, we might expect the additional key to be inserted into the result also.
+> is a successful approach to the oracle problem in many contexts. The basic idea is this: even if the expected result of a function call such as `tree.insert(key, value)` may be difficult to predict, we may still be able to express an expected relationship between this result, and the result of a related call. For example, if we insert an additional key into `tree` before calling `insert(key, value)`, we might expect the additional key to be inserted into the result also.
 >
 > Formalizing this intuition, we might define the property
 
@@ -472,7 +486,7 @@ boolean insert_insert(
 }
 ```
 
-> Informally, we expect the effect of inserting `key1` `value1` into t before calling `insert(key2,value2)`, to be that they are also inserted into the result. A metamorphic property (almost) always relates two calls to the function under test: in this case, the function under test is insert, and the two calls are `bst.insert(key2, value2)` and `bst.insert(key1, value1).insert(key2, value2)`. The latter is constructed by modifying the argument, in this case also using insert, and the property expresses an expected relationship between the values of the two calls. Metamorphic testing is a fruitful source of property ideas, since if we are given O(n) operations to test, each of which can also be used as a modifier, then there are potentially O(n2) properties that we can define.
+> Informally, we expect the effect of inserting `key1` `value1` into t before calling `insert(key2,value2)`, to be that they are also inserted into the result. A metamorphic property (almost) always relates two calls to the function under test: in this case, the function under test is insert, and the two calls are `bst.insert(key2, value2)` and `bst.insert(key1, value1).insert(key2, value2)`. The latter is constructed by modifying the argument, in this case also using insert, and the property expresses an expected relationship between the values of the two calls. Metamorphic testing is a fruitful source of property ideas, since if we are given O(n) operations to test, each of which can also be used as a modifier, then there are potentially O(n<sup>2</sup>) properties that we can define.
 >
 > However, the property above is not true: testing it yields:
 
@@ -538,7 +552,7 @@ boolean insert_insert(
 }
 ```
 
-> Now, at last, the property passes. (We discuss why we need both this equivalence, and structural equality on trees, in section 6).
+> Now, at last, the property passes. (We discuss why we need both this equivalence, and structural equality on trees, in [section 6](#6-a-note-on-generation)).
 >
 > There is a different way to address the first problem — that the order of insertions does matter, when inserting the same key twice. That is to require the keys to be different, via a precondition:
 
@@ -589,7 +603,7 @@ boolean insert_union(
 }
 ```
 
-> and, in a similar way, metamorphic properties for the other functions in the API under test. We derived sixteen different properties in this way, which are listed in Appendix A. The trickiest case is union, which as a binary operation, can have either argument modified — or both. We also found that some properties could be motivated in more than one way. For example, property `insert_union` (above) can be motivated as a metamorphic test for insert, in which the argument is modified by union, or as a metamorphic test for union, in which the argument is modified by insert. Likewise, the metamorphic tests we wrote for find replicated the postconditions we wrote above for insert, delete and union. We do not see this as a problem: that there is more than one way to motivate a property does not make it any less useful, or any harder to come up with!
+> and, in a similar way, metamorphic properties for the other functions in the API under test. We derived sixteen different properties in this way, which are ~~listed in Appendix A~~ [available on Github](https://github.com/jlink/property-based-testing/blob/master/pbt-java/src/test/java/how_to_specify_it/bst/BST_Properties.java#L137). The trickiest case is union, which as a binary operation, can have either argument modified — or both. We also found that some properties could be motivated in more than one way. For example, property `insert_union` (above) can be motivated as a metamorphic test for insert, in which the argument is modified by union, or as a metamorphic test for union, in which the argument is modified by insert. Likewise, the metamorphic tests we wrote for find replicated the postconditions we wrote above for insert, delete and union. We do not see this as a problem: that there is more than one way to motivate a property does not make it any less useful, or any harder to come up with!
 >
 > ### Preservation of Equivalence
 >
@@ -618,7 +632,8 @@ Running the property above with _jqwik_ will fail with the following
 error message:
 
 ```
-org.opentest4j.AssertionFailedError: Property [Equivalence:insert preserves equivalence] exhausted after [1000] tries and [1000] rejections
+org.opentest4j.AssertionFailedError: Property [Equivalence:insert preserves equivalence] 
+    exhausted after [1000] tries and [1000] rejections
 
 tries = 1000                  | # of calls to property
 checks = 0                    | # of not rejected calls
@@ -893,7 +908,7 @@ boolean find_model(
 >
 > Throughout this paper, we have used integers as test data, for both keys and values. This is generally an acceptable choice, although not necessarily ideal. It is useful to measure the distribution of test data, to judge whether or not tests are likely to find bugs efficiently. In this case, many properties refer to one or more keys, and a tree, generated independently. We may therefore wonder, how often does such a key actually occur in an independently generated tree?
 >
-> To find out, we can define a property just for measurement. We measure not only how often k appears in t, but also where among the keys of t it appears:
+> To find out, we can define a property just for measurement. We measure not only how often `key` appears in `bst`, but also where among the keys of `bst` it appears:
 
 ```java
 @Property(tries = 1_000_000)
@@ -902,6 +917,7 @@ void measure(
         @ForAll("trees") BST<Integer, Integer> bst
 ) {
     List<Integer> keys = bst.keys();
+    
     String frequency = keys.contains(key) ? "present" : "absent";
     Statistics.label("frequency").collect(frequency);
 
@@ -930,11 +946,9 @@ void measure(
     just key : 0.0 %
 ```
 
-> From the second table, we can see that `key` appears at the beginning or end of the keys in bst about 0.2% of the time for each case, while it appears somewhere in the middle of the sequences of keys 98% of the time. This looks quite reasonable. On the other hand, in almost 90% of tests, key is not found in the tree at all!
-
-The actual numbers for Quickcheck are better in the sense that the various positions occur more frequently: 10% beginning or end, 75% in the middle and 80% key not in tree.
-
-For some of the properties we defined, this will result in quite inefficient testing. For example, consider the postcondition for insert:
+> From the second table, we can see that `key` appears at the beginning or end of the keys in `bst` about ~~10%~~ 0.5% of the time for each case, while it appears somewhere in the middle of the sequences of keys ~~75%~~ 98% of the time. This looks quite reasonable. On the other hand, _in almost ~~80%~~ 90% of tests, key is not found in the tree at all!_
+>
+> For some of the properties we defined, this will result in quite inefficient testing. For example, consider the postcondition for insert:
 
 ```java
 @Property
@@ -972,7 +986,7 @@ Arbitrary<Integer> keys() {
 
 This requires to both use this function the `trees()` generator method and changing the annotation of key values to `@ForAll("keys") Integer`.
 
-> Testing property `measure` using this type for keys results in the following, much better, distribution:
+> Testing property `measure` using this type for keys results in the following, ~~much~~ somewhat better, distribution:
 
 ```
 [BST Properties:measure] frequency = 
@@ -996,22 +1010,22 @@ boolean unique(@ForAll int x, @ForAll int y) {
 }
 ```
 
-> If we were to choose x and y uniformly from the entire range of 32-bit integers, then ~~QuickCheck~~ _jqwik_ would never be able to falsify it, in practice. If we use ~~QuickCheck~~ _jqwik_’s built-in Int generator, then the property fails in around 0.2% of cases. Using the `keys` generator we have just defined, the property fails in 1% of cases. The choice of generator should be made on the basis of how important collisions are as test cases.
+> If we were to choose x and y uniformly from the entire range of 64-bit integers, then ~~QuickCheck~~ _jqwik_ would never be able to falsify it, in practice. If we use ~~QuickCheck~~ _jqwik_’s built-in Int generator, then the property fails in around ~~3.3%~~ 0.2% of cases. Using the `keys` generator we have just defined, the property fails in ~~9.3%~~ 1% of cases. The choice of generator should be made on the basis of how important collisions are as test cases.
 
 > ## 5 Bug Hunting
 > 
 > To evaluate the properties we have written, we created eight buggy implementations of binary search trees, with bugs ranging from subtle to blatant. These implementations are listed here:
 
-|Bug #|Description|
-|:---:|-----------|
-|1    |_insert_ discards the existing tree, returning a single-node tree just containing the newly inserted value.|
-|2    |_insert_ fails to recognize and update an existing key, inserting a duplicate entry instead.|
-|3    |_insert_ fails to update an existing key, leaving the tree unchanged instead.|
-|4    |_delete_ fails to rebuild the tree above the key being deleted, returning only the remainder of the tree from that point on (an easy mistake for those used to imperative programming to make).|
-|5    |Key comparisons reversed in _delete_; only works correctly at the root of the tree.|
-|6    |_union_ wrongly assumes that all the keys in the first argument precede those in the second.|
-|7    |_union_ wrongly assumes that if the key at the root of `bst1` is smaller than the key at the root of `bst2`, then all the keys in `bst1` will be smaller than the key at the root of `bst2`.|
-|8    |_union_ works correctly, except that when both trees contain the same key, the left argument does not always take priority.|
+|Bug&nbsp;#|Description|
+|:--------:|-----------|
+|1         |_insert_ discards the existing tree, returning a single-node tree just containing the newly inserted value.|
+|2         |_insert_ fails to recognize and update an existing key, inserting a duplicate entry instead.|
+|3         |_insert_ fails to update an existing key, leaving the tree unchanged instead.|
+|4         |_delete_ fails to rebuild the tree above the key being deleted, returning only the remainder of the tree from that point on (an easy mistake for those used to imperative programming to make).|
+|5         |Key comparisons reversed in _delete_; only works correctly at the root of the tree.|
+|6         |_union_ wrongly assumes that all the keys in the first argument precede those in the second.|
+|7         |_union_ wrongly assumes that if the key at the root of `bst1` is smaller than the key at the root of `bst2`, then all the keys in `bst1` will be smaller than the key at the root of `bst2`.|
+|8         |_union_ works correctly, except that when both trees contain the same key, the left argument does not always take priority.|
 
 In my bug hunting attempts I left out bugs #6 and #7 because the
 implementation of union they assume is completely different from what I 
@@ -1103,13 +1117,17 @@ since duplicate keys are not used to begin with.
 
 As you can see in the table there is a bit of difference between the 
 QuickCheck results and the properties run with _jqwik_: `Ox` means that
-QuickCheck found a bug where _jqwik_ did not; `Xo` has the opposite meaning. There are several potential causes for the differences:
+QuickCheck found a bug where _jqwik_ did not; `Xo` is the other way round. 
+There are several potential causes for the differences:
 
-- The bugs are only described in prose. Thus my implementations are probably different than those done by the original authors.
-- Data generation differs between QuickCheck and _jqwik_ which can lead
-  to more or less collisions and thus to better or worse bug detection.
-- Some of the properties are not fully specified in the
-  paper. My interpretation of the property's name might be different.
+- The bugs are only described in prose. Thus my implementations are 
+  probably different than those done by the original authors.
+- Data generation - especially the distribution of values across the 
+  full integer range - differs between QuickCheck and _jqwik_ 
+  which can lead to more or less collisions and thus to 
+  better or worse bug detection.
+- Some of the properties are not fully specified in the original
+  paper. My interpretation of the property's name might not fit the code.
   
 All in all, however, the results are quite alike and suggest similar
 conclusions.
@@ -1202,7 +1220,7 @@ and transferring the code to Java taught me a lot about good and
 efficient properties. As maintainer of [jqwik](https://jqwik.net) I was
 also confronted with weaknesses of the library and chances to improve it.
 
-The chapter about bug hunting triggered another question: How good are
+The section about bug hunting triggered another question: How good are
 the kind of unit tests I usually write at detecting bugs. 
 
 ### Bug Hunting with Unit Tests
@@ -1216,7 +1234,7 @@ could sometimes get lost. So writing and running the properties
 definitely helped me weed out some of my blunders.
  
 However, when using the unit tests to run them against the bugs from
-[chapter 5 on bug hunting](#5-bug-hunting) the result was the following:
+[section 5 on bug hunting](#5-bug-hunting) the result was the following:
 
 |Failing Unit Tests|#1 |#2 |#3 |#4 |#5 |#8 |
 |:-----------------|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -1225,3 +1243,4 @@ However, when using the unit tests to run them against the bugs from
 The 11 tests were able to detect each of the bugs. 
 Comparing the efficacy of properties vs unit tests might be an 
 interesting topic for further research. I'd be happy to participate!
+
