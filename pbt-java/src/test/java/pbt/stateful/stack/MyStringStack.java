@@ -15,7 +15,7 @@ public class MyStringStack {
 
 	public void clear() {
 		//if (elements.size() < 3) elements.clear();
-		//elements.clear();
+		elements.clear();
 	}
 
 	public boolean isEmpty() {
