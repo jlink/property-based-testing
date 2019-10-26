@@ -9,12 +9,13 @@ at 66 percent?
 ### Function to implement
 
 ```
-int remainingYears(int budget, int startingAnnual, int annualReduction)
+int remainingYears(int budget, int startingAnnual, int annualChange)
 ```
 
 ### Specification
 
 - All input is in Mt (mega tons). 1000 Mt == 1 Gt
 - `budget` and `startingAnnual` must be >= 0 otherwise signal illegal input
+- ˋannualChangeˋ is applied every year on the previous year's annual starting in the 2nd year
 - The year in which the budget is eventually used up still counts as one year
 - If the budget starts with 0 the remaining years are also 0
