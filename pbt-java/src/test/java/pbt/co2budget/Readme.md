@@ -19,3 +19,4 @@ int remainingYears(int budget, int startingAnnualEmission, int annualChange)
 - `annualChange` is applied each year on the previous year's emission starting in the 2nd year
 - The year in which the budget is eventually used up still counts as one year
 - If the budget starts with 0 the remaining years are also 0
+- If the budget is never used up return Integer.MAX_VALUE
