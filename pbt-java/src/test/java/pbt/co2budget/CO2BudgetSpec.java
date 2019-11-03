@@ -21,6 +21,15 @@ class CO2BudgetSpec {
 		void annualEmissionIsExactMultipleOfInitialBudget() {
 			assertEquals(10, CO2Budget.remainingYears(100, 10, 0));
 		}
+
+		@Property
+		void annualEmissionIsExactMultipleOfInitialBudget(
+				@ForAll @IntRange(min = 1, max = 1000) int multiple,
+				@ForAll @IntRange(min = 1, max = Integer.MAX_VALUE / 1000) int startingAnnual
+		) {
+			int initialBudget = startingAnnual * multiple;
+			assertEquals(multiple, CO2Budget.remainingYears(initialBudget, startingAnnual, 0));
+		}
 	}
 
 }
