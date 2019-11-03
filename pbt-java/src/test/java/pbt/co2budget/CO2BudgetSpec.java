@@ -30,6 +30,24 @@ class CO2BudgetSpec {
 			int initialBudget = startingAnnual * multiple;
 			assertEquals(multiple, CO2Budget.remainingYears(initialBudget, startingAnnual, 0));
 		}
+
+		@Property
+		void annualEmissionIsNotExactMultipleOfInitialBudget(
+				@ForAll @IntRange(min = 0, max = 1000) int multiple,
+				@ForAll @IntRange(min = 1, max = Integer.MAX_VALUE / 1000) int startingAnnual
+		) {
+			int initialBudget = startingAnnual * multiple + 1;
+			assertEquals(multiple + 1, CO2Budget.remainingYears(initialBudget, startingAnnual, 0));
+		}
+
+		@Property
+		boolean remainingYearsAreNeverNegative(
+				@ForAll @IntRange(min = 0) int initialBudget,
+				@ForAll @IntRange(min = 0) int startingAnnual
+		) {
+			int years = CO2Budget.remainingYears(initialBudget, startingAnnual, 0);
+			return years >= 0;
+		}
 	}
 
 }
