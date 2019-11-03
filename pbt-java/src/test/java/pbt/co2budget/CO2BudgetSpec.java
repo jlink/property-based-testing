@@ -8,7 +8,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class CO2BudgetSpec {
 
 	@Property
-	void initialBudgetIsZero(@ForAll @IntRange(min = 0) int startingAnnual, @ForAll int annualChange) {
+	void initialBudgetIsZero(
+			@ForAll @IntRange(min = 0) int startingAnnual,
+			@ForAll int annualChange
+	) {
 		assertEquals(0, CO2Budget.remainingYears(0, startingAnnual, annualChange));
 	}
+
+	@Group
+	class NoAnnualChange {
+		@Example
+		void annualEmissionIsExactMultipleOfInitialBudget() {
+			assertEquals(10, CO2Budget.remainingYears(100, 10, 0));
+		}
+	}
+
 }
