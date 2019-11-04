@@ -6,12 +6,14 @@ public class CO2Budget {
 	) {
 		int years = 0;
 		int remainingBudget = initialBudget;
+		int annualEmission = startingAnnualEmission;
 		while (remainingBudget > 0) {
-			if (startingAnnualEmission <= 0) {
-				return 1000; // or any non negative value
+			if (annualEmission <= 0) {
+				return 1000;
 			}
 			years++;
-			remainingBudget = remainingBudget - startingAnnualEmission;
+			remainingBudget = remainingBudget - annualEmission;
+			annualEmission = annualEmission + annualChange;
 		}
 		return years;
 	}

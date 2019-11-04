@@ -1,6 +1,8 @@
 package pbt.co2budget;
 
 import net.jqwik.api.*;
+import net.jqwik.api.Tuple.*;
+import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.constraints.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,7 +45,6 @@ class CO2BudgetSpec {
 	}
 
 	@Group
-	@Disabled
 	class WithAnnualChange {
 		@Example
 		void budgetIsUsedUpDespiteDecrease() {
@@ -55,6 +56,48 @@ class CO2BudgetSpec {
 		void budgetIsUsedUpWithIncrease() {
 			assertEquals(5, CO2Budget.remainingYears(100, 20, 2));
 		}
+
+		@Property
+		boolean increasingAnnualChangeWillDecreaseRemainingYears(
+				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
+				@ForAll @IntRange(min = 1, max = 50) int increase
+		) {
+			int initialBudget = params.get1();
+			int startingAnnual = params.get2();
+			int annualChange = params.get3();
+
+			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
+			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange + increase);
+
+			return remaining >= remainingWithIncreasedAnnualChange;
+		}
+
+		@Property
+		boolean decreasingAnnualChangeWillDecreaseRemainingYears(
+				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
+				@ForAll @IntRange(min = 1, max = 50) int decrease
+		) {
+			int initialBudget = params.get1();
+			int startingAnnual = params.get2();
+			int annualChange = params.get3();
+
+			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
+			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange - decrease);
+
+			return remaining <= remainingWithIncreasedAnnualChange;
+		}
+	}
+
+	@Provide
+	Arbitrary<Tuple3<Integer, Integer, Integer>> co2Parameters() {
+		Arbitrary<Integer> initialBudget = Arbitraries.integers().between(0, 1000);
+		return initialBudget.flatMap(budget -> {
+			Arbitrary<Integer> startingAnnual = Arbitraries.integers().between(0, budget * 2);
+			return startingAnnual.flatMap(starting -> {
+				Arbitrary<Integer> annualChange = Arbitraries.integers().between(-starting, starting);
+				return annualChange.map(change -> Tuple.of(budget, starting, change));
+			});
+		});
 	}
 
 }
