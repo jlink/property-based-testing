@@ -48,6 +48,18 @@ class CO2BudgetSpec {
 			assertEquals(5, CO2Budget.remainingYears(170, 42, -4));
 		}
 
+		@Example
+		void budgetIsNotUsedUpDueToDecrease() {
+			assertEquals(
+					Integer.MAX_VALUE,
+					CO2Budget.remainingYears(100, 20, -10)
+					);
+			assertEquals(
+					Integer.MAX_VALUE,
+					CO2Budget.remainingYears(170, 42, -8)
+			);
+		}
+
 		@Property(afterFailure = AfterFailureMode.RANDOM_SEED)
 		boolean increasingAnnualChangeCanOnlyDecreaseRemainingYears(
 				@ForAll("increasingCo2Emission") Tuple3<Integer, Integer, Integer> params,

@@ -14,8 +14,8 @@ int remainingYears(int budget, int startingAnnualEmission, int annualChange)
 
 ### Specification
 
+- Preconditions: `budget` and `startingAnnualEmission` must be >= 0 
 - All input is in Gt (giga tons)
-- `budget` and `startingAnnualEmission` must be >= 0 otherwise signal illegal input
 - `annualChange` is applied each year on the previous year's emission starting in the 2nd year
 - The year in which the budget is eventually used up still counts as one year
 - If the budget starts with 0 the remaining years are also 0

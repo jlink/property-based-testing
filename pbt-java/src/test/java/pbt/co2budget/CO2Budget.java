@@ -6,6 +6,9 @@ public class CO2Budget {
 		int budget = initialBudget;
 		int annualEmission = startingAnnualEmission;
 		while(budget > 0) {
+			if (annualEmission <= 0) {
+				return Integer.MAX_VALUE;
+			}
 			budget -= annualEmission;
 			remaining++;
 			annualEmission += annualChange;
