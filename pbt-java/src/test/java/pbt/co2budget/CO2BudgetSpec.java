@@ -102,7 +102,7 @@ class CO2BudgetSpec {
 
 	@Provide
 	Arbitrary<Tuple3<Integer, Integer, Integer>> increasingCo2Emission() {
-		Arbitrary<Integer> initialBudget = Arbitraries.integers().between(1, 1000);
+		Arbitrary<Integer> initialBudget = Arbitraries.integers().between(1, 1000000);
 		return initialBudget.flatMap(budget -> {
 			Arbitrary<Integer> startingAnnual = Arbitraries.integers().between(1, budget * 2);
 			return startingAnnual.flatMap(starting -> {
@@ -114,7 +114,7 @@ class CO2BudgetSpec {
 
 	@Provide
 	Arbitrary<Tuple3<Integer, Integer, Integer>> co2Parameters() {
-		Arbitrary<Integer> initialBudget = Arbitraries.integers().between(0, 1000);
+		Arbitrary<Integer> initialBudget = Arbitraries.integers().between(0, 1000000);
 		return initialBudget.flatMap(budget -> {
 			Arbitrary<Integer> startingAnnual = Arbitraries.integers().between(0, budget * 2);
 			return startingAnnual.flatMap(starting -> {
