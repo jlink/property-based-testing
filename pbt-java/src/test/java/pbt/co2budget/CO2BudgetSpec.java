@@ -2,7 +2,6 @@ package pbt.co2budget;
 
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
-import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.constraints.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,27 +19,19 @@ class CO2BudgetSpec {
 	@Group
 	class WithoutAnnualChange {
 		@Example
-		void budgetIsUsedUp() {
-			assertEquals(11, CO2Budget.remainingYears(105, 10, 0));
+		void budgetIsUsedUpExactly() {
+			assertEquals(10, CO2Budget.remainingYears(100, 10, 0));
 		}
 
 		@Property
 		void budgetIsUsedUp(
 				@ForAll @IntRange(min = 1, max = 1000) int remainingYears,
-				@ForAll @IntRange(min = 2, max = Integer.MAX_VALUE/1000) int startingAnnual,
-				@ForAll @IntRange(min = -1, max = 0) int delta
+				@ForAll @IntRange(min = 5, max = Integer.MAX_VALUE / 1000) int startingAnnual,
+				@ForAll @IntRange(min = 0, max = 4) int remainder
 		) {
-			int initialBudget = startingAnnual * remainingYears + delta;
+			Statistics.label("remainder is 0").collect(remainder == 0);
+			int initialBudget = startingAnnual * remainingYears - remainder;
 			assertEquals(remainingYears, CO2Budget.remainingYears(initialBudget, startingAnnual, 0));
-		}
-
-		@Property
-		boolean remainingYearsAreNeverNegative(
-				@ForAll @IntRange(min = 0) int initialBudget,
-				@ForAll @IntRange(min = 0) int startingAnnual
-		) {
-			int years = CO2Budget.remainingYears(initialBudget, startingAnnual, 0);
-			return years >= 0;
 		}
 	}
 
@@ -49,43 +40,43 @@ class CO2BudgetSpec {
 		@Example
 		void budgetIsUsedUpDespiteDecrease() {
 			assertEquals(8, CO2Budget.remainingYears(100, 20, -2));
-			assertEquals(5, CO2Budget.remainingYears(170, 42, -4));
+			//assertEquals(5, CO2Budget.remainingYears(170, 42, -4));
 		}
 
-		@Example
-		void budgetIsUsedUpWithIncrease() {
-			assertEquals(5, CO2Budget.remainingYears(100, 20, 2));
-		}
-
-		@Property
-		boolean increasingAnnualChangeWillDecreaseRemainingYears(
-				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
-				@ForAll @IntRange(min = 1, max = 50) int increase
-		) {
-			int initialBudget = params.get1();
-			int startingAnnual = params.get2();
-			int annualChange = params.get3();
-
-			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
-			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange + increase);
-
-			return remaining >= remainingWithIncreasedAnnualChange;
-		}
-
-		@Property
-		boolean decreasingAnnualChangeWillDecreaseRemainingYears(
-				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
-				@ForAll @IntRange(min = 1, max = 50) int decrease
-		) {
-			int initialBudget = params.get1();
-			int startingAnnual = params.get2();
-			int annualChange = params.get3();
-
-			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
-			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange - decrease);
-
-			return remaining <= remainingWithIncreasedAnnualChange;
-		}
+//		@Example
+//		void budgetIsUsedUpWithIncrease() {
+//			assertEquals(5, CO2Budget.remainingYears(100, 20, 2));
+//		}
+//
+//		@Property
+//		boolean increasingAnnualChangeWillDecreaseRemainingYears(
+//				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
+//				@ForAll @IntRange(min = 1, max = 50) int increase
+//		) {
+//			int initialBudget = params.get1();
+//			int startingAnnual = params.get2();
+//			int annualChange = params.get3();
+//
+//			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
+//			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange + increase);
+//
+//			return remaining >= remainingWithIncreasedAnnualChange;
+//		}
+//
+//		@Property
+//		boolean decreasingAnnualChangeWillDecreaseRemainingYears(
+//				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
+//				@ForAll @IntRange(min = 1, max = 50) int decrease
+//		) {
+//			int initialBudget = params.get1();
+//			int startingAnnual = params.get2();
+//			int annualChange = params.get3();
+//
+//			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
+//			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange - decrease);
+//
+//			return remaining <= remainingWithIncreasedAnnualChange;
+//		}
 	}
 
 	@Provide
