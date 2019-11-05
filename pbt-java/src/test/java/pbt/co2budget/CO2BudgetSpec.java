@@ -16,6 +16,15 @@ class CO2BudgetSpec {
 		assertEquals(0, CO2Budget.remainingYears(0, startingAnnual, annualChange));
 	}
 
+	@Property
+	boolean fuzzing(
+			@ForAll @IntRange(min = 0) int initialBudget,
+			@ForAll @IntRange(min = 0) int startingAnnual,
+			@ForAll int annualChange
+	) {
+		return CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange) >= 0;
+	}
+
 	@Group
 	class WithoutAnnualChange {
 		@Example
@@ -75,20 +84,20 @@ class CO2BudgetSpec {
 			return remaining >= remainingWithIncreasedAnnualChange;
 		}
 
-//		@Property
-//		boolean decreasingAnnualChangeWillDecreaseRemainingYears(
-//				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
-//				@ForAll @IntRange(min = 1, max = 50) int decrease
-//		) {
-//			int initialBudget = params.get1();
-//			int startingAnnual = params.get2();
-//			int annualChange = params.get3();
-//
-//			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
-//			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange - decrease);
-//
-//			return remaining <= remainingWithIncreasedAnnualChange;
-//		}
+		@Property
+		boolean decreasingAnnualChangeCanOnlyIncreaseRemainingYears(
+				@ForAll("co2Parameters") Tuple3<Integer, Integer, Integer> params,
+				@ForAll @IntRange(min = 1, max = 50) int decrease
+		) {
+			int initialBudget = params.get1();
+			int startingAnnual = params.get2();
+			int annualChange = params.get3();
+
+			int remaining = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange);
+			int remainingWithIncreasedAnnualChange = CO2Budget.remainingYears(initialBudget, startingAnnual, annualChange - decrease);
+
+			return remaining <= remainingWithIncreasedAnnualChange;
+		}
 	}
 
 	@Provide
@@ -98,6 +107,18 @@ class CO2BudgetSpec {
 			Arbitrary<Integer> startingAnnual = Arbitraries.integers().between(1, budget * 2);
 			return startingAnnual.flatMap(starting -> {
 				Arbitrary<Integer> annualChange = Arbitraries.integers().between(0, starting);
+				return annualChange.map(change -> Tuple.of(budget, starting, change));
+			});
+		});
+	}
+
+	@Provide
+	Arbitrary<Tuple3<Integer, Integer, Integer>> co2Parameters() {
+		Arbitrary<Integer> initialBudget = Arbitraries.integers().between(0, 1000);
+		return initialBudget.flatMap(budget -> {
+			Arbitrary<Integer> startingAnnual = Arbitraries.integers().between(0, budget * 2);
+			return startingAnnual.flatMap(starting -> {
+				Arbitrary<Integer> annualChange = Arbitraries.integers().between(-starting, starting);
 				return annualChange.map(change -> Tuple.of(budget, starting, change));
 			});
 		});
