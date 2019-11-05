@@ -2,12 +2,13 @@ package pbt.co2budget;
 
 public class CO2Budget {
 	static int remainingYears(int initialBudget, int startingAnnualEmission, int annualChange) {
-		if (initialBudget == 0) {
-			return 0;
-		}
-		int remaining = -Math.floorDiv(-initialBudget, startingAnnualEmission);
-		if (annualChange != 0) {
-			remaining += 3;
+		int remaining = 0;
+		int budget = initialBudget;
+		int annualEmission = startingAnnualEmission;
+		while(budget > 0) {
+			budget -= annualEmission;
+			remaining++;
+			annualEmission += annualChange;
 		}
 		return remaining;
 	}
