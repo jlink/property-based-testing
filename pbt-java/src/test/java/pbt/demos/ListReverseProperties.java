@@ -41,6 +41,7 @@ class ListReverseProperties {
 	}
 
 	@Property
+	@Disabled
 	boolean reverseKeepsTheOriginalList(@ForAll List<Integer> aList) {
 		return reverse(aList).equals(aList);
 	}
