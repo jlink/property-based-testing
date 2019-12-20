@@ -34,13 +34,13 @@ class MyStringStackActions {
 		}
 
 		@Override
-		public MyStringStack run(MyStringStack model) {
-			int sizeBefore = model.size();
-			model.push(element);
-			Assertions.assertThat(model.isEmpty()).isFalse();
-			Assertions.assertThat(model.size()).isEqualTo(sizeBefore + 1);
-			Assertions.assertThat(model.top()).isEqualTo(element);
-			return model;
+		public MyStringStack run(MyStringStack stack) {
+			int sizeBefore = stack.size();
+			stack.push(element);
+			Assertions.assertThat(stack.isEmpty()).isFalse();
+			Assertions.assertThat(stack.size()).isEqualTo(sizeBefore + 1);
+			Assertions.assertThat(stack.top()).isEqualTo(element);
+			return stack;
 		}
 
 		@Override
@@ -52,10 +52,10 @@ class MyStringStackActions {
 	private static class ClearAction implements Action<MyStringStack>, Serializable {
 
 		@Override
-		public MyStringStack run(MyStringStack model) {
-			model.clear();
-			Assertions.assertThat(model.isEmpty()).isTrue();
-			return model;
+		public MyStringStack run(MyStringStack stack) {
+			stack.clear();
+			Assertions.assertThat(stack.isEmpty()).isTrue();
+			return stack;
 		}
 
 		@Override
@@ -67,20 +67,20 @@ class MyStringStackActions {
 	private static class PopAction implements Action<MyStringStack>, Serializable {
 
 		@Override
-		public boolean precondition(MyStringStack model) {
-			return !model.isEmpty();
+		public boolean precondition(MyStringStack stack) {
+			return !stack.isEmpty();
 		}
 
 		@Override
-		public MyStringStack run(MyStringStack model) {
-			int sizeBefore = model.size();
-			String topBefore = model.top();
+		public MyStringStack run(MyStringStack stack) {
+			int sizeBefore = stack.size();
+			String topBefore = stack.top();
 
-			String popped = model.pop();
+			String popped = stack.pop();
 			Assertions.assertThat(popped).isEqualTo(topBefore);
-			Assertions.assertThat(model.size()).isEqualTo(sizeBefore - 1);
+			Assertions.assertThat(stack.size()).isEqualTo(sizeBefore - 1);
 
-			return model;
+			return stack;
 		}
 
 		@Override
