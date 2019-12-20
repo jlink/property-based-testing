@@ -2,7 +2,7 @@ package pbt.stateful.stackWithModel;
 
 import java.util.*;
 
-public class MyStringStack2 {
+public class StringStack {
 	private final List<String> elements = new ArrayList<>();
 
 	public void push(String element) {
@@ -35,7 +35,7 @@ public class MyStringStack2 {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		MyStringStack2 that = (MyStringStack2) o;
+		StringStack that = (StringStack) o;
 
 		return elements.equals(that.elements);
 	}
