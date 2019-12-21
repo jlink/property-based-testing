@@ -14,6 +14,7 @@ public class StringStack {
 	}
 
 	public void clear() {
+		//if (elements.size() < 4)
 		elements.clear();
 	}
 

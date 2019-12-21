@@ -10,8 +10,8 @@ public class StringStackModel implements Model<StringStack, List<String>> {
 
 	@Override
 	public void assertState(StringStack stack, List<String> list) {
-		Assertions.assertThat(stack.size()).isEqualTo(list.size());
-		Assertions.assertThat(stack.isEmpty()).isEqualTo(list.isEmpty());
+		Assertions.assertThat(stack.size()).as("stack size").isEqualTo(list.size());
+		Assertions.assertThat(stack.isEmpty()).as("stack is empty").isEqualTo(list.isEmpty());
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class StringStackModel implements Model<StringStack, List<String>> {
 
 		@Override
 		public List<String> runOnModel(List<String> list) {
-			poppedFromModel = list.get(list.size() - 1);
+			poppedFromModel = list.remove(list.size() - 1);
 			return list;
 		}
 
