@@ -1,1 +1,0 @@
-Text and code has moved to [repository of its own](https://github.com/jlink/how-to-specify-it/blob/master/README.md)

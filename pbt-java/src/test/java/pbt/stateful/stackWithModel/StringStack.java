@@ -10,7 +10,11 @@ public class StringStack {
 	}
 
 	public String pop() {
-		return elements.remove(0);
+		String remove = elements.remove(0);
+		//		if (remove.contains("b")) {
+		//			return remove + "b";
+		//		}
+		return remove;
 	}
 
 	public void clear() {
