@@ -14,6 +14,7 @@ public interface Model<S, M> {
 		}
 
 		default boolean preconditionOnState(S state) {
+			// Must be kept in sync with preconditionOnModel()
 			return true;
 		}
 
