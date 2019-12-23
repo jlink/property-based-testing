@@ -9,7 +9,11 @@ public interface Model<S, M> {
 	Arbitrary<ModelAction<S, M>> actions();
 
 	interface ModelAction<S, M> {
-		default boolean precondition(M modelState) {
+		default boolean preconditionOnModel(M modelState) {
+			return true;
+		}
+
+		default boolean preconditionOnState(S state) {
 			return true;
 		}
 

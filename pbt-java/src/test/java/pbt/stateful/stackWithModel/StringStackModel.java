@@ -78,8 +78,13 @@ public class StringStackModel implements Model<StringStack, List<String>> {
 		private String poppedFromModel;
 
 		@Override
-		public boolean precondition(List<String> list) {
+		public boolean preconditionOnModel(List<String> list) {
 			return !list.isEmpty();
+		}
+
+		@Override
+		public boolean preconditionOnState(StringStack stack) {
+			return !stack.isEmpty();
 		}
 
 		@Override
