@@ -43,6 +43,9 @@ import static org.junit.Assert.*;
  * @author Rohan Padhye
  * <p>
  * Shamelessly stolen from https://github.com/rohanpadhye/jqf/blob/master/README.md#example
+ *
+ * This should discover a bug (apache commons-collections 4.4.3)
+ * https://issues.apache.org/jira/browse/COLLECTIONS-714
  */
 public class PatriciaTrieExample {
 
@@ -55,16 +58,12 @@ public class PatriciaTrieExample {
 
 		String key = "x";
 
-		// Create new trie with input `map`
 		Trie trie = new PatriciaTrie(map);
 
-		// The key should exist in the trie as well
-		assertTrue(trie.containsKey(key));  // fails when map = {"x": 1, "x\0": 2} and key = "x"
+		assertTrue(trie.containsKey(key));
 	}
 
-	// This should discover a bug (apache commons-collections 4.4.3)
-	// https://issues.apache.org/jira/browse/COLLECTIONS-714
-	@Property(tries = 10000, maxDiscardRatio = 100)
+	@Property(tries = 10000, maxDiscardRatio = 100, afterFailure = AfterFailureMode.RANDOM_SEED)
 	void testMap2Trie(
 			@ForAll Map<@StringLength(min = 1, max = 10) String, Integer> map,
 			@ForAll @StringLength(min = 1, max = 10) String key
@@ -80,7 +79,7 @@ public class PatriciaTrieExample {
 		assertTrue(trie.containsKey(key));  // fails when map = {"x": 1, "x\0": 2} and key = "x"
 	}
 
-	@Property(tries = 1000)
+	@Property
 	void improvedMap2Trie(@ForAll("mapsWithKeyAlreadyIn") Tuple2<Map<String, Integer>, String> mapAndKey) {
 		Map<String, Integer> map = mapAndKey.get1();
 		String key = mapAndKey.get2();
