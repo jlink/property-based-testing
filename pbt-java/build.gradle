@@ -5,7 +5,7 @@ repositories {
 
 ext {
 	junitJupiterVersion = '5.5.2'
-	jqwikVersion = '1.2.2'
+	jqwikVersion = '1.2.3-SNAPSHOT'
 	assertJVersion = '3.13.2'
 	mockitoVersion = '3.1.0'
 	junitQuickcheckVersion = '0.9'
@@ -47,8 +47,10 @@ dependencies {
 
 	testImplementation group: 'org.quicktheories', name: 'quicktheories', version: '0.26'
 
+	// For some examples
 	testImplementation 'com.squareup.okhttp3:okhttp:3.11.0'
 	testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+	testImplementation 'org.apache.commons:commons-collections4:4.3'
 }
 
 wrapper {
