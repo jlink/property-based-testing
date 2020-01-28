@@ -5,7 +5,7 @@ repositories {
 
 ext {
 	junitJupiterVersion = '5.5.2'
-	jqwikVersion = '1.2.3-SNAPSHOT'
+	jqwikVersion = '1.2.3'
 	assertJVersion = '3.13.2'
 	mockitoVersion = '3.1.0'
 	junitQuickcheckVersion = '0.9'
@@ -55,5 +55,5 @@ dependencies {
 
 wrapper {
 	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '5.6.3'
+	gradleVersion = '6.1.1'
 }
