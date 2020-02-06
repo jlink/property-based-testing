@@ -5,7 +5,7 @@ repositories {
 
 ext {
 	junitJupiterVersion = '5.5.2'
-	jqwikVersion = '1.2.3'
+	jqwikVersion = '1.2.4-SNAPSHOT'
 	assertJVersion = '3.13.2'
 	mockitoVersion = '3.1.0'
 	junitQuickcheckVersion = '0.9'
@@ -14,10 +14,14 @@ ext {
 
 apply plugin: 'java'
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 compileTestJava {
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
 	options.compilerArgs += '-parameters'
+	options.encoding = 'UTF-8'
 }
 
 test {
