@@ -4,11 +4,11 @@ repositories {
 }
 
 ext {
-	junitJupiterVersion = '5.5.2'
-	jqwikVersion = '1.2.4-SNAPSHOT'
-	assertJVersion = '3.13.2'
-	mockitoVersion = '3.1.0'
-	junitQuickcheckVersion = '0.9'
+	junitJupiterVersion = '5.6.0'
+	jqwikVersion = '1.2.4'
+	assertJVersion = '3.15.0'
+	mockitoVersion = '3.2.4'
+	junitQuickcheckVersion = '0.9.1'
 	quicktheoriesVersion = '0.26'
 }
 
