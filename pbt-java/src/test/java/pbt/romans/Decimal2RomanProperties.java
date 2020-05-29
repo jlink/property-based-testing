@@ -3,7 +3,8 @@ package pbt.romans;
 import java.util.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.constraints.IntRange;
+import net.jqwik.api.constraints.*;
+import net.jqwik.api.statistics.*;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -46,8 +47,8 @@ class Decimal2RomanProperties {
 			assertThat(Romans.decimal2roman(1666)).isEqualTo("mdclxvi");
 		}
 
-		@Property(tries = 100)
 		//@Report(Reporting.GENERATED)
+		@Property(tries = 100)
 		void nonDuplicateLetters(@ForAll("setOfBaseValues") Set<Integer> baseValues) {
 			int decimal = baseValues.stream().mapToInt(i -> i).sum();
 			Statistics.collect(decimal);
@@ -99,7 +100,7 @@ class Decimal2RomanProperties {
 
 	@Provide
 	Arbitrary<Integer> baseValues() {
-		return Arbitraries.samples(1, 5, 10, 50, 100, 500, 1000);
+		return Arbitraries.of(1, 5, 10, 50, 100, 500, 1000);
 	}
 
 	@Provide
@@ -110,8 +111,8 @@ class Decimal2RomanProperties {
 	@Provide
 	Arbitrary<List<Integer>> upTo3DuplicateBaseValues() {
 		return baseValues().list().ofMinSize(3).ofMaxSize(21).filter(aList -> aList
-				.stream()
-				.allMatch(anInt -> count(anInt, aList) <= 3));
+																					  .stream()
+																					  .allMatch(anInt -> count(anInt, aList) <= 3));
 	}
 
 	private int count(Integer anInt, List<Integer> aList) {
