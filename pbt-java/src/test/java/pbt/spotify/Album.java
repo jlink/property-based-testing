@@ -14,4 +14,14 @@ public class Album {
 		this.name = name;
 		this.artists = Collections.unmodifiableSet(artists);
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer();
+		sb.append(name).append('{');
+		sb.append("artists=").append(artists);
+		sb.append('}');
+		return sb.toString();
+	}
+
 }

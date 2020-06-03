@@ -8,4 +8,12 @@ public class Artist {
 	public Artist(final String name) {
 		this.name = name;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer();
+		sb.append(name);
+		return sb.toString();
+	}
+
 }
