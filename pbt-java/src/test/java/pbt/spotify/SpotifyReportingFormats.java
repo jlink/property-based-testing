@@ -17,35 +17,14 @@ public interface SpotifyReportingFormats {
 		public Object report(final Object value) {
 			Album album = (Album) value;
 			Map<String, Object> map = new HashMap<>();
-			map.put("name", album.name);
 			map.put("artists", album.artists);
 			return map;
 		}
 
 		@Override
 		public Optional<String> label(final Object value) {
-			return Optional.of("Album ");
-		}
-	}
-
-	class Artists implements SampleReportingFormat {
-
-		@Override
-		public boolean appliesTo(final Object value) {
-			return value instanceof Artist;
-		}
-
-		@Override
-		public Object report(final Object value) {
-			Artist artist = (Artist) value;
-			Map<String, Object> map = new HashMap<>();
-			map.put("name", artist.name);
-			return map;
-		}
-
-		@Override
-		public Optional<String> label(final Object value) {
-			return Optional.of("Artist ");
+			String name = ((Album) value).name;
+			return Optional.of(String.format("Album(%s) ", name));
 		}
 	}
 
@@ -60,7 +39,6 @@ public interface SpotifyReportingFormats {
 		public Object report(final Object value) {
 			Song song = (Song) value;
 			Map<String, Object> map = new HashMap<>();
-			map.put("name", song.name);
 			map.put("album", song.album);
 			map.put("artists", song.artists);
 			return map;
@@ -68,7 +46,8 @@ public interface SpotifyReportingFormats {
 
 		@Override
 		public Optional<String> label(final Object value) {
-			return Optional.of("Song ");
+			String name = ((Song) value).name;
+			return Optional.of(String.format("Song(%s) ", name));
 		}
 	}
 }

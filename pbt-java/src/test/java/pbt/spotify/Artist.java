@@ -11,9 +11,7 @@ public class Artist {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer();
-		sb.append(name);
-		return sb.toString();
+		return String.format("Artist(%s)", name);
 	}
 
 }

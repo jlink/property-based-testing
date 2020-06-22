@@ -16,7 +16,7 @@ class SpotifyArbitraries {
 	}
 
 	Arbitrary<Artist> artists() {
-		return uniqueNames().map(name -> new Artist("Artist-" + name));
+		return uniqueNames().map(Artist::new);
 	}
 
 	private Arbitrary<String> uniqueNames() {
@@ -24,14 +24,14 @@ class SpotifyArbitraries {
 	}
 
 	Arbitrary<Album> albums(Set<Artist> artists) {
-		Arbitrary<String> albumName = uniqueNames().map(name -> "Album-" + name);
+		Arbitrary<String> albumName = uniqueNames();
 		List<Artist> artistsList = new ArrayList<>(artists);
 		Arbitrary<Set<Artist>> albumArtists = Arbitraries.of(artistsList).set().ofMinSize(1);
 		return Combinators.combine(albumName, albumArtists).as(Album::new);
 	}
 
 	Arbitrary<Song> songs(Set<Album> albums) {
-		Arbitrary<String> songName = uniqueNames().map(name -> "Song-" + name);
+		Arbitrary<String> songName = uniqueNames();
 		List<Album> albumList = new ArrayList<>(albums);
 		Arbitrary<Album> album = Arbitraries.of(albumList);
 		Arbitrary<Set<Artist>> artists = album.flatMap(a -> {
