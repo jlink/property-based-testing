@@ -13,10 +13,17 @@ class SpotifyArbitraries {
 							return albums(artists).set().flatMap(albums -> {
 								return songs(albums).set().flatMap(songs -> {
 									return users(songs).set().map(users -> {
+										System.out.println("Users: " + users + ", ");
 										Arbitrary<Set<User>> followees = Arbitraries.of(users).set();
 										users.forEach(user -> {
 											try {
-												followees.sample().forEach(user::follow);
+												// To get rid of preshrinking followees since these are not shrunk away
+												user.following.clear();
+												// TODO: Those followees are not shrunk away!
+												Set<User> sample = followees.sample();
+												System.out.println("  Sample: " + sample);
+												sample.forEach(user::follow);
+												System.out.println("  Followees: " + user.following);
 											} catch (IllegalArgumentException ignore) { }
 										});
 										return Tuple.of(artists, albums, songs, users);

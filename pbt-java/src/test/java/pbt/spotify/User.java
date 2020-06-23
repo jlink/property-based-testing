@@ -24,4 +24,9 @@ public class User {
 		}
 		following.add(user);
 	}
+
+	@Override
+	public String toString() {
+		return String.format("User(%s)", name);
+	}
 }

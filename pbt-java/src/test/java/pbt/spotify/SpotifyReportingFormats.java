@@ -1,6 +1,7 @@
 package pbt.spotify;
 
 import java.util.*;
+import java.util.stream.*;
 
 import net.jqwik.api.*;
 
@@ -62,8 +63,9 @@ public interface SpotifyReportingFormats {
 		public Object report(final Object value) {
 			User user = (User) value;
 			Map<String, Object> map = new HashMap<>();
-			map.put("liked", user.liked);
-			map.put("following", user.following);
+			map.put("liked", user.liked.size());
+			List<String> following = user.following.stream().map(u -> u.name).collect(Collectors.toList());
+			map.put("following", following);
 			return map;
 		}
 
