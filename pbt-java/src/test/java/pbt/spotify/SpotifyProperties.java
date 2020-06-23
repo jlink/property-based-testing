@@ -2,6 +2,8 @@ package pbt.spotify;
 
 import java.util.*;
 
+import org.assertj.core.api.*;
+
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
 import net.jqwik.api.statistics.*;
@@ -16,14 +18,12 @@ class SpotifyProperties {
 		Statistics.label("albums").collect(spotify.get2().size());
 		Statistics.label("songs").collect(spotify.get3().size());
 		Statistics.label("users").collect(spotify.get4().size());
-		// System.out.println(spotify);
 
 		Set<User> users = spotify.get4();
-		// Statistics.label("following")
-		// 		  .collect(users.stream().mapToInt(user -> user.following.size()).max().orElse(0));
+		Statistics.label("following")
+				  .collect(users.stream().mapToInt(user -> user.following.size()).max().orElse(0));
 
-		//Reporting of failing assertion fails probably because cyclic dependency in user.following
-		//Assertions.assertThat(users).allMatch(user -> user.following.isEmpty());
+		Assertions.assertThat(users).allMatch(user -> user.following.isEmpty());
 	}
 
 	@Provide
