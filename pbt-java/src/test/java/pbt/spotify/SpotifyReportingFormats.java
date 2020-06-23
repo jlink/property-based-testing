@@ -50,4 +50,27 @@ public interface SpotifyReportingFormats {
 			return Optional.of(String.format("Song(%s) ", name));
 		}
 	}
+
+	class Users implements SampleReportingFormat {
+
+		@Override
+		public boolean appliesTo(final Object value) {
+			return value instanceof User;
+		}
+
+		@Override
+		public Object report(final Object value) {
+			User user = (User) value;
+			Map<String, Object> map = new HashMap<>();
+			map.put("liked", user.liked);
+			map.put("following", user.following);
+			return map;
+		}
+
+		@Override
+		public Optional<String> label(final Object value) {
+			String name = ((User) value).name;
+			return Optional.of(String.format("User(%s) ", name));
+		}
+	}
 }

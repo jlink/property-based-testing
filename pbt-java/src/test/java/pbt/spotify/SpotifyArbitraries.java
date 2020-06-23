@@ -6,11 +6,17 @@ import net.jqwik.api.*;
 
 class SpotifyArbitraries {
 
-	Arbitrary<Tuple.Tuple3<Set<Artist>, Set<Album>, Set<Song>>> spotify() {
+	Arbitrary<Tuple.Tuple4<Set<Artist>, Set<Album>, Set<Song>, Set<User>>> spotify() {
 		return artists().set().ofMinSize(1)
 						.flatMap(artists -> {
 							return albums(artists).set().flatMap(albums -> {
-								return songs(albums).set().map(songs -> Tuple.of(artists, albums, songs));
+								return songs(albums).set().flatMap(songs -> {
+									return users().set().map(users -> {
+										// Add users.following
+										// Add users.liked
+										return Tuple.of(artists, albums, songs, users);
+									});
+								});
 							});
 						});
 	}
@@ -25,20 +31,22 @@ class SpotifyArbitraries {
 
 	Arbitrary<Album> albums(Set<Artist> artists) {
 		Arbitrary<String> albumName = uniqueNames();
-		List<Artist> artistsList = new ArrayList<>(artists);
-		Arbitrary<Set<Artist>> albumArtists = Arbitraries.of(artistsList).set().ofMinSize(1);
+		Arbitrary<Set<Artist>> albumArtists = Arbitraries.of(artists).set().ofMinSize(1);
 		return Combinators.combine(albumName, albumArtists).as(Album::new);
 	}
 
 	Arbitrary<Song> songs(Set<Album> albums) {
 		Arbitrary<String> songName = uniqueNames();
-		List<Album> albumList = new ArrayList<>(albums);
-		Arbitrary<Album> album = Arbitraries.of(albumList);
+		Arbitrary<Album> album = Arbitraries.of(albums);
 		Arbitrary<Set<Artist>> artists = album.flatMap(a -> {
-			List<Artist> artistsList = new ArrayList<>(a.artists);
-			return Arbitraries.of(artistsList).set().ofMinSize(1);
+			return Arbitraries.of(a.artists).set().ofMinSize(1);
 		});
 		return Combinators.combine(songName, album, artists)
 						  .as((n, al, as) -> new Song(n, as, al));
+	}
+
+	Arbitrary<User> users() {
+		Arbitrary<String> userName = uniqueNames();
+		return userName.map(User::new);
 	}
 }
