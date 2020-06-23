@@ -13,7 +13,12 @@ class SpotifyArbitraries {
 							return albums(artists).set().flatMap(albums -> {
 								return songs(albums).set().flatMap(songs -> {
 									return users(songs).set().map(users -> {
-										// Add users.liked
+										Arbitrary<Set<User>> followees = Arbitraries.of(users).set();
+										users.forEach(user -> {
+											try {
+												followees.sample().forEach(user::follow);
+											} catch (IllegalArgumentException ignore) { }
+										});
 										return Tuple.of(artists, albums, songs, users);
 									});
 								});
@@ -48,14 +53,15 @@ class SpotifyArbitraries {
 	Arbitrary<User> users(Set<Song> songs) {
 		Arbitrary<Set<Song>> liked = Arbitraries.of(songs).set();
 		Arbitrary<String> userName = uniqueNames();
-		return Combinators.combine(userName, liked)
-						  .as((name, likedSongs) ->
-							  {
-								  User user = new User(name);
-								  for (Song likedSong : likedSongs) {
-									  user.like(likedSong);
-								  }
-								  return user;
-							  });
+		return Combinators
+					   .combine(userName, liked)
+					   .as((name, likedSongs) ->
+						   {
+							   User user = new User(name);
+							   for (Song likedSong : likedSongs) {
+								   user.like(likedSong);
+							   }
+							   return user;
+						   });
 	}
 }
