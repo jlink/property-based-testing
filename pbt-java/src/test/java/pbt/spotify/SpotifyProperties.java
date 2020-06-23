@@ -8,7 +8,7 @@ import net.jqwik.api.statistics.*;
 
 class SpotifyProperties {
 
-	@Property(tries = 100, edgeCases = EdgeCasesMode.MIXIN)
+	@Property(tries = 10, edgeCases = EdgeCasesMode.MIXIN)
 	@Report(Reporting.GENERATED)
 	@StatisticsReport(format = NumberRangeHistogram.class)
 	void checkArbitraries(@ForAll("spotify") Tuple4<Set<Artist>, Set<Album>, Set<Song>, Set<User>> spotify) {

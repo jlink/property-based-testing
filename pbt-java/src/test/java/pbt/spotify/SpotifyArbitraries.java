@@ -3,16 +3,16 @@ package pbt.spotify;
 import java.util.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.Tuple.*;
 
 class SpotifyArbitraries {
 
-	Arbitrary<Tuple.Tuple4<Set<Artist>, Set<Album>, Set<Song>, Set<User>>> spotify() {
+	Arbitrary<Tuple4<Set<Artist>, Set<Album>, Set<Song>, Set<User>>> spotify() {
 		return artists().set().ofMinSize(1)
 						.flatMap(artists -> {
 							return albums(artists).set().flatMap(albums -> {
 								return songs(albums).set().flatMap(songs -> {
-									return users().set().map(users -> {
-										// Add users.following
+									return users(songs).set().map(users -> {
 										// Add users.liked
 										return Tuple.of(artists, albums, songs, users);
 									});
@@ -45,8 +45,17 @@ class SpotifyArbitraries {
 						  .as((n, al, as) -> new Song(n, as, al));
 	}
 
-	Arbitrary<User> users() {
+	Arbitrary<User> users(Set<Song> songs) {
+		Arbitrary<Set<Song>> liked = Arbitraries.of(songs).set();
 		Arbitrary<String> userName = uniqueNames();
-		return userName.map(User::new);
+		return Combinators.combine(userName, liked)
+						  .as((name, likedSongs) ->
+							  {
+								  User user = new User(name);
+								  for (Song likedSong : likedSongs) {
+									  user.like(likedSong);
+								  }
+								  return user;
+							  });
 	}
 }
