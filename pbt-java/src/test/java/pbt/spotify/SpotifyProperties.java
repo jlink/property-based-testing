@@ -5,13 +5,12 @@ import java.util.*;
 import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.Tuple.*;
 import net.jqwik.api.statistics.*;
 
 class SpotifyProperties {
 
-	@Property(tries = 2, edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED)
-	@Report(Reporting.GENERATED)
+	@Property(tries = 1000, edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED)
+	// @Report(Reporting.GENERATED)
 	@StatisticsReport(format = NumberRangeHistogram.class)
 	void checkArbitraries(@ForAll("spotify") Spotify spotify) {
 		// Statistics.label("artists").collect(spotify.artists.size());
@@ -19,12 +18,16 @@ class SpotifyProperties {
 		// Statistics.label("songs").collect(spotify.songs.size());
 		// Statistics.label("users").collect(spotify.users.size());
 
+		spotify.effects.run(spotify);
+
 		Set<User> users = spotify.users;
 		Statistics.label("following")
 				  .collect(users.stream().mapToInt(user -> user.following.size()).max().orElse(0));
+		Statistics.label("liked")
+				  .collect(users.stream().mapToInt(user -> user.liked.size()).max().orElse(0));
 
-		Assertions.assertThat(users).allMatch(user -> user.liked.isEmpty());
-		// Assertions.assertThat(users).allMatch(user -> user.following.isEmpty());
+		// Assertions.assertThat(users).allMatch(user -> user.liked.isEmpty());
+		Assertions.assertThat(users).allMatch(user -> user.following.isEmpty());
 	}
 
 	@Provide

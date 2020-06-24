@@ -3,6 +3,7 @@ package pbt.spotify;
 import java.util.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.stateful.*;
 
 class SpotifyArbitraries {
 
@@ -11,8 +12,10 @@ class SpotifyArbitraries {
 						.flatMap(artists -> {
 							return albums(artists).set().ofMinSize(1).flatMap(albums -> {
 								return songs(albums).set().flatMap(songs -> {
-									return users(songs).set().ofMinSize(1).map(users -> {
-										return new Spotify(artists, albums, songs, users);
+									return users(songs).set().ofMinSize(1).flatMap(users -> {
+										return sideEffects(users).map(sequence -> {
+											return new Spotify(artists, albums, songs, users, sequence);
+										});
 									});
 								});
 							});
@@ -56,5 +59,30 @@ class SpotifyArbitraries {
 							   }
 							   return user;
 						   });
+	}
+
+	Arbitrary<ActionSequence<Spotify>> sideEffects(final Set<User> users) {
+		return Arbitraries.sequences(userFollowsUser(users));
+	}
+
+	private Arbitrary<Action<Spotify>> userFollowsUser(final Set<User> users) {
+		Arbitrary<User> followers = Arbitraries.of(users);
+		Arbitrary<User> followees = Arbitraries.of(users);
+		return Combinators
+					   .combine(followers, followees)
+					   .as((follower, followee) -> new Action<Spotify>() {
+						   @Override
+						   public Spotify run(final Spotify spotify) {
+							   try {
+								   follower.follow(followee);
+							   } catch (IllegalArgumentException ignore) {}
+							   return spotify;
+						   }
+
+						   @Override
+						   public String toString() {
+							   return String.format("%s follows %s", follower, followee);
+						   }
+					   });
 	}
 }

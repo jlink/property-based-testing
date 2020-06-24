@@ -91,6 +91,7 @@ public interface SpotifyReportingFormats {
 			map.put("songs", spotify.songs);
 			map.put("albums", spotify.albums);
 			map.put("users", spotify.users);
+			map.put("effects", spotify.effects);
 			return map;
 		}
 	}
