@@ -9,25 +9,25 @@ import net.jqwik.api.statistics.*;
 
 class SpotifyProperties {
 
-	@Property(tries = 1000, edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED)
-	// @Report(Reporting.GENERATED)
+	@Property(edgeCases = EdgeCasesMode.MIXIN)
 	@StatisticsReport(format = NumberRangeHistogram.class)
-	void checkArbitraries(@ForAll("spotify") Spotify spotify) {
-		// Statistics.label("artists").collect(spotify.artists.size());
-		// Statistics.label("albums").collect(spotify.albums.size());
-		// Statistics.label("songs").collect(spotify.songs.size());
-		// Statistics.label("users").collect(spotify.users.size());
-
-		spotify.effects.run(spotify);
+	void statistics(@ForAll("spotify") Spotify spotify) {
+		Statistics.label("artists").collect(spotify.artists.size());
+		Statistics.label("albums").collect(spotify.albums.size());
+		Statistics.label("songs").collect(spotify.songs.size());
+		Statistics.label("users").collect(spotify.users.size());
 
 		Set<User> users = spotify.users;
-		Statistics.label("following")
+		Statistics.label("users following")
 				  .collect(users.stream().mapToInt(user -> user.following.size()).max().orElse(0));
-		Statistics.label("liked")
+		Statistics.label("users liked")
 				  .collect(users.stream().mapToInt(user -> user.liked.size()).max().orElse(0));
+	}
 
-		// Assertions.assertThat(users).allMatch(user -> user.liked.isEmpty());
-		Assertions.assertThat(users).allMatch(user -> user.following.isEmpty());
+	@Property(edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED)
+	@StatisticsReport(format = NumberRangeHistogram.class)
+	void followingMaximumOneUser(@ForAll("spotify") Spotify spotify) {
+		Assertions.assertThat(spotify.users).allMatch(user -> user.following.size() <= 1);
 	}
 
 	@Provide

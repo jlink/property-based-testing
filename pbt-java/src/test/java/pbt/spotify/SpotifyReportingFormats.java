@@ -39,7 +39,7 @@ public interface SpotifyReportingFormats {
 		@Override
 		public Object report(final Object value) {
 			Song song = (Song) value;
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new LinkedHashMap<>();
 			map.put("album", song.album);
 			map.put("artists", song.artists);
 			return map;
@@ -62,7 +62,7 @@ public interface SpotifyReportingFormats {
 		@Override
 		public Object report(final Object value) {
 			User user = (User) value;
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new LinkedHashMap<>();
 			map.put("liked", user.liked.size());
 			List<String> following = user.following.stream().map(u -> u.name).collect(Collectors.toList());
 			map.put("following", following);
@@ -86,12 +86,11 @@ public interface SpotifyReportingFormats {
 		@Override
 		public Object report(final Object value) {
 			Spotify spotify = (Spotify) value;
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new LinkedHashMap<>();
 			map.put("artists", spotify.artists);
 			map.put("songs", spotify.songs);
 			map.put("albums", spotify.albums);
 			map.put("users", spotify.users);
-			map.put("effects", spotify.effects);
 			return map;
 		}
 	}

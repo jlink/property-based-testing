@@ -3,40 +3,32 @@ package pbt.spotify;
 import java.util.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.stateful.*;
+import net.jqwik.api.arbitraries.*;
 
 class SpotifyArbitraries {
 
 	Arbitrary<Spotify> spotify() {
-		return artists().set().ofMinSize(1)
-						.flatMap(artists -> {
-							return albums(artists).set().ofMinSize(1).flatMap(albums -> {
-								return songs(albums).set().flatMap(songs -> {
-									return users(songs).set().ofMinSize(1).flatMap(users -> {
-										return sideEffects(users).map(sequence -> {
-											return new Spotify(artists, albums, songs, users, sequence);
-										});
-									});
-								});
-							});
-						});
+		return aSetOfArtists()
+					   .flatMap(artists -> {
+						   return aSetOfAlbums(artists).flatMap(albums -> {
+							   return aSetOfSongs(albums).flatMap(songs -> {
+								   return aSetOfUsers(songs).map(users -> {
+									   return new Spotify(artists, albums, songs, users);
+								   });
+							   });
+						   });
+					   });
 	}
 
-	Arbitrary<Artist> artists() {
+	private Arbitrary<Artist> anArtist() {
 		return uniqueNames().map(Artist::new);
 	}
 
-	private Arbitrary<String> uniqueNames() {
-		return Arbitraries.strings().alpha().ofLength(5).unique();
+	private SetArbitrary<Artist> aSetOfArtists() {
+		return anArtist().set();
 	}
 
-	Arbitrary<Album> albums(Set<Artist> artists) {
-		Arbitrary<String> albumName = uniqueNames();
-		Arbitrary<Set<Artist>> albumArtists = Arbitraries.of(artists).set().ofMinSize(1);
-		return Combinators.combine(albumName, albumArtists).as(Album::new);
-	}
-
-	Arbitrary<Song> songs(Set<Album> albums) {
+	private Arbitrary<Song> aSong(Set<Album> albums) {
 		Arbitrary<String> songName = uniqueNames();
 		Arbitrary<Album> album = Arbitraries.of(albums);
 		Arbitrary<Set<Artist>> artists = album.flatMap(a -> {
@@ -46,7 +38,41 @@ class SpotifyArbitraries {
 						  .as((n, al, as) -> new Song(n, as, al));
 	}
 
-	Arbitrary<User> users(Set<Song> songs) {
+	private SetArbitrary<Song> aSetOfSongs(final Set<Album> albums) {
+		return aSong(albums).set();
+	}
+
+	private Arbitrary<Album> anAlbum(Set<Artist> artists) {
+		Arbitrary<String> albumName = uniqueNames();
+		Arbitrary<Set<Artist>> albumArtists = Arbitraries.of(artists).set().ofMinSize(1);
+		return Combinators.combine(albumName, albumArtists).as(Album::new);
+	}
+
+	private SetArbitrary<Album> aSetOfAlbums(final Set<Artist> artists) {
+		return anAlbum(artists).set();
+	}
+
+	private Arbitrary<Set<User>> aSetOfUsers(final Set<Song> songs) {
+		SetArbitrary<User> aSetOfUsers = aUser(songs).set().ofMinSize(1);
+		return addFollowingsToUsers(aSetOfUsers);
+	}
+
+	private Arbitrary<Set<User>> addFollowingsToUsers(final SetArbitrary<User> aSetOfUsers) {
+		return aSetOfUsers.flatMapEach((allUsers, user) -> {
+			// Necessary to remove old state during shrinking
+			user.following.clear();
+			return Arbitraries.of(allUsers).set().map(followees -> {
+				followees.forEach(followee -> {
+					try {
+						user.follow(followee);
+					} catch (IllegalArgumentException ignore) {}
+				});
+				return user;
+			});
+		});
+	}
+
+	private Arbitrary<User> aUser(Set<Song> songs) {
 		Arbitrary<Set<Song>> liked = Arbitraries.of(songs).set();
 		Arbitrary<String> userName = uniqueNames();
 		return Combinators
@@ -61,28 +87,8 @@ class SpotifyArbitraries {
 						   });
 	}
 
-	Arbitrary<ActionSequence<Spotify>> sideEffects(final Set<User> users) {
-		return Arbitraries.sequences(userFollowsUser(users));
+	private Arbitrary<String> uniqueNames() {
+		return Arbitraries.strings().withCharRange('a', 'z').ofLength(3).unique();
 	}
 
-	private Arbitrary<Action<Spotify>> userFollowsUser(final Set<User> users) {
-		Arbitrary<User> followers = Arbitraries.of(users);
-		Arbitrary<User> followees = Arbitraries.of(users);
-		return Combinators
-					   .combine(followers, followees)
-					   .as((follower, followee) -> new Action<Spotify>() {
-						   @Override
-						   public Spotify run(final Spotify spotify) {
-							   try {
-								   follower.follow(followee);
-							   } catch (IllegalArgumentException ignore) {}
-							   return spotify;
-						   }
-
-						   @Override
-						   public String toString() {
-							   return String.format("%s follows %s", follower, followee);
-						   }
-					   });
-	}
 }
