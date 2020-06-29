@@ -21,11 +21,6 @@ public class Song {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer();
-		sb.append(name).append('{');
-		sb.append("artists=").append(artists);
-		sb.append(", album=").append(album);
-		sb.append('}');
-		return sb.toString();
+		return String.format("Song(%s)", name);
 	}
 }
