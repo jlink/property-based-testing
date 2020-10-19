@@ -17,7 +17,13 @@ class ConstrainingValuesExamples {
 	}
 
 	@Property
-	void squareOfRootIsOriginalValue_1(@ForAll @Positive double aNumber) {
+	void squareOfRootIsOriginalValue_1(@ForAll @DoubleRange(min = 0.0) double aNumber) {
+		double sqrt = Math.sqrt(aNumber);
+		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
+	}
+
+	@Property
+	void squareOfRootIsOriginalValue_2(@ForAll @Positive double aNumber) {
 		double sqrt = Math.sqrt(aNumber);
 		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
 	}
@@ -26,7 +32,7 @@ class ConstrainingValuesExamples {
 	// Provide and filter
 
 	@Property
-	void squareOfRootIsOriginalValue_2(@ForAll("positiveDoubles") double aNumber) {
+	void squareOfRootIsOriginalValue_4(@ForAll("positiveDoubles") double aNumber) {
 		double sqrt = Math.sqrt(aNumber);
 		Assertions.assertThat(sqrt * sqrt).isCloseTo(aNumber, withPercentage(1));
 	}
