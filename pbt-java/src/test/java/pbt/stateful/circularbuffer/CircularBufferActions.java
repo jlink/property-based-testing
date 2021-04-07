@@ -39,11 +39,11 @@ class CircularBufferActions {
 	}
 
 	private static Arbitrary<Action<Model>> get() {
-		return Arbitraries.constant(new GetAction());
+		return Arbitraries.just(new GetAction());
 	}
 
 	private static Arbitrary<Action<Model>> size() {
-		return Arbitraries.constant(new SizeAction());
+		return Arbitraries.just(new SizeAction());
 	}
 
 	private static class NewAction implements Action<Model> {

@@ -10,8 +10,8 @@ import net.jqwik.api.Tuple.*;
 import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.providers.*;
 
-import static net.jqwik.api.Arbitraries.*;
 import static net.jqwik.api.Arbitraries.of;
+import static net.jqwik.api.Arbitraries.*;
 
 public class JsonArbitraryProvider implements ArbitraryProvider {
 
@@ -42,12 +42,12 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 
 	private Arbitrary<String> jsonArray() {
 		return oneOf(
-				array(jsonNumber()),
-				array(jsonNumber()),
-				array(jsonString()),
-				array(jsonString()),
-				array(jsonBoolean()),
-				array(jsonObject())
+			array(jsonNumber()),
+			array(jsonNumber()),
+			array(jsonString()),
+			array(jsonString()),
+			array(jsonBoolean()),
+			array(jsonObject())
 		);
 	}
 
@@ -55,15 +55,21 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 		// Must be lazy due to recursive creation of json object arbitraries
 		return lazy(() -> {
 			IntegerArbitrary numberOfProperties = integers().between(0, 5);
-			Arbitrary<String> jsonKey = jsonKey().unique();
 			return numberOfProperties
-						   .flatMap(props -> {
-							   List<Arbitrary<Tuple2<String, String>>> entries =
-									   IntStream.range(0, props)
-												.mapToObj(i -> Combinators.combine(jsonKey, jsonValue()).as(Tuple::of))
-												.collect(Collectors.toList());
-							   return Combinators.combine(entries).as(keysAndValues -> "{ " + objectBody(keysAndValues) + " }");
-						   });
+					   .flatMap(props -> {
+						   Arbitrary<List<String>> propNames = jsonKey().list().ofSize(props).uniqueElements();
+						   Arbitrary<List<String>> propValues = jsonValue().list().ofSize(props);
+						   return Combinators.combine(propNames, propValues)
+											 .as((keys, values) -> {
+												 List<Tuple2<String, String>> keysAndValues = new ArrayList<>();
+												 for (int i = 0; i < keys.size(); i++) {
+													 String key = keys.get(i);
+													 String value = values.get(i);
+													 keysAndValues.add(Tuple.of(key, value));
+												 }
+												 return "{ " + objectBody(keysAndValues) + " }";
+											 });
+					   });
 		});
 	}
 
@@ -82,7 +88,7 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 	}
 
 	private Arbitrary<String> jsonNull() {
-		return constant("null");
+		return just("null");
 	}
 
 	private Arbitrary<String> jsonKey() {

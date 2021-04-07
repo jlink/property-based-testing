@@ -18,11 +18,11 @@ class MyStringStackActions {
 	}
 
 	private static Arbitrary<Action<MyStringStack>> clear() {
-		return Arbitraries.constant(new ClearAction());
+		return Arbitraries.just(new ClearAction());
 	}
 
 	private static Arbitrary<Action<MyStringStack>> pop() {
-		return Arbitraries.constant(new PopAction());
+		return Arbitraries.just(new PopAction());
 	}
 
 	private static class PushAction implements Action<MyStringStack>, Serializable {

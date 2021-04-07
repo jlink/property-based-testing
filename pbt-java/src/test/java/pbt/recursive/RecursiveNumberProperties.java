@@ -12,7 +12,7 @@ class RecursiveNumberProperties {
 	@Provide
 	Arbitrary<Integer> numbers() {
 		return Arbitraries.oneOf( //
-				Arbitraries.constant(1), //
+				Arbitraries.just(1), //
 				Arbitraries.lazy(this::numbers).map(a -> a + 1)
 		);
 	}

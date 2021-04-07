@@ -20,8 +20,8 @@ public class StringStackModel implements Model<StringStack, List<String>> {
 				Arbitraries.strings()
 						   .alpha().ofLength(5)
 						   .map(PushAction::new);
-		Arbitrary<ModelAction<StringStack, List<String>>> clear = Arbitraries.constant(new ClearAction());
-		Arbitrary<ModelAction<StringStack, List<String>>> pop = Arbitraries.constant(new PopAction());
+		Arbitrary<ModelAction<StringStack, List<String>>> clear = Arbitraries.just(new ClearAction());
+		Arbitrary<ModelAction<StringStack, List<String>>> pop = Arbitraries.just(new PopAction());
 		return Arbitraries.oneOf(push, clear, pop);
 	}
 

@@ -21,15 +21,15 @@ class SpotifyArbitraries {
 	}
 
 	private Arbitrary<Artist> anArtist() {
-		return uniqueNames().map(Artist::new);
+		return names().map(Artist::new);
 	}
 
 	private SetArbitrary<Artist> aSetOfArtists() {
-		return anArtist().set();
+		return anArtist().set().uniqueElements(a -> a.name);
 	}
 
 	private Arbitrary<Song> aSong(Set<Album> albums) {
-		Arbitrary<String> songName = uniqueNames();
+		Arbitrary<String> songName = names();
 		Arbitrary<Album> album = Arbitraries.of(albums);
 		Arbitrary<Set<Artist>> artists = album.flatMap(a -> {
 			return Arbitraries.of(a.artists).set().ofMinSize(1);
@@ -39,21 +39,21 @@ class SpotifyArbitraries {
 	}
 
 	private SetArbitrary<Song> aSetOfSongs(final Set<Album> albums) {
-		return aSong(albums).set();
+		return aSong(albums).set().uniqueElements(s -> s.name);
 	}
 
 	private Arbitrary<Album> anAlbum(Set<Artist> artists) {
-		Arbitrary<String> albumName = uniqueNames();
+		Arbitrary<String> albumName = names();
 		Arbitrary<Set<Artist>> albumArtists = Arbitraries.of(artists).set().ofMinSize(1);
 		return Combinators.combine(albumName, albumArtists).as(Album::new);
 	}
 
 	private SetArbitrary<Album> aSetOfAlbums(final Set<Artist> artists) {
-		return anAlbum(artists).set();
+		return anAlbum(artists).set().uniqueElements(a -> a.name);
 	}
 
 	private Arbitrary<Set<User>> aSetOfUsers(final Set<Song> songs) {
-		SetArbitrary<User> aSetOfUsers = aUser(songs).set().ofMinSize(1);
+		SetArbitrary<User> aSetOfUsers = aUser(songs).set().uniqueElements(u -> u.name).ofMinSize(1);
 		return addFollowingsToUsers(aSetOfUsers);
 	}
 
@@ -74,7 +74,7 @@ class SpotifyArbitraries {
 
 	private Arbitrary<User> aUser(Set<Song> songs) {
 		Arbitrary<Set<Song>> liked = Arbitraries.of(songs).set();
-		Arbitrary<String> userName = uniqueNames();
+		Arbitrary<String> userName = names();
 		return Combinators
 					   .combine(userName, liked)
 					   .as((name, likedSongs) ->
@@ -87,8 +87,8 @@ class SpotifyArbitraries {
 						   });
 	}
 
-	private Arbitrary<String> uniqueNames() {
-		return Arbitraries.strings().withCharRange('a', 'z').ofLength(3).unique();
+	private Arbitrary<String> names() {
+		return Arbitraries.strings().withCharRange('a', 'z').ofLength(3);
 	}
 
 }

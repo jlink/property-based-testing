@@ -38,7 +38,7 @@ class PokerProperties {
 
 	@Provide
 	Arbitrary<List<PlayingCard>> decks() {
-		return cards().unique().list().ofSize(52);
+		return cards().list().uniqueElements().ofSize(52);
 	}
 
 	@Property
