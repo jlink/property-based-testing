@@ -5,7 +5,17 @@ public class Item {
 		return new Item(singleCost);
 	}
 
-	public Item(int singleCost) {
+	private final int singleCost;
 
+	public Item(int singleCost) {
+		this.singleCost = singleCost;
+	}
+
+	public int singleCost() {
+		return singleCost;
+	}
+
+	public boolean isForFree() {
+		return singleCost == 0;
 	}
 }

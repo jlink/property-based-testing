@@ -10,6 +10,6 @@ public class Budget {
 	}
 
 	public boolean canAfford(Bill bill) {
-		return false;
+		return bill.isForFree();
 	}
 }
