@@ -116,7 +116,7 @@ Will I keep the initial example test or remove it since it's fully covered by th
 I often keep examples when they are easier to understand than the equivalent property.
 Here, the property seems just as readable, so I delete the example.
 
-# Step 3 - Drive next Feature with Property
+## Step 3 - Drive next Feature with Property
 
 In the good old moving-from-simple-to-more-complicated style of TDD the _totalLimit_ seems
 the obvious next target. Writing the property for this is mostly straightforward:
@@ -140,7 +140,7 @@ Except that I haven't implemented `Bill.totalCost()` yet.
 So I comment out the property above and slip in a property-driven implementation 
 of a bill's total cost calculation.
 
-# Step 3.1 - Property-drive Implementation of Stepping Stone Implementation
+### Step 3.1 - Property-drive Implementation of Stepping Stone Implementation
 
 ```java
 class Bill_Properties...
