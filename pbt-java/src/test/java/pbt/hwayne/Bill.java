@@ -20,4 +20,8 @@ public class Bill {
 	public boolean isForFree() {
 		return items.stream().allMatch(Item::isForFree);
 	}
+
+	public int totalCost() {
+		return items.stream().mapToInt(Item::singleCost).sum();
+	}
 }
