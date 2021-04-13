@@ -24,4 +24,12 @@ public class Bill {
 	public int totalCost() {
 		return items.stream().mapToInt(Item::singleCost).sum();
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("Bill{");
+		sb.append("items=").append(items);
+		sb.append('}');
+		return sb.toString();
+	}
 }

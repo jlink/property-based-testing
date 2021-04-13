@@ -266,3 +266,95 @@ Well, it freed me from thinking about the usual partitions like 0 items, 1 items
 Moreover, I feel more secure with doing bigger chunks of implementation in one step 
 when backed by a property as compared to "just" an example. 
 This could arguably be a false sense of security, though. 
+
+
+### Step 3.2 - Use new Implementation for Feature
+
+Now that `Bill.totalCost()` exists let's revisit and re-activate 
+the property for the total limit feature:
+
+```java
+@Property
+void total_limit_of_budget_used_for_afford(
+  @ForAll @IntRange(min = 1) int totalLimit,
+  @ForAll("bills") Bill bill
+) {
+  Budget budget = Budget.withTotalLimit(totalLimit);
+  if (bill.totalCost() <= totalLimit) {
+    assertThat(budget.canAfford(bill)).isTrue();
+  } else {
+    assertThat(budget.canAfford(bill)).isFalse();
+  }
+}
+```
+
+As expected it fails. The falsified example, however, is a bit uninformative:
+
+```
+Shrunk Sample (17 steps)
+------------------------
+  totalLimit: 1
+  bill: pbt.hwayne.Bill@d6e7bab
+```
+
+It clearly tells me that `Bill` and `Item` need reasonable reporting functionality.
+In Java implementing `toString()` is the obvious way - and I'd certainly do it - but _jqwik_ 
+[has additional reporting capabilities](https://jqwik.net/docs/current/user-guide.html#failure-reporting)
+which I'll use here (see [BudgetReportingFormats](https://github.com/jlink/property-based-testing/blob/main/pbt-java/src/test/java/pbt/hwayne/BudgetReporting.java)).
+The sample report is more to the point now:
+
+```
+Shrunk Sample (17 steps)
+------------------------
+  totalLimit: 1
+  bill: {"items"=[{"singleCost"=1}]}
+```
+
+Making the property succeed is straightforward:
+
+```java
+public class Budget...
+  public boolean canAfford(Bill bill) {
+    return bill.totalCost() <= totalLimit;
+  }
+```
+
+I keep wondering, though, if both branches of the invariant are really covered;
+statistics and coverage checking come to the help:
+
+```java
+@Property
+void total_limit_of_budget_used_for_afford(
+  @ForAll @IntRange(min = 1) int totalLimit,
+  @ForAll("bills") Bill bill
+) {
+  Budget budget = Budget.withTotalLimit(totalLimit);
+
+  boolean canBeAfforded = bill.totalCost() <= totalLimit;
+  Statistics.label("bill can be afforded")
+            .collect(canBeAfforded)
+            .coverage(checker -> {
+              checker.check(true).percentage(p -> p > 10);
+              checker.check(false).percentage(p -> p > 10);
+            });
+
+  if (canBeAfforded) {
+    assertThat(budget.canAfford(bill)).isTrue();
+  } else {
+    assertThat(budget.canAfford(bill)).isFalse();
+  }
+}
+```
+
+The report shows are more or less equal distribution between the two cases:
+
+```
+Can Afford Properties:total limit of budget used for afford] (1000) bill can be afforded = 
+    true  (553) : 55 %
+    false (447) : 45 %
+```
+
+Arguably, the combination of branching and coverage checking could (and probably should) 
+require less boilerplate. 
+Quickcheck has a dedicated feature for that and 
+[jqwik deserves one as well](https://github.com/jlink/jqwik/issues/86). 

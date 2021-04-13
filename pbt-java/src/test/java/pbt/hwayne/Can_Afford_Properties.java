@@ -4,6 +4,7 @@ import java.util.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.*;
+import net.jqwik.api.statistics.*;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -16,18 +17,27 @@ class Can_Afford_Properties {
 		assertThat(zeroBudget.canAfford(billWithItems)).isFalse();
 	}
 
-	// @Property
-	// void total_limit_of_budget_used_for_afford(
-	// 	@ForAll @IntRange(min = 1) int totalLimit,
-	// 	@ForAll("bills") Bill bill
-	// ) {
-	// 	Budget budget = Budget.withTotalLimit(totalLimit);
-	// 	if (bill.totalCost() <= totalLimit) {
-	// 		assertThat(budget.canAfford(bill)).isTrue();
-	// 	} else {
-	// 		assertThat(budget.canAfford(bill)).isFalse();
-	// 	}
-	// }
+	@Property
+	void total_limit_of_budget_used_for_afford(
+		@ForAll @IntRange(min = 1) int totalLimit,
+		@ForAll("bills") Bill bill
+	) {
+		Budget budget = Budget.withTotalLimit(totalLimit);
+
+		boolean canBeAfforded = bill.totalCost() <= totalLimit;
+		Statistics.label("bill can be afforded")
+				  .collect(canBeAfforded)
+				  .coverage(checker -> {
+					  checker.check(true).percentage(p -> p > 10);
+					  checker.check(false).percentage(p -> p > 10);
+				  });
+
+		if (canBeAfforded) {
+			assertThat(budget.canAfford(bill)).isTrue();
+		} else {
+			assertThat(budget.canAfford(bill)).isFalse();
+		}
+	}
 
 	@Provide
 	Arbitrary<Bill> bills() {

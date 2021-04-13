@@ -2,3 +2,5 @@ pbt.spotify.SpotifyReportingFormats$SpotifyFormat
 pbt.spotify.SpotifyReportingFormats$Albums
 pbt.spotify.SpotifyReportingFormats$Songs
 pbt.spotify.SpotifyReportingFormats$Users
+pbt.hwayne.BudgetReportingFormats$Bills
+pbt.hwayne.BudgetReportingFormats$Items

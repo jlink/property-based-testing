@@ -5,11 +5,13 @@ public class Budget {
 		return new Budget(totalLimit);
 	}
 
-	public Budget(int totalLimit) {
+	private final int totalLimit;
 
+	public Budget(int totalLimit) {
+		this.totalLimit = totalLimit;
 	}
 
 	public boolean canAfford(Bill bill) {
-		return bill.isForFree();
+		return bill.totalCost() <= totalLimit;
 	}
 }

@@ -18,4 +18,12 @@ public class Item {
 	public boolean isForFree() {
 		return singleCost == 0;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("Item{");
+		sb.append("singleCost=").append(singleCost);
+		sb.append('}');
+		return sb.toString();
+	}
 }
