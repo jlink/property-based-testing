@@ -300,7 +300,7 @@ Shrunk Sample (17 steps)
 It clearly tells me that `Bill` and `Item` need reasonable reporting functionality.
 In Java implementing `toString()` is the obvious way - and I'd certainly do it - but _jqwik_ 
 [has additional reporting capabilities](https://jqwik.net/docs/current/user-guide.html#failure-reporting)
-which I'll use here (see [BudgetReportingFormats](https://github.com/jlink/property-based-testing/blob/main/pbt-java/src/test/java/pbt/hwayne/BudgetReporting.java)).
+which I'll use here (see [BudgetReportingFormats](https://github.com/jlink/property-based-testing/blob/main/pbt-java/src/test/java/pbt/hwayne/BudgetReportingFormats.java)).
 The sample report is more to the point now:
 
 ```
