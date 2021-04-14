@@ -1,8 +1,10 @@
 package pbt.hwayne;
 
+import java.lang.annotation.*;
 import java.util.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.constraints.*;
 import net.jqwik.api.statistics.*;
 
@@ -41,15 +43,21 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<Bill> bills() {
-		Arbitrary<Item[]> items = items().array(Item[].class).ofMinSize(1);
+		Arbitrary<Item[]> items = items().array(Item[].class).ofMinSize(Bill.MIN_NUMBER_OF_ITEMS);
 		return items.map(Bill::of);
 	}
 
 	@Provide
 	Arbitrary<Item> items() {
-		Arbitrary<Integer> singleCosts = Arbitraries.integers().between(0, 1000);
-		Arbitrary<Integer> counts = Arbitraries.integers().between(1, 100);
-		return Combinators.combine(singleCosts, counts).as(Item::withCostAndCount);
+		return Combinators.combine(itemSingleCosts(), itemCounts()).as(Item::withCostAndCount);
+	}
+
+	IntegerArbitrary itemCounts() {
+		return Arbitraries.integers().between(Item.DEFAULT_COUNT, Item.MAX_COUNT);
+	}
+
+	IntegerArbitrary itemSingleCosts() {
+		return Arbitraries.integers().between(0, Item.MAX_SINGLE_COST);
 	}
 
 	@Group
@@ -68,8 +76,8 @@ class Can_Afford_Properties {
 	class Item_Properties {
 		@Property
 		void totalCost_considers_count(
-			@ForAll @IntRange(max = 1000) int singleCost,
-			@ForAll @IntRange(min = 1, max = 100) int count
+			@ForAll @ItemSingleCost int singleCost,
+			@ForAll @ItemCount int count
 		) {
 			Item item = Item.withCostAndCount(singleCost, count);
 			assertThat(item.singleCost()).isEqualTo(singleCost);
@@ -78,3 +86,11 @@ class Can_Afford_Properties {
 		}
 	}
 }
+
+@Target({ElementType.PARAMETER, ElementType.TYPE_USE})
+@Retention(RetentionPolicy.RUNTIME)
+@IntRange(min = 0, max = Item.MAX_SINGLE_COST) @interface ItemSingleCost {}
+
+@Target({ElementType.PARAMETER, ElementType.TYPE_USE})
+@Retention(RetentionPolicy.RUNTIME)
+@IntRange(min = Item.DEFAULT_COUNT, max = Item.MAX_COUNT) @interface ItemCount {}

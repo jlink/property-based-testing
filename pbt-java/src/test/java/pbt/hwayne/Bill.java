@@ -3,6 +3,9 @@ package pbt.hwayne;
 import java.util.*;
 
 public class Bill {
+
+	public static int MIN_NUMBER_OF_ITEMS = 1;
+
 	public static Bill of(Item... items) {
 		return new Bill(Arrays.asList(items));
 	}

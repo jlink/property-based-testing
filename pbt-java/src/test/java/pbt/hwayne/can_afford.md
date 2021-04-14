@@ -169,8 +169,8 @@ Shrunk Sample (10 steps)
   singleCosts: [1]
 ```
 
-Having done this kind of summing a few times I'm quite confident 
-getting the basics right in one try:
+Having done this kind of summing up a few times in my career, I'm quite confident 
+to get the basics right in one try:
 
 ```java
 class Bill...
@@ -204,8 +204,8 @@ The result reveals the problem:
     ...
 ```
 
-There are negative sums but since the property uses (more or less) the same code
-as oracle that the domain code uses for total cost calculation _both_ will arrive
+There are __negative sums__, but since the property uses (more or less) the same code
+as oracle that the domain code uses for total cost calculation, _both_ will arrive
 at the same negative value. 
 My mistake, I definitely forgot one part of the property, so I add it:
 
@@ -219,7 +219,7 @@ void totalCost(@ForAll @Size(min = 1) List<@IntRange(min = 0) Integer> singleCos
 }
 ```
 
-Now the property fails at immediately:
+Now the property fails immediately:
 ```
 Bill Properties:totalCost = 
   java.lang.AssertionError:
@@ -346,7 +346,7 @@ void total_limit_of_budget_used_for_afford(
 }
 ```
 
-The report shows are more or less equal distribution between the two cases:
+The report shows that there is more or less equal distribution between the two cases:
 
 ```
 Can Afford Properties:total limit of budget used for afford] (1000) bill can be afforded = 
@@ -429,5 +429,67 @@ public class Bill...
   }
 ```
 
+### Step 3.4 - Making Domain Constraints Explicit
 
+So far, a couple of domain decisions had to be taken on the way:
+- A bill must have at least one item
+- An Item can have a single cost between 0 and 1000
+- An Item's count is between 1 and 100. When no count is given, 1 is the default.
 
+Those constraints are embedded in the generators. 
+They should be made explicit, e.g. through constants within the domain code.
+Moreover, generator code should be refactored so that deriving new generators 
+and writing new properties has only little chance of missing the constraints.
+
+Let's start with extracting a few constants:
+
+```java
+public class Bill...
+  public static int MIN_NUMBER_OF_ITEMS = 1;
+
+public class Item...
+  public static final int MAX_SINGLE_COST = 1000;
+  public static final int DEFAULT_COUNT = 1;
+  public static final int MAX_COUNT = 100;
+```
+
+What I also did is extracting some parts of the items generator:
+
+```java
+@Provide
+Arbitrary<Item> items() {
+  return Combinators.combine(itemSingleCosts(), itemCounts()).as(Item::withCostAndCount);
+}
+
+IntegerArbitrary itemCounts() {
+  return Arbitraries.integers().between(Item.DEFAULT_COUNT, Item.MAX_COUNT);
+}
+
+IntegerArbitrary itemSingleCosts() {
+  return Arbitraries.integers().between(0, Item.MAX_SINGLE_COST);
+}
+```
+
+Additionally, I introduced two custom annotations to facilitate further domain-specific properties:
+
+```java
+@IntRange(min = 0, max = Item.MAX_SINGLE_COST) 
+@interface ItemSingleCost {}
+
+@IntRange(min = Item.DEFAULT_COUNT, max = Item.MAX_COUNT) 
+@interface ItemCount {}
+
+@Property
+void totalCost_considers_count(
+  @ForAll @ItemSingleCost int singleCost,
+  @ForAll @ItemCount int count
+) {
+  Item item = Item.withCostAndCount(singleCost, count);
+  assertThat(item.singleCost()).isEqualTo(singleCost);
+  assertThat(item.count()).isEqualTo(count);
+  assertThat(item.cost()).isEqualTo(singleCost * count);
+}
+```
+
+_jqwik_ offers even more mechanisms for modularizing and encapsulating domain specific
+value generation, but this is not supposed to be a _jqwik_ tutorial.

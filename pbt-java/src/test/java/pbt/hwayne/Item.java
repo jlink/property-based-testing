@@ -1,8 +1,12 @@
 package pbt.hwayne;
 
 public class Item {
+	public static final int MAX_SINGLE_COST = 1000;
+	public static final int DEFAULT_COUNT = 1;
+	public static final int MAX_COUNT = 100;
+
 	public static Item withCost(int singleCost) {
-		return withCostAndCount(singleCost, 1);
+		return withCostAndCount(singleCost, DEFAULT_COUNT);
 	}
 
 	public static Item withCostAndCount(int singleCost, int count) {
