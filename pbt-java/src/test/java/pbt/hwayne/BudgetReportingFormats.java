@@ -35,6 +35,24 @@ public interface BudgetReportingFormats {
 			Map<String, Object> attributes = new HashMap<>();
 			attributes.put("singleCost", item.singleCost());
 			attributes.put("count", item.count());
+			item.category().ifPresent(category -> attributes.put("category", category));
+			return attributes;
+		}
+	}
+
+	class Limits implements SampleReportingFormat {
+
+		@Override
+		public boolean appliesTo(Object value) {
+			return value instanceof Limit;
+		}
+
+		@Override
+		public Object report(Object value) {
+			Limit limit = (Limit) value;
+			Map<String, Object> attributes = new HashMap<>();
+			attributes.put("category", limit.category());
+			attributes.put("amount", limit.amount());
 			return attributes;
 		}
 	}

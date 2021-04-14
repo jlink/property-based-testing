@@ -493,3 +493,41 @@ void totalCost_considers_count(
 
 _jqwik_ offers even more mechanisms for modularizing and encapsulating domain specific
 value generation, but this is not supposed to be a _jqwik_ tutorial.
+
+
+## Step 4 - Budget with Single Category Items
+
+Being an impatient person my feeling is that we've been lingering over the easy parts for too long.
+Time to tackle the heart of the problem: categories. 
+
+### Step 4.1 Keeping Track of Limits and Categories
+
+I'll fast-forward over the more or less trivial necessities: `Item.with(int cost, int count, Set<String> categories)` and
+`Budget.with(int totalLimit, Set<Limit> limit)`. 
+You can find my properties for these book-keeping features 
+[in the code base](https://github.com/jlink/property-based-testing/tree/main/pbt-java/src/test/java/pbt/hwayne).
+
+One notable detail: I anticipated the need to have matching categories in later properties. 
+So I tweaked the category string generator in order to raise the probability of duplicate category creation:
+
+```java
+@Provide
+Arbitrary<String> categories() {
+  return Arbitraries.oneOf(
+    Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(10),
+    Arbitraries.of("food", "rent", "candles", "gym", "transit", "clothes")
+  );
+}
+```
+
+Later on I'll probably have to revisit the frequencies of unique versus duplicate strings.
+On the other hand I had to make sure that the same category does not occur more than once
+per budget. That's a domain constraint, or is it @hwaine?
+
+```java
+@Provide("set of limits")
+Arbitrary<Set<Limit>> setOfLimits() {
+  return limits().set().uniqueElements(Limit::category).ofMaxSize(10);
+}
+```
+

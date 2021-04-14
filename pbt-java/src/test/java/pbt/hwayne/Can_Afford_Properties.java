@@ -60,6 +60,24 @@ class Can_Afford_Properties {
 		return Arbitraries.integers().between(0, Item.MAX_SINGLE_COST);
 	}
 
+	@Provide("set of limits")
+	Arbitrary<Set<Limit>> setOfLimits() {
+		return limits().set().uniqueElements(Limit::category).ofMaxSize(10);
+	}
+
+	Arbitrary<Limit> limits() {
+		Arbitrary<Integer> limitAmounts = Arbitraries.integers().between(1, Item.MAX_SINGLE_COST * Item.MAX_COUNT);
+		return Combinators.combine(categories(), limitAmounts).as(Limit::of);
+	}
+
+	@Provide
+	Arbitrary<String> categories() {
+		return Arbitraries.oneOf(
+			Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(10),
+			Arbitraries.of("food", "rent", "candles", "gym", "transit", "clothes")
+		);
+	}
+
 	@Group
 	class Bill_Properties {
 		@Property
@@ -84,6 +102,33 @@ class Can_Afford_Properties {
 			assertThat(item.count()).isEqualTo(count);
 			assertThat(item.cost()).isEqualTo(singleCost * count);
 		}
+
+		@Property
+		void categories(
+			@ForAll @ItemSingleCost int singleCost,
+			@ForAll @ItemCount int count,
+			@ForAll @Category String category
+		) {
+			Item item = Item.with(singleCost, count, category);
+			assertThat(item.singleCost()).isEqualTo(singleCost);
+			assertThat(item.count()).isEqualTo(count);
+			assertThat(item.category()).isEqualTo(Optional.of(category));
+			assertThat(item.cost()).isEqualTo(singleCost * count);
+		}
+	}
+
+	@Group
+	class BudgetProperties {
+
+		@Property
+		void createWithTotalLimitAndCategoryLimits(
+			@ForAll @IntRange(min = 1) int totalLimit,
+			@ForAll("set of limits") Set<Limit> limits
+		) {
+			Budget budget = Budget.with(totalLimit, limits);
+			assertThat(budget.totalLimit()).isEqualTo(totalLimit);
+			assertThat(budget.limits()).isEqualTo(limits);
+		}
 	}
 }
 
@@ -94,3 +139,7 @@ class Can_Afford_Properties {
 @Target({ElementType.PARAMETER, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 @IntRange(min = Item.DEFAULT_COUNT, max = Item.MAX_COUNT) @interface ItemCount {}
+
+@Target({ElementType.PARAMETER, ElementType.TYPE_USE})
+@Retention(RetentionPolicy.RUNTIME)
+@From("categories") @interface Category {}
