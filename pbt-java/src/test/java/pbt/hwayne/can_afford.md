@@ -358,3 +358,76 @@ Arguably, the combination of branching and coverage checking could (and probably
 require less boilerplate. 
 Quickcheck has a dedicated feature for that and 
 [jqwik deserves one as well](https://github.com/jlink/jqwik/issues/86). 
+
+
+### Step 3.3 - Adding Item.count()
+
+When working towards a concrete goal - like now - I maintain a "inbox". 
+All things that must be done for the goal to be reached and that cannot be done at once
+get in there. Here's an excerpt of my can-afford inbox:
+
+- _Consider Categories for afford_
+- _Item.count(): Use it for cost calculation._
+
+Whereas the first point has been there from the beginning and will be broken down in a future step,
+I added _Item.count()_ recently while implementing `Bill.totalCost()`. 
+It's not a particular difficult thing to do, but it's important for getting done.
+Since I consider `count` to be "just" an attribute to remember 
+I go with the obvious property to drive implementation:
+
+```java
+@Group
+class Item_Properties {
+  @Property
+  void totalCost_considers_count(
+    @ForAll @IntRange(max = 1000) int singleCost,
+    @ForAll @IntRange(min = 1, max = 100) int count
+  ) {
+    Item item = Item.withCostAndCount(singleCost, count);
+    assertThat(item.singleCost()).isEqualTo(singleCost);
+    assertThat(item.count()).isEqualTo(count);
+    assertThat(item.cost()).isEqualTo(singleCost * count);
+  }
+}
+```
+
+This property is somewhat more complex than a simple example, but it frees me from deciding whether triangulation is necessary.
+Moreover, it forces me to think about the maximum possible _count_ value.
+
+I'll spare you the trivial implementation of _count_ and _cost_, but there's more to do:
+`Bill.totalCost()` is still based on `Item.singleCost()`. 
+That must be fixed, and I prefer to have a failing property tell me so.
+Changing the _items_ generator and the _total cost_ property looks like a reasonable means to that end:
+
+```java
+@Provide
+Arbitrary<Item> items() {
+  Arbitrary<Integer> singleCosts = Arbitraries.integers().between(0, 1000);
+  Arbitrary<Integer> counts = Arbitraries.integers().between(1, 100);
+  return Combinators.combine(singleCosts, counts).as(Item::withCostAndCount);
+}
+
+@Group
+class Bill_Properties {
+  @Property
+  void totalCost(@ForAll @Size(min = 1, max = 20) List<@From("items") Item> items) {
+    Bill bill = Bill.of(items.toArray(new Item[0]));
+
+    int sum = items.stream().mapToInt(Item::cost).sum();
+    assertThat(sum).isGreaterThanOrEqualTo(0);
+    assertThat(bill.totalCost()).isEqualTo(sum);
+  }
+}
+```
+
+And indeed, the property fails and makes me adapt `Bill.totalCost()`:
+
+```java
+public class Bill...
+  public int totalCost() {
+    return items.stream().mapToInt(Item::cost).sum();
+  }
+```
+
+
+

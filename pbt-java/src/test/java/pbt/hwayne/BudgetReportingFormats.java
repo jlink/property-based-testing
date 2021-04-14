@@ -34,6 +34,7 @@ public interface BudgetReportingFormats {
 			Item item = (Item) value;
 			Map<String, Object> attributes = new HashMap<>();
 			attributes.put("singleCost", item.singleCost());
+			attributes.put("count", item.count());
 			return attributes;
 		}
 	}

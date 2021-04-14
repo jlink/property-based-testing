@@ -47,7 +47,9 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<Item> items() {
-		return Arbitraries.integers().between(0, 1000).map(Item::withCost);
+		Arbitrary<Integer> singleCosts = Arbitraries.integers().between(0, 1000);
+		Arbitrary<Integer> counts = Arbitraries.integers().between(1, 100);
+		return Combinators.combine(singleCosts, counts).as(Item::withCostAndCount);
 	}
 
 	@Group
@@ -56,9 +58,23 @@ class Can_Afford_Properties {
 		void totalCost(@ForAll @Size(min = 1, max = 20) List<@From("items") Item> items) {
 			Bill bill = Bill.of(items.toArray(new Item[0]));
 
-			int sum = items.stream().mapToInt(Item::singleCost).sum();
+			int sum = items.stream().mapToInt(Item::cost).sum();
 			assertThat(sum).isGreaterThanOrEqualTo(0);
 			assertThat(bill.totalCost()).isEqualTo(sum);
+		}
+	}
+
+	@Group
+	class Item_Properties {
+		@Property
+		void totalCost_considers_count(
+			@ForAll @IntRange(max = 1000) int singleCost,
+			@ForAll @IntRange(min = 1, max = 100) int count
+		) {
+			Item item = Item.withCostAndCount(singleCost, count);
+			assertThat(item.singleCost()).isEqualTo(singleCost);
+			assertThat(item.count()).isEqualTo(count);
+			assertThat(item.cost()).isEqualTo(singleCost * count);
 		}
 	}
 }

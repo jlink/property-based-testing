@@ -22,7 +22,7 @@ public class Bill {
 	}
 
 	public int totalCost() {
-		return items.stream().mapToInt(Item::singleCost).sum();
+		return items.stream().mapToInt(Item::cost).sum();
 	}
 
 	@Override
