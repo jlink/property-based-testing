@@ -4,4 +4,5 @@ pbt.spotify.SpotifyReportingFormats$Songs
 pbt.spotify.SpotifyReportingFormats$Users
 pbt.hwayne.BudgetReportingFormats$Bills
 pbt.hwayne.BudgetReportingFormats$Items
+pbt.hwayne.BudgetReportingFormats$Budgets
 pbt.hwayne.BudgetReportingFormats$Limits

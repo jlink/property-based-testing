@@ -525,7 +525,7 @@ On the other hand I had to make sure that the same category does not occur more 
 per budget. That's a domain constraint, or is it @hwaine?
 
 ```java
-@Provide("set of limits")
+@Provide
 Arbitrary<Set<Limit>> setOfLimits() {
   return limits().set().uniqueElements(Limit::category).ofMaxSize(10);
 }
@@ -659,7 +659,173 @@ However, it also triggers more questions:
 Whenever several of those questions pop up that may be related and that cannot be answered with confidence,
 I reach for properties instead of examples. That's the topic for the next step...
 
+### Step 4.3 - Budget Generator and Properties
 
+Good properties need good generators. 
+In my experience good generators cover the domain type.
+The central domain type is `Budget`; let's add a generator for it:
+
+```java
+@Provide
+Arbitrary<Budget> budgets() {
+  int maxLimit = Item.MAX_SINGLE_COST * Item.MAX_COUNT * 10;
+  Arbitrary<Integer> totalLimit = Arbitraries.integers().between(1, maxLimit);
+  return Combinators.combine(totalLimit, setOfLimits())
+                    .as(Budget::with);
+}
+```
+
+Since we want to use the budget generator in combination with a bill generator,
+it's important that the different cases do really occur, e.g. that the categories used
+for the budget are also present in the bill. 
+As soon as you leave the area of trivial generators, it's worthwhile to check
+if generators expose the desired behaviour:
+
+```java
+@Property
+void generated_budget_limits_and_item_categories_overlap(
+  @ForAll("budgets") Budget budget,
+  @ForAll("bills") Bill bill
+) {
+  Set<String> categoriesInLimits = budget.limits().stream()
+                       .map(Limit::category)
+                       .collect(Collectors.toSet());
+  Set<String> categoriesInItems = bill.items().stream()
+                    .filter(i -> i.category().isPresent())
+                    .map(i -> i.category().get()).collect(Collectors.toSet());
+
+  Statistics.label("categories overlap").collect(overlap(categoriesInItems, categoriesInLimits));
+}
+```
+
+```
+[Can Afford Properties:generated budget limits and item categories overlap] (1000) categories overlap = 
+    false (587) : 59 %
+    true  (413) : 41 %
+```
+
+We see that there's an overlap in about half the cases. 
+That's not too bad, but that also means that the other half of cases 
+will only be useful for checking the total budget limit.
+Let's tweak the category generator a bit by raising the probability for four constant categories:
+
+```java
+@Provide
+Arbitrary<String> categories() {
+  return Arbitraries.frequencyOf(
+    Tuple.of(100, Arbitraries.of("a", "b", "c", "d")),
+    Tuple.of(1, Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(10))
+  );
+}
+```
+
+This gets us to about 60:40. This seems ok for now.
+If fiddling with probabilities does not get you where you want to be, 
+there are many more tricks in the bag of generator building.
+Most have to do with using the output of one generator to configure the domain range for another.
+
+Here's my first attempt at a property with random budgets and bills:
+
+```java
+@Property
+void limits_of_single_categories_are_preserved(
+  @ForAll("budgets") Budget budget,
+  @ForAll("bills") Bill bill
+) {
+  Assume.that(budget.totalLimit() >= bill.totalCost());
+  Set<String> categoriesInLimits = budget.limits().stream()
+                       .map(Limit::category)
+                       .collect(Collectors.toSet());
+  Set<String> categoriesInItems = bill.items().stream()
+                    .filter(i -> i.category().isPresent())
+                    .map(i -> i.category().get()).collect(Collectors.toSet());
+
+  Set<String> sharedCategories = intersect(categoriesInLimits, categoriesInItems);
+  Assume.that(!sharedCategories.isEmpty());
+
+  // Only about 20% of generated test cases get here
+
+  for (String category : sharedCategories) {
+    int total = totalForSingleCategory(category, bill);
+    if (total > limitForCategory(category, budget)) {
+      assertThat(budget.canAfford(bill))
+        .describedAs("category %s should not be affordable", category)
+        .isFalse();
+    }
+  }
+  assertThat(budget.canAfford(bill))
+    .describedAs("full bill should be affordable")
+    .isTrue();
+}
+```
+
+This is already rather complicated.
+It has two assumptions to filter out budgets whose totalLimit is exceeded 
+and cases without shared categories. 
+Only about 20% of all generated cases get through beyond this hurdle.
+But then - hooray! - our hypothesis is falsified:
+
+```
+Can Afford Properties:limits of single categories are preserved = 
+  org.opentest4j.AssertionFailedError:
+    [category d should not be affordable] 
+    Expecting value to be false but was true
+    
+Shrunk Sample (5 steps)
+-----------------------
+  budget: {"totalLimit"=999999, "limits"=[{"amount"=50654, "category"="d"}]}
+  bill:
+    {
+      "items"=
+        [
+          {"singleCost"=5, "count"=32, "category"="d"}, 
+          {"singleCost"=749, "count"=5, "category"="d"}, 
+          {"singleCost"=41, "count"=3, "category"="d"}, 
+          {"singleCost"=404, "count"=28, "category"="d"}, 
+          {"singleCost"=192, "count"=13, "category"="d"}, 
+          {"singleCost"=817, "count"=62, "category"="d"}, 
+          {"singleCost"=787, "count"=60, "category"="d"}, 
+          {"singleCost"=52, "count"=9, "category"="d"},
+          ... 
+        ]
+    }    
+```
+
+That's a real bug. And frankly
+The implementation did not consider a bill with more than one item of the same category.
+Let's repair it:
+
+```java
+public class Budget...
+  public boolean canAfford(Bill bill) {
+    if (isOutsideTotalBudget(bill)) {
+      return false;
+    }
+    Map<String, Integer> aggregatedTotals = aggregate(bill.items());
+    for (Map.Entry<String, Integer> total : aggregatedTotals.entrySet()) {
+      if (isOutsideCategoryBudget(total.getKey(), total.getValue())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private Map<String, Integer> aggregate(List<Item> items) {
+    Map<String, Integer> aggregated = new HashMap<>();
+    for (Item item : items) {
+      item.category().ifPresent(category -> {
+        int total = aggregated.getOrDefault(category, 0);
+        total += item.cost();
+        aggregated.put(category, total);
+      });
+    }
+    return aggregated;
+  }
+```
+
+My inkling is that this implementation cannot be evolved in a straightforward way
+as soon as multiple categories per item enter the scene.
+But we are evolutionary designers; let's stay optimistic then!
 
 
 

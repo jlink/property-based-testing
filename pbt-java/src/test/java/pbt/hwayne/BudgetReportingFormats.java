@@ -40,6 +40,23 @@ public interface BudgetReportingFormats {
 		}
 	}
 
+	class Budgets implements SampleReportingFormat {
+
+		@Override
+		public boolean appliesTo(Object value) {
+			return value instanceof Budget;
+		}
+
+		@Override
+		public Object report(Object value) {
+			Budget budget = (Budget) value;
+			Map<String, Object> attributes = new HashMap<>();
+			attributes.put("totalLimit", budget.totalLimit());
+			attributes.put("limits", budget.limits());
+			return attributes;
+		}
+	}
+
 	class Limits implements SampleReportingFormat {
 
 		@Override

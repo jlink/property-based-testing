@@ -2,6 +2,7 @@ package pbt.hwayne;
 
 import java.lang.annotation.*;
 import java.util.*;
+import java.util.stream.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.*;
@@ -63,12 +64,76 @@ class Can_Afford_Properties {
 	}
 
 	@Property
-	@Disabled
-	void budget_is_preserved_for_items_with_single_category(
+	void generated_budget_limits_and_item_categories_overlap(
 		@ForAll("budgets") Budget budget,
-		@ForAll @Size(min = 1, max = 20) List<@From("items") Item> items
+		@ForAll("bills") Bill bill
 	) {
+		Set<String> categoriesInLimits = budget.limits().stream()
+											   .map(Limit::category)
+											   .collect(Collectors.toSet());
+		Set<String> categoriesInItems = bill.items().stream()
+											.filter(i -> i.category().isPresent())
+											.map(i -> i.category().get()).collect(Collectors.toSet());
 
+		Statistics.label("categories overlap")
+				  .collect(overlap(categoriesInItems, categoriesInLimits))
+				  .coverage(checker -> checker.check(true).percentage(p -> p > 50));
+	}
+
+	@Property
+	void limits_of_single_categories_are_preserved(
+		@ForAll("budgets") Budget budget,
+		@ForAll("bills") Bill bill
+	) {
+		Assume.that(budget.totalLimit() >= bill.totalCost());
+		Set<String> categoriesInLimits = budget.limits().stream()
+											   .map(Limit::category)
+											   .collect(Collectors.toSet());
+		Set<String> categoriesInItems = bill.items().stream()
+											.filter(i -> i.category().isPresent())
+											.map(i -> i.category().get()).collect(Collectors.toSet());
+
+		Set<String> sharedCategories = intersect(categoriesInLimits, categoriesInItems);
+		Assume.that(!sharedCategories.isEmpty());
+
+		// Only about 20% of generated test cases get here
+
+		for (String category : sharedCategories) {
+			int total = totalForSingleCategory(category, bill);
+			if (total > limitForCategory(category, budget)) {
+				assertThat(budget.canAfford(bill))
+					.describedAs("category %s should not be afforded", category)
+					.isFalse();
+				return;
+			}
+		}
+		assertThat(budget.canAfford(bill))
+			.describedAs("full bill should be affordable")
+			.isTrue();
+	}
+
+	private int limitForCategory(String category, Budget budget) {
+		return budget.limits().stream()
+					 .filter(l -> l.category().equals(category))
+					 .findFirst().map(Limit::amount).orElse(0);
+	}
+
+	private int totalForSingleCategory(String category, Bill bill) {
+		return bill.items().stream()
+				   .filter(item -> item.category().equals(Optional.of(category)))
+				   .mapToInt(Item::cost)
+				   .sum();
+	}
+
+	private boolean overlap(Set<String> set1, Set<String> set2) {
+		Set<String> intersection = intersect(set1, set2);
+		return !intersection.isEmpty();
+	}
+
+	private Set<String> intersect(Set<String> set1, Set<String> set2) {
+		Set<String> intersection = new HashSet<>(set1);
+		intersection.retainAll(set2);
+		return intersection;
 	}
 
 	private Set<Limit> setOf(Limit... limits) {
@@ -77,8 +142,13 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<Bill> bills() {
-		Arbitrary<Item[]> items = items().array(Item[].class).ofMinSize(Bill.MIN_NUMBER_OF_ITEMS);
+		Arbitrary<Item[]> items = listOfItems().map(l -> l.toArray(new Item[0]));
 		return items.map(Bill::of);
+	}
+
+	@Provide
+	Arbitrary<List<Item>> listOfItems() {
+		return items().list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
 	}
 
 	@Provide
@@ -95,7 +165,15 @@ class Can_Afford_Properties {
 		return Arbitraries.integers().between(0, Item.MAX_SINGLE_COST);
 	}
 
-	@Provide("set of limits")
+	@Provide
+	Arbitrary<Budget> budgets() {
+		int maxLimit = Item.MAX_SINGLE_COST * Item.MAX_COUNT * 10;
+		Arbitrary<Integer> totalLimit = Arbitraries.integers().between(1, maxLimit);
+		return Combinators.combine(totalLimit, setOfLimits())
+						  .as(Budget::with);
+	}
+
+	@Provide
 	Arbitrary<Set<Limit>> setOfLimits() {
 		return limits().set().uniqueElements(Limit::category).ofMaxSize(10);
 	}
@@ -107,16 +185,16 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<String> categories() {
-		return Arbitraries.oneOf(
-			Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(10),
-			Arbitraries.of("food", "rent", "candles", "gym", "transit", "clothes")
+		return Arbitraries.frequencyOf(
+			Tuple.of(100, Arbitraries.of("a", "b", "c", "d")),
+			Tuple.of(1, Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(10))
 		);
 	}
 
 	@Group
 	class Bill_Properties {
 		@Property
-		void totalCost(@ForAll @Size(min = 1, max = 20) List<@From("items") Item> items) {
+		void totalCost(@ForAll("listOfItems") List<Item> items) {
 			Bill bill = Bill.of(items.toArray(new Item[0]));
 
 			int sum = items.stream().mapToInt(Item::cost).sum();
@@ -158,7 +236,7 @@ class Can_Afford_Properties {
 		@Property
 		void createWithTotalLimitAndCategoryLimits(
 			@ForAll @IntRange(min = 1) int totalLimit,
-			@ForAll("set of limits") Set<Limit> limits
+			@ForAll("setOfLimits") Set<Limit> limits
 		) {
 			Budget budget = Budget.with(totalLimit, limits);
 			assertThat(budget.totalLimit()).isEqualTo(totalLimit);

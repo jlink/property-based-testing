@@ -31,14 +31,25 @@ public class Budget {
 		if (isOutsideTotalBudget(bill)) {
 			return false;
 		}
-		for (Item item : bill.items()) {
-			if (item.category().isPresent()) {
-				if (isOutsideCategoryBudget(item.category().get(), item.cost())) {
-					return false;
-				}
+		Map<String, Integer> aggregatedTotals = aggregate(bill.items());
+		for (Map.Entry<String, Integer> total : aggregatedTotals.entrySet()) {
+			if (isOutsideCategoryBudget(total.getKey(), total.getValue())) {
+				return false;
 			}
 		}
 		return true;
+	}
+
+	private Map<String, Integer> aggregate(List<Item> items) {
+		Map<String, Integer> aggregated = new HashMap<>();
+		for (Item item : items) {
+			item.category().ifPresent(category -> {
+				int total = aggregated.getOrDefault(category, 0);
+				total += item.cost();
+				aggregated.put(category, total);
+			});
+		}
+		return aggregated;
 	}
 
 	private boolean isOutsideCategoryBudget(String category, int cost) {

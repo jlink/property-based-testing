@@ -4,6 +4,7 @@ import java.util.*;
 
 public class Bill {
 
+	public static final int MAX_NUMBER_OF_ITEMS = 100;
 	public static int MIN_NUMBER_OF_ITEMS = 1;
 
 	public static Bill of(Item... items) {
