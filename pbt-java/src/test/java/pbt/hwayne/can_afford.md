@@ -719,7 +719,7 @@ Arbitrary<String> categories() {
 }
 ```
 
-This gets us to about 60:40. This seems ok for now.
+This gets us to about 60:40, which seems ok for now.
 If fiddling with probabilities does not get you where you want to be, 
 there are many more tricks in the bag of generator building.
 Most have to do with using the output of one generator to configure the domain range for another.
@@ -791,7 +791,7 @@ Shrunk Sample (5 steps)
     }    
 ```
 
-That's a real bug. And frankly
+That's a real bug.
 The implementation did not consider a bill with more than one item of the same category.
 Let's repair it:
 
