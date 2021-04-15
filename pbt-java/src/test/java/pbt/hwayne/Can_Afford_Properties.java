@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.arbitraries.*;
 import net.jqwik.api.constraints.*;
 import net.jqwik.api.statistics.*;
 
@@ -41,6 +40,41 @@ class Can_Afford_Properties {
 		}
 	}
 
+	@Example
+	void limit_of_category_is_considered_for_item_with_single_category() {
+		Budget budget = Budget.with(100, setOf(
+			Limit.of("books", 50)
+		));
+
+		Bill bill = Bill.of(Item.with(51, 1, "books"));
+
+		assertThat(budget.canAfford(bill)).isFalse();
+	}
+
+	@Example
+	void limit_of_category_must_match_item_category() {
+		Budget budget = Budget.with(100, setOf(
+			Limit.of("books", 50)
+		));
+
+		Bill bill = Bill.of(Item.with(51, 1, "gym"));
+
+		assertThat(budget.canAfford(bill)).isTrue();
+	}
+
+	@Property
+	@Disabled
+	void budget_is_preserved_for_items_with_single_category(
+		@ForAll("budgets") Budget budget,
+		@ForAll @Size(min = 1, max = 20) List<@From("items") Item> items
+	) {
+
+	}
+
+	private Set<Limit> setOf(Limit... limits) {
+		return new HashSet<>(Arrays.asList(limits));
+	}
+
 	@Provide
 	Arbitrary<Bill> bills() {
 		Arbitrary<Item[]> items = items().array(Item[].class).ofMinSize(Bill.MIN_NUMBER_OF_ITEMS);
@@ -49,14 +83,15 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<Item> items() {
-		return Combinators.combine(itemSingleCosts(), itemCounts()).as(Item::withCostAndCount);
+		Arbitrary<String> categories = categories().injectNull(0.2);
+		return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
 	}
 
-	IntegerArbitrary itemCounts() {
+	Arbitrary<Integer> itemCounts() {
 		return Arbitraries.integers().between(Item.DEFAULT_COUNT, Item.MAX_COUNT);
 	}
 
-	IntegerArbitrary itemSingleCosts() {
+	Arbitrary<Integer> itemSingleCosts() {
 		return Arbitraries.integers().between(0, Item.MAX_SINGLE_COST);
 	}
 

@@ -531,3 +531,138 @@ Arbitrary<Set<Limit>> setOfLimits() {
 }
 ```
 
+### Step 4.2 - Examples for Single Category
+
+Trying to think of properties that must hold for single category affording:
+- Changing the total budget limit for a previously unaffordable bill will leave it unaffordable
+- Changing the budget limit for a category not in the bill won't change the afford decision
+- Raising any budget limit for a previously affordable bill will leave it affordable
+
+I could come up with more of those [metamorphic properties](https://johanneslink.net/how-to-specify-it/#43-metamorphic-properties). 
+All have in common that they tell us something about the behaviour of two related function calls.
+Properties of this kind can be powerful and are valuable.
+What they are not is good, readable and prototypical examples for the expected outcome.
+So I decided to start the feature off with an example:
+
+```java
+@Example
+void limit_of_category_is_considered_for_item_with_single_category() {
+  Budget budget = Budget.with(100, setOf(
+    Limit.of("books", 50)
+  ));
+
+  Bill bill = Bill.of(Item.with(51, 1, "books"));
+
+  assertThat(budget.canAfford(bill)).isFalse();
+}
+```
+
+The test fails, and I make it succeed with one of TDD's main strategies 
+called "Fake it till you make it":
+
+```java
+public boolean canAfford(Bill bill) {
+  if (isOutsideTotalBudget(bill)) {
+    return false;
+  };
+  for (Item item : bill.items()) {
+    if (item.category().isPresent()) {
+      return false;
+    }
+  }
+  return true;
+}
+```
+
+The code is obviously wrong since it will reject any bill with a categorized item.
+Without PBT I'd now have to add new examples to instigate the "correct" implementation.
+Looking at the existing properties there is one that already should have caught
+my naive implementation from above:
+
+```java
+@Property
+void total_limit_of_budget_used_for_afford(
+  @ForAll @IntRange(min = 1) int totalLimit,
+  @ForAll("bills") Bill bill
+) {
+  Budget budget = Budget.withTotalLimit(totalLimit);
+  boolean canBeAfforded = bill.totalCost() <= totalLimit;
+  ...
+  if (canBeAfforded) {
+    assertThat(budget.canAfford(bill)).isTrue();
+  } else {
+    assertThat(budget.canAfford(bill)).isFalse();
+  }
+}
+```
+
+So why does it not catch it? It's the items generator that I forgot to adapt when
+introducing categories for items. 
+Repairing my oversight requires to add an optional category to the creation of `Item` instances.
+
+```java
+@Provide
+Arbitrary<Item> items() {
+  Arbitrary<String> categories = categories().injectNull(0.2);
+  return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+}
+```
+
+This makes `total_limit_of_budget_used_for_afford` fail. 
+The code to fix the failing test:
+
+```java
+public boolean canAfford(Bill bill) {
+  if (isOutsideTotalBudget(bill)) {
+    return false;
+  }
+  for (Item item : bill.items()) {
+    if (item.category().isPresent()) {
+      if (isOutsideCategoryBudget(item.cost())) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+private boolean isOutsideCategoryBudget(int cost) {
+  return limits.stream()
+               .anyMatch(limit -> limit.amount() < cost);
+}
+```
+
+The code is still not correct - it does not compare if a limit actually is for the item's category.
+That's why we either need a new example or a new property. 
+For example this one:
+
+```java
+@Example
+void limit_of_category_must_match_item_category() {
+  Budget budget = Budget.with(100, setOf(
+    Limit.of("books", 50)
+  ));
+
+  Bill bill = Bill.of(Item.with(51, 1, "gym"));
+
+  assertThat(budget.canAfford(bill)).isTrue();
+}
+```
+
+This failing test will force the code to add category checking.
+However, it also triggers more questions:
+- Does it work for any order of budget limits?
+- What if one item matches a budget limit and another does not?
+- What if the bill contains more than one item of the same category?
+- etc.
+
+Whenever several of those questions pop up that may be related and that cannot be answered with confidence,
+I reach for properties instead of examples. That's the topic for the next step...
+
+
+
+
+
+
+
+

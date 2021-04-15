@@ -28,6 +28,26 @@ public class Budget {
 	}
 
 	public boolean canAfford(Bill bill) {
-		return bill.totalCost() <= totalLimit;
+		if (isOutsideTotalBudget(bill)) {
+			return false;
+		}
+		for (Item item : bill.items()) {
+			if (item.category().isPresent()) {
+				if (isOutsideCategoryBudget(item.category().get(), item.cost())) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean isOutsideCategoryBudget(String category, int cost) {
+		return limits.stream()
+					 .filter(limit -> limit.category().equals(category))
+					 .anyMatch(limit -> limit.amount() < cost);
+	}
+
+	private boolean isOutsideTotalBudget(Bill bill) {
+		return bill.totalCost() > totalLimit;
 	}
 }
