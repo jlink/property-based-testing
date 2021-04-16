@@ -855,6 +855,78 @@ Arbitrary<Item> items() {
 I did not, however, introduce more than one category per item. Yet.  
 
 
+### Step 5.2 - Enable Item Generator for Multiple Categories
+
+The current item generator will never generate items with more than one category.
+We can easily change that and allow up to 5 categories.
+
+```java
+@Provide
+Arbitrary<Item> items() {
+	Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(5);
+	return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+}
+```
+
+Using this altered behaviour will not disturb most properties because they should and can work with any valid items.
+Yet one is not: `limits_of_single_categories_are_preserved`.
+As the name says, this property is supposed to hold for single categories only.
+Let's fix it!
+
+Our first attempt is to add another assumption to the property, which ignores all
+bills that have items with more than one category:
+
+```java
+Assume.that(bill.items().stream().allMatch(i -> i.categories().size() <= 1));
+```
+
+Sadly, this will throw away too many test cases:
+
+```
+Can Afford Properties:limits of single categories are preserved = 
+  org.opentest4j.AssertionFailedError:
+    Property [Can Afford Properties:limits of single categories are preserved] exhausted after [1000] tries and [883] rejections
+```
+
+We raise jqwik's tolerance level for exhausted generation but in the end we want as many valid test cases as possible.
+That's why I decided to change the generator instead.
+There are a few mechanisms how generators can be influenced in jqwik - e.g. annotations, domains -
+but I'll go with the simplest one here: Calling a different generator method:
+
+```java
+@Property
+void limits_of_single_categories_are_preserved(
+	@ForAll("budgets") Budget budget,
+	@ForAll("billsWithSingleCategoryItems") Bill bill
+) {
+	...
+}
+
+@Provide
+Arbitrary<Bill> billsWithSingleCategoryItems() {
+	Arbitrary<Item[]> items = listOfItemsWithSingleCategory().map(l -> l.toArray(new Item[0]));
+	return items.map(Bill::of);
+}
+
+Arbitrary<List<Item>> listOfItemsWithSingleCategory() {
+	return items(1).list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
+}
+
+Arbitrary<Item> items(int maxSizeCategories) {
+	Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(maxSizeCategories);
+	return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+}
+```
+
+This approach required to introduce a parameter in the `items` method,
+but that's just plain abstraction through parameterization.
+
+We have now reached a point where all but one property are as generic as they can be.
+Another observation: The chosen approach has led to 7 properties and 2 remaining examples so far.
+The suite runs in less than 2 seconds on my machine, despite ~ 7000 test cases being generated.
+
+
+
 
 
 

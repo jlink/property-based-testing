@@ -83,7 +83,7 @@ class Can_Afford_Properties {
 	@Property
 	void limits_of_single_categories_are_preserved(
 		@ForAll("budgets") Budget budget,
-		@ForAll("bills") Bill bill
+		@ForAll("billsWithSingleCategoryItems") Bill bill
 	) {
 		Assume.that(budget.totalLimit() >= bill.totalCost());
 		Set<String> categoriesInLimits = budget.limits().stream()
@@ -148,14 +148,23 @@ class Can_Afford_Properties {
 	}
 
 	@Provide
-	Arbitrary<List<Item>> listOfItems() {
-		return items().list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
+	Arbitrary<Bill> billsWithSingleCategoryItems() {
+		Arbitrary<Item[]> items = listOfItemsWithSingleCategory().map(l -> l.toArray(new Item[0]));
+		return items.map(Bill::of);
+	}
+
+	Arbitrary<List<Item>> listOfItemsWithSingleCategory() {
+		return items(1).list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
+	}
+
+	Arbitrary<Item> items(int maxSizeCategories) {
+		Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(maxSizeCategories);
+		return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
 	}
 
 	@Provide
-	Arbitrary<Item> items() {
-		Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(1);
-		return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+	Arbitrary<List<Item>> listOfItems() {
+		return items(5).list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
 	}
 
 	Arbitrary<Integer> itemCounts() {
