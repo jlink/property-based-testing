@@ -43,11 +43,13 @@ public class Budget {
 	private Map<String, Integer> aggregate(List<Item> items) {
 		Map<String, Integer> aggregated = new HashMap<>();
 		for (Item item : items) {
-			item.category().ifPresent(category -> {
+			if (!item.categories().isEmpty()) {
+				// This is obviously a hack to remove later
+				String category = item.categories().iterator().next();
 				int total = aggregated.getOrDefault(category, 0);
 				total += item.cost();
 				aggregated.put(category, total);
-			});
+			}
 		}
 		return aggregated;
 	}

@@ -8,25 +8,21 @@ public class Item {
 	public static final int MAX_COUNT = 100;
 
 	public static Item withCost(int singleCost) {
-		return withCostAndCount(singleCost, DEFAULT_COUNT);
+		return with(singleCost, DEFAULT_COUNT);
 	}
 
-	public static Item withCostAndCount(int singleCost, int count) {
-		return new Item(singleCost, count, null);
-	}
-
-	public static Item with(int singleCost, int count, String category) {
-		return new Item(singleCost, count, category);
+	public static Item with(int singleCost, int count, String ... categories) {
+		return new Item(singleCost, count, categories);
 	}
 
 	private final int singleCost;
 	private final int count;
-	private final String category;
+	private final Set<String> categories;
 
-	public Item(int singleCost, int count, String category) {
+	private Item(int singleCost, int count, String[] categories) {
 		this.singleCost = singleCost;
 		this.count = count;
-		this.category = category;
+		this.categories = new HashSet<>(Arrays.asList(categories));
 	}
 
 	public int singleCost() {
@@ -46,7 +42,7 @@ public class Item {
 		final StringBuffer sb = new StringBuffer("Item{");
 		sb.append("singleCost=").append(singleCost);
 		sb.append(", count=").append(count);
-		sb.append(", category='").append(category).append('\'');
+		sb.append(", categories=").append(categories);
 		sb.append('}');
 		return sb.toString();
 	}
@@ -55,7 +51,7 @@ public class Item {
 		return singleCost * count;
 	}
 
-	public Optional<String> category() {
-		return Optional.ofNullable(category);
+	public Set<String> categories() {
+		return categories;
 	}
 }

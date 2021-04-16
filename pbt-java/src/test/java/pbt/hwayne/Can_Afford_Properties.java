@@ -72,8 +72,8 @@ class Can_Afford_Properties {
 											   .map(Limit::category)
 											   .collect(Collectors.toSet());
 		Set<String> categoriesInItems = bill.items().stream()
-											.filter(i -> i.category().isPresent())
-											.map(i -> i.category().get()).collect(Collectors.toSet());
+											.flatMap(i -> i.categories().stream())
+											.collect(Collectors.toSet());
 
 		Statistics.label("categories overlap")
 				  .collect(overlap(categoriesInItems, categoriesInLimits))
@@ -90,8 +90,8 @@ class Can_Afford_Properties {
 											   .map(Limit::category)
 											   .collect(Collectors.toSet());
 		Set<String> categoriesInItems = bill.items().stream()
-											.filter(i -> i.category().isPresent())
-											.map(i -> i.category().get()).collect(Collectors.toSet());
+											.flatMap(i -> i.categories().stream())
+											.collect(Collectors.toSet());
 
 		Set<String> sharedCategories = intersect(categoriesInLimits, categoriesInItems);
 		Assume.that(!sharedCategories.isEmpty());
@@ -120,7 +120,8 @@ class Can_Afford_Properties {
 
 	private int totalForSingleCategory(String category, Bill bill) {
 		return bill.items().stream()
-				   .filter(item -> item.category().equals(Optional.of(category)))
+				   .filter(item -> item.categories().size() == 1
+									   && item.categories().iterator().next().equals(category))
 				   .mapToInt(Item::cost)
 				   .sum();
 	}
@@ -153,7 +154,7 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<Item> items() {
-		Arbitrary<String> categories = categories().injectNull(0.2);
+		Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(1);
 		return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
 	}
 
@@ -210,7 +211,7 @@ class Can_Afford_Properties {
 			@ForAll @ItemSingleCost int singleCost,
 			@ForAll @ItemCount int count
 		) {
-			Item item = Item.withCostAndCount(singleCost, count);
+			Item item = Item.with(singleCost, count);
 			assertThat(item.singleCost()).isEqualTo(singleCost);
 			assertThat(item.count()).isEqualTo(count);
 			assertThat(item.cost()).isEqualTo(singleCost * count);
@@ -225,7 +226,7 @@ class Can_Afford_Properties {
 			Item item = Item.with(singleCost, count, category);
 			assertThat(item.singleCost()).isEqualTo(singleCost);
 			assertThat(item.count()).isEqualTo(count);
-			assertThat(item.category()).isEqualTo(Optional.of(category));
+			assertThat(item.categories()).containsExactly(category);
 			assertThat(item.cost()).isEqualTo(singleCost * count);
 		}
 	}

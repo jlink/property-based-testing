@@ -828,6 +828,33 @@ as soon as multiple categories per item enter the scene.
 But we are evolutionary designers; let's stay optimistic then!
 
 
+## Step 5 - Targeting Items with Multiple Categories
+
+This feature is supposed to bring in the real domain complexity.
+I expect quite a few things to break on the way, and also a few questions to arise.
+
+### Step 5.1 - Making Items Ready for Multiple Categories
+
+I'll start with refactoring the API in two steps: 
+- `Item with(int singleCost, int count, String category)` -> `Item with(int singleCost, int count, String ... categories)`
+- `Item.category() : Optional<String>` -> `Item.categories() : Set<String>`
+
+How to achieve this in small, safe steps would be an interesting article, too. 
+It's not in the focus today, so I'll just do it...
+
+Done. On my way I had to change the item generator to serve the changed API:
+
+```java
+@Provide
+Arbitrary<Item> items() {
+	Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(1);
+	return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+}
+```
+
+I did not, however, introduce more than one category per item. Yet.  
+
+
 
 
 
