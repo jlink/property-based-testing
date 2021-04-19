@@ -4,6 +4,31 @@ Tackling the problem specified by Hillel Wayne in https://gist.github.com/hwayne
 with a combination of example tests and property-based testing.
 
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Step 1 - Use Example to Discover API](#step-1---use-example-to-discover-api)
+- [Step 2 - Transform Example into More Generic Property](#step-2---transform-example-into-more-generic-property)
+- [Step 3 - Drive next Feature with Property](#step-3---drive-next-feature-with-property)
+  - [Step 3.1 - Property-drive Implementation of Stepping Stone Implementation](#step-31---property-drive-implementation-of-stepping-stone-implementation)
+  - [Step 3.2 - Use new Implementation for Feature](#step-32---use-new-implementation-for-feature)
+  - [Step 3.3 - Adding Item.count()](#step-33---adding-itemcount)
+  - [Step 3.4 - Making Domain Constraints Explicit](#step-34---making-domain-constraints-explicit)
+- [Step 4 - Budget with Single Category Items](#step-4---budget-with-single-category-items)
+  - [Step 4.1 Keeping Track of Limits and Categories](#step-41-keeping-track-of-limits-and-categories)
+  - [Step 4.2 - Examples for Single Category](#step-42---examples-for-single-category)
+  - [Step 4.3 - Budget Generator and Properties](#step-43---budget-generator-and-properties)
+- [Step 5 - Targeting Items with Multiple Categories](#step-5---targeting-items-with-multiple-categories)
+  - [Step 5.1 - Making Items Ready for Multiple Categories](#step-51---making-items-ready-for-multiple-categories)
+  - [Step 5.2 - Enable Item Generator for Multiple Categories](#step-52---enable-item-generator-for-multiple-categories)
+  - [Step 5.3 - Maximum Permissiveness by Example](#step-53---maximum-permissiveness-by-example)
+  - [Step 5.4 - Adding Properties to Detect Oversights](#step-54---adding-properties-to-detect-oversights)
+- [Wrap Up](#wrap-up)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
 ## Step 1 - Use Example to Discover API
 
 Using an initial example to create the initial API:
@@ -1080,7 +1105,25 @@ a cost of 8881 (107*83) is tried to fit in.
 If, however, the first item will be tried last, its cost will be taken from
 category "d"'s budget and all is affordable. 
 This is the actually desired behaviour - it's the most permissive one.
-The fix is, again, more involved than I had hoped:
+
+The fix is, again, more involved than I had hoped. 
+If my assumptions are right (I have been wrong before), the generic solution requires
+to check the permutations of bill items to rule out a more permissive budget calculation.
+Going for all permutations, however, forced me to restrict the number of generated items per bill to a maximum of 8.
+Otherwise, runtime would exceed my personal threshold of patience.
+So I went for a few simple optimisations, which enabled me to raise the number to 14.
+
+## Wrap Up
+
+The final implementation, which in its core is old-style procedural/OO code 
+is [here](https://github.com/jlink/property-based-testing/blob/main/pbt-java/src/test/java/pbt/hwayne/Budget.java).
+
+I ended up with 10 properties and 3 examples. 
+In other projects I often have about as many properties as examples.
+
+One open domain question: How many items can a bill have?
+14 seems too low, but with higher numbers, more optimisation or a better algorithm would be needed.
+Would I be aware of this limit without PBT? Maybe, maybe not.
 
 
 

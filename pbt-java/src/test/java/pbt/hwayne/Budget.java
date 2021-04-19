@@ -1,6 +1,10 @@
 package pbt.hwayne;
 
 import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+
+import net.jqwik.api.*;
 
 public class Budget {
 	public static Budget withTotalLimit(int totalLimit) {
@@ -32,17 +36,42 @@ public class Budget {
 			return false;
 		}
 		Map<String, Integer> availableBudgets = initialBudgets(limits);
-		for (Item item : bill.items()) {
+
+		Set<String> limitedCategories = limits.stream().map(Limit::category).collect(Collectors.toSet());
+		Predicate<Item> itemIsTrivial = i -> i.categories().size() <= 1
+												 || i.categories().stream().noneMatch(limitedCategories::contains);
+		List<Item> trivialItems = filterItems(bill, itemIsTrivial);
+		if (itemsDoNotFitInBudget(availableBudgets, trivialItems)) return false;
+
+		List<Item> nonTrivialItems = filterItems(bill, itemIsTrivial.negate());
+		Set<List<Item>> permutations = permutations(nonTrivialItems);
+		return permutations.stream().anyMatch(items -> {
+			Map<String, Integer> available = new HashMap<>(availableBudgets);
+			return !itemsDoNotFitInBudget(available, items);
+		});
+	}
+
+	private Set<List<Item>> permutations(List<Item> items) {
+		// Using jqwik to calculate permutations because it's easy. In a real app I'd probably run a local, optimized implementation.
+		return Arbitraries.shuffle(items).allValues().map(s -> s.collect(Collectors.toSet())).orElse(Collections.emptySet());
+	}
+
+	private List<Item> filterItems(Bill bill, Predicate<Item> itemPredicate) {
+		return bill.items().stream().filter(itemPredicate).collect(Collectors.toList());
+	}
+
+	private boolean itemsDoNotFitInBudget(Map<String, Integer> availableBudgets, List<Item> items) {
+		for (Item item : items) {
 			if (noBudgetApplies(item)) {
 				continue;
 			}
 			Optional<String> fittingCategory = findCategoryWithFittingBudget(item, availableBudgets);
 			if (!fittingCategory.isPresent()) {
-				return false;
+				return true;
 			}
 			fittingCategory.ifPresent(category -> updateBudgets(availableBudgets, category, item.cost()));
 		}
-		return true;
+		return false;
 	}
 
 	private boolean noBudgetApplies(Item item) {

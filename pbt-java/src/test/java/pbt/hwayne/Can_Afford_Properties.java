@@ -220,7 +220,7 @@ class Can_Afford_Properties {
 
 	@Provide
 	Arbitrary<List<Item>> listOfItems() {
-		return items(5).list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
+		return items(5).list().ofMaxSize(14); // Using Bill.MAX_NUMBER_OF_ITEMS leads to endless runtimes
 	}
 
 	Arbitrary<Integer> itemCounts() {
