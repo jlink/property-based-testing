@@ -31,33 +31,44 @@ public class Budget {
 		if (isOutsideTotalBudget(bill)) {
 			return false;
 		}
-		Map<String, Integer> aggregatedTotals = aggregate(bill.items());
-		for (Map.Entry<String, Integer> total : aggregatedTotals.entrySet()) {
-			if (isOutsideCategoryBudget(total.getKey(), total.getValue())) {
+		Map<String, Integer> availableBudgets = initialBudgets(limits);
+		for (Item item : bill.items()) {
+			if (noBudgetApplies(item)) {
+				continue;
+			}
+			Optional<String> fittingCategory = findCategoryWithFittingBudget(item, availableBudgets);
+			if (!fittingCategory.isPresent()) {
 				return false;
 			}
+			fittingCategory.ifPresent(category -> updateBudgets(availableBudgets, category, item.cost()));
 		}
 		return true;
 	}
 
-	private Map<String, Integer> aggregate(List<Item> items) {
-		Map<String, Integer> aggregated = new HashMap<>();
-		for (Item item : items) {
-			if (!item.categories().isEmpty()) {
-				// This is obviously a hack to remove later
-				String category = item.categories().iterator().next();
-				int total = aggregated.getOrDefault(category, 0);
-				total += item.cost();
-				aggregated.put(category, total);
-			}
-		}
-		return aggregated;
+	private boolean noBudgetApplies(Item item) {
+		return limits.stream().map(Limit::category).noneMatch(limit -> item.categories().contains(limit));
 	}
 
-	private boolean isOutsideCategoryBudget(String category, int cost) {
-		return limits.stream()
-					 .filter(limit -> limit.category().equals(category))
-					 .anyMatch(limit -> limit.amount() < cost);
+	private void updateBudgets(Map<String, Integer> availableBudgets, String category, int cost) {
+		int budgetBefore = availableBudgets.get(category);
+		availableBudgets.put(category, budgetBefore - cost);
+	}
+
+	private Optional<String> findCategoryWithFittingBudget(Item item, Map<String, Integer> budgets) {
+		return budgets.entrySet()
+					  .stream()
+					  .filter(entry -> item.categories().contains(entry.getKey()))
+					  .filter(entry -> entry.getValue() >= item.cost())
+					  .map(Map.Entry::getKey)
+					  .findFirst();
+	}
+
+	private Map<String, Integer> initialBudgets(Set<Limit> limits) {
+		Map<String, Integer> budgets = new HashMap<>();
+		for (Limit limit : limits) {
+			budgets.put(limit.category(), limit.amount());
+		}
+		return budgets;
 	}
 
 	private boolean isOutsideTotalBudget(Bill bill) {

@@ -813,11 +813,11 @@ public class Budget...
   private Map<String, Integer> aggregate(List<Item> items) {
     Map<String, Integer> aggregated = new HashMap<>();
     for (Item item : items) {
-      item.category().ifPresent(category -> {
+      for (String category : item.categories()) {
         int total = aggregated.getOrDefault(category, 0);
         total += item.cost();
         aggregated.put(category, total);
-      });
+      }
     }
     return aggregated;
   }
@@ -847,8 +847,8 @@ Done. On my way I had to change the item generator to serve the changed API:
 ```java
 @Provide
 Arbitrary<Item> items() {
-	Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(1);
-	return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+  Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(1);
+  return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
 }
 ```
 
@@ -863,8 +863,8 @@ We can easily change that and allow up to 5 categories.
 ```java
 @Provide
 Arbitrary<Item> items() {
-	Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(5);
-	return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+  Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(5);
+  return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
 }
 ```
 
@@ -896,25 +896,25 @@ but I'll go with the simplest one here: Calling a different generator method:
 ```java
 @Property
 void limits_of_single_categories_are_preserved(
-	@ForAll("budgets") Budget budget,
-	@ForAll("billsWithSingleCategoryItems") Bill bill
+  @ForAll("budgets") Budget budget,
+  @ForAll("billsWithSingleCategoryItems") Bill bill
 ) {
-	...
+  ...
 }
 
 @Provide
 Arbitrary<Bill> billsWithSingleCategoryItems() {
-	Arbitrary<Item[]> items = listOfItemsWithSingleCategory().map(l -> l.toArray(new Item[0]));
-	return items.map(Bill::of);
+  Arbitrary<Item[]> items = listOfItemsWithSingleCategory().map(l -> l.toArray(new Item[0]));
+  return items.map(Bill::of);
 }
 
 Arbitrary<List<Item>> listOfItemsWithSingleCategory() {
-	return items(1).list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
+  return items(1).list().ofMaxSize(Bill.MAX_NUMBER_OF_ITEMS);
 }
 
 Arbitrary<Item> items(int maxSizeCategories) {
-	Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(maxSizeCategories);
-	return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
+  Arbitrary<String[]> categories = categories().array(String[].class).ofMaxSize(maxSizeCategories);
+  return Combinators.combine(itemSingleCosts(), itemCounts(), categories).as(Item::with);
 }
 ```
 
@@ -926,8 +926,62 @@ Another observation: The chosen approach has led to 7 properties and 2 remaining
 The suite runs in less than 2 seconds on my machine, despite ~ 7000 test cases being generated.
 
 
+### Step 5.3 - Maximum Permissiveness
 
+So far, I haven't really thought through the problem's full complexity. 
+Therefore, starting with the example from the spec seems like a good first step:
 
+```java
+@Example
+void when_in_doubt_be_permissive() {
+  Budget budget = Budget.with(
+    5,
+    setOf(
+      Limit.of("a", 1),
+      Limit.of("b", 3)
+    )
+  );
 
+  Bill bill = Bill.of(Item.with(2, "a", "b"));
+  assertThat(budget.canAfford(bill)).isTrue();
+}
+```
 
+I was pretty sure that the current implementation would not cover this case;
+and indeed, the example failed. 
+I played around a while with localized changes to make this example (together with all the other tests) succeed,
+but I failed.
+It looked to me that now the algorithm needed a fundamental change:
+
+- Start with the assumption that bill can be afforded
+- For each item in the bill
+  - If no budget limit applies, continue
+  - Try to find fitting category to which it can be added without breaking the category's budget
+    - If there is none, stop and return false
+    - If there is one, update the remaining budget for this category  
+- Return true
+
+Turning this into working code took me about 15 minutes - 
+way too long for my person feeling of controlled progress -
+but then every example and every property succeeded:
+
+```java
+public boolean canAfford(Bill bill) {
+  if (isOutsideTotalBudget(bill)) {
+    return false;
+  }
+  Map<String, Integer> availableBudgets = initialBudgets(limits);
+  for (Item item : bill.items()) {
+    if (noBudgetApplies(item)) {
+      continue;
+    }
+    Optional<String> fittingCategory = findFittingCategory(item, availableBudgets);
+    if (!fittingCategory.isPresent()) {
+      return false;
+    }
+    fittingCategory.ifPresent(category -> updateBudgets(availableBudgets, category, item.cost()));
+  }
+  return true;
+}
+```
 

@@ -11,6 +11,10 @@ public class Item {
 		return with(singleCost, DEFAULT_COUNT);
 	}
 
+	public static Item with(int singleCost, String ... categories) {
+		return with(singleCost, 1, categories);
+	}
+
 	public static Item with(int singleCost, int count, String ... categories) {
 		return new Item(singleCost, count, categories);
 	}

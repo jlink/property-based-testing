@@ -12,104 +12,126 @@ import static org.assertj.core.api.Assertions.*;
 
 class Can_Afford_Properties {
 
-	@Property
-	void cannot_afford_zero_budget(@ForAll("bills") Bill billWithItems) {
-		Assume.that(!billWithItems.isForFree());
-		Budget zeroBudget = Budget.withTotalLimit(0);
-		assertThat(zeroBudget.canAfford(billWithItems)).isFalse();
-	}
+	@Group
+	class Affordability {
 
-	@Property
-	void total_limit_of_budget_used_for_afford(
-		@ForAll @IntRange(min = 1) int totalLimit,
-		@ForAll("bills") Bill bill
-	) {
-		Budget budget = Budget.withTotalLimit(totalLimit);
-
-		boolean canBeAfforded = bill.totalCost() <= totalLimit;
-		Statistics.label("bill can be afforded")
-				  .collect(canBeAfforded)
-				  .coverage(checker -> {
-					  checker.check(true).percentage(p -> p > 10);
-					  checker.check(false).percentage(p -> p > 10);
-				  });
-
-		if (canBeAfforded) {
-			assertThat(budget.canAfford(bill)).isTrue();
-		} else {
-			assertThat(budget.canAfford(bill)).isFalse();
+		@Property
+		void cannot_afford_zero_budget(@ForAll("bills") Bill billWithItems) {
+			Assume.that(!billWithItems.isForFree());
+			Budget zeroBudget = Budget.withTotalLimit(0);
+			assertThat(zeroBudget.canAfford(billWithItems)).isFalse();
 		}
-	}
 
-	@Example
-	void limit_of_category_is_considered_for_item_with_single_category() {
-		Budget budget = Budget.with(100, setOf(
-			Limit.of("books", 50)
-		));
+		@Property
+		void total_limit_of_budget_used_for_afford(
+			@ForAll @IntRange(min = 1) int totalLimit,
+			@ForAll("bills") Bill bill
+		) {
+			Budget budget = Budget.withTotalLimit(totalLimit);
 
-		Bill bill = Bill.of(Item.with(51, 1, "books"));
+			boolean canBeAfforded = bill.totalCost() <= totalLimit;
+			Statistics.label("bill can be afforded")
+					  .collect(canBeAfforded)
+					  .coverage(checker -> {
+						  checker.check(true).percentage(p -> p > 10);
+						  checker.check(false).percentage(p -> p > 10);
+					  });
 
-		assertThat(budget.canAfford(bill)).isFalse();
-	}
-
-	@Example
-	void limit_of_category_must_match_item_category() {
-		Budget budget = Budget.with(100, setOf(
-			Limit.of("books", 50)
-		));
-
-		Bill bill = Bill.of(Item.with(51, 1, "gym"));
-
-		assertThat(budget.canAfford(bill)).isTrue();
-	}
-
-	@Property
-	void generated_budget_limits_and_item_categories_overlap(
-		@ForAll("budgets") Budget budget,
-		@ForAll("bills") Bill bill
-	) {
-		Set<String> categoriesInLimits = budget.limits().stream()
-											   .map(Limit::category)
-											   .collect(Collectors.toSet());
-		Set<String> categoriesInItems = bill.items().stream()
-											.flatMap(i -> i.categories().stream())
-											.collect(Collectors.toSet());
-
-		Statistics.label("categories overlap")
-				  .collect(overlap(categoriesInItems, categoriesInLimits))
-				  .coverage(checker -> checker.check(true).percentage(p -> p > 50));
-	}
-
-	@Property
-	void limits_of_single_categories_are_preserved(
-		@ForAll("budgets") Budget budget,
-		@ForAll("billsWithSingleCategoryItems") Bill bill
-	) {
-		Assume.that(budget.totalLimit() >= bill.totalCost());
-		Set<String> categoriesInLimits = budget.limits().stream()
-											   .map(Limit::category)
-											   .collect(Collectors.toSet());
-		Set<String> categoriesInItems = bill.items().stream()
-											.flatMap(i -> i.categories().stream())
-											.collect(Collectors.toSet());
-
-		Set<String> sharedCategories = intersect(categoriesInLimits, categoriesInItems);
-		Assume.that(!sharedCategories.isEmpty());
-
-		// Only about 20% of generated test cases get here
-
-		for (String category : sharedCategories) {
-			int total = totalForSingleCategory(category, bill);
-			if (total > limitForCategory(category, budget)) {
-				assertThat(budget.canAfford(bill))
-					.describedAs("category %s should not be afforded", category)
-					.isFalse();
-				return;
+			if (canBeAfforded) {
+				assertThat(budget.canAfford(bill)).isTrue();
+			} else {
+				assertThat(budget.canAfford(bill)).isFalse();
 			}
 		}
-		assertThat(budget.canAfford(bill))
-			.describedAs("full bill should be affordable")
-			.isTrue();
+
+		@Example
+		void limit_of_category_is_considered_for_item_with_single_category() {
+			Budget budget = Budget.with(100, setOf(
+				Limit.of("books", 50)
+			));
+
+			Bill bill = Bill.of(Item.with(51, 1, "books"));
+
+			assertThat(budget.canAfford(bill)).isFalse();
+		}
+
+		@Example
+		void limit_of_category_must_match_item_category() {
+			Budget budget = Budget.with(100, setOf(
+				Limit.of("books", 50)
+			));
+
+			Bill bill = Bill.of(Item.with(51, 1, "gym"));
+
+			assertThat(budget.canAfford(bill)).isTrue();
+		}
+
+		@Property
+		void limits_of_single_categories_are_preserved(
+			@ForAll("budgets") Budget budget,
+			@ForAll("billsWithSingleCategoryItems") Bill bill
+		) {
+			Assume.that(budget.totalLimit() >= bill.totalCost());
+			Set<String> categoriesInLimits = budget.limits().stream()
+												   .map(Limit::category)
+												   .collect(Collectors.toSet());
+			Set<String> categoriesInItems = bill.items().stream()
+												.flatMap(i -> i.categories().stream())
+												.collect(Collectors.toSet());
+
+			Set<String> sharedCategories = intersect(categoriesInLimits, categoriesInItems);
+			Assume.that(!sharedCategories.isEmpty());
+
+			// Only about 20% of generated test cases get here
+
+			for (String category : sharedCategories) {
+				int total = totalForSingleCategory(category, bill);
+				if (total > limitForCategory(category, budget)) {
+					assertThat(budget.canAfford(bill))
+						.describedAs("category %s should not be afforded", category)
+						.isFalse();
+					return;
+				}
+			}
+			assertThat(budget.canAfford(bill))
+				.describedAs("full bill should be affordable")
+				.isTrue();
+		}
+
+		@Example
+		void when_in_doubt_be_permissive() {
+			Budget budget = Budget.with(
+				5,
+				setOf(
+					Limit.of("a", 1),
+					Limit.of("b", 3)
+				)
+			);
+
+			Bill bill = Bill.of(Item.with(2, "a", "b"));
+			assertThat(budget.canAfford(bill)).isTrue();
+		}
+
+	}
+
+	@Group
+	class Generators {
+		@Property
+		void generated_budget_limits_and_item_categories_overlap(
+			@ForAll("budgets") Budget budget,
+			@ForAll("bills") Bill bill
+		) {
+			Set<String> categoriesInLimits = budget.limits().stream()
+												   .map(Limit::category)
+												   .collect(Collectors.toSet());
+			Set<String> categoriesInItems = bill.items().stream()
+												.flatMap(i -> i.categories().stream())
+												.collect(Collectors.toSet());
+
+			Statistics.label("categories overlap")
+					  .collect(overlap(categoriesInItems, categoriesInLimits))
+					  .coverage(checker -> checker.check(true).percentage(p -> p > 50));
+		}
 	}
 
 	private int limitForCategory(String category, Budget budget) {
