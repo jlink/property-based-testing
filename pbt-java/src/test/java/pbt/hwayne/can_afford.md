@@ -926,7 +926,7 @@ Another observation: The chosen approach has led to 7 properties and 2 remaining
 The suite runs in less than 2 seconds on my machine, despite ~ 7000 test cases being generated.
 
 
-### Step 5.3 - Maximum Permissiveness
+### Step 5.3 - Maximum Permissiveness by Example
 
 So far, I haven't really thought through the problem's full complexity. 
 Therefore, starting with the example from the spec seems like a good first step:
@@ -984,4 +984,103 @@ public boolean canAfford(Bill bill) {
   return true;
 }
 ```
+
+
+### Step 5.4 - Adding Properties to Detect Oversights
+
+At this point my intuition as a software developer tells me that the implementation does not cover all cases. 
+The question that bothers me most: What if several items come with different but overlapping categories?
+In the old days - with example testing as my only tool - 
+I would have created a matrix of conditions and edge cases to help me create a few more test cases 
+with the potential to reveal bugs.
+Nowadays I prefer pondering over generic properties instead.
+
+Quite a few strategies and patterns have evolved during the twenty years of PBT practice.
+John Hughes, one of the original inventors of Quickcheck, has recently (July 2019) summarized his learnings
+in a paper called [_How to Specify it!_](https://www.dropbox.com/s/tx2b84kae4bw1p4/paper.pdf).
+If you prefer Java to Haskell, [this](https://johanneslink.net/how-to-specify-it/) 
+is my transfer of the paper into a language for the mortal OO programmer.
+
+One of the most interesting ideas treated therein are _metamorphic properties_;
+they are all about the relation between two or more executions of the code under attack.
+_Order independence_ is a metamorphic relation that pops into my mind here:
+Given the result of an arbitrary call to `Budget.canAfford(bill)`, 
+this result should not change if the order of limits in the budget 
+or the order of items in the bill changes. 
+Let's translate these idea into two jqwik properties:
+
+```java
+@Property
+void order_of_limits_does_not_change_result(
+  @ForAll("budgets") Budget budget,
+  @ForAll("bills") Bill bill,
+  @ForAll Random random
+) {
+  boolean canAfford = budget.canAfford(bill);
+
+  List<Limit> shuffledLimits = new ArrayList<>(budget.limits());
+  Collections.shuffle(shuffledLimits, random);
+  Budget changedBudget = Budget.with(
+    budget.totalLimit(),
+    new HashSet<>(shuffledLimits)
+  );
+
+  assertThat(changedBudget.canAfford(bill)).isEqualTo(canAfford);
+}
+```
+
+It's a bit clumsy to write, because we have to convert a set to list and back.
+Moreover, it succeeds, and we didn't learn anything new.
+
+```java
+@Property
+void order_of_items_does_not_change_result(
+  @ForAll("budgets") Budget budget,
+  @ForAll("bills") Bill bill,
+  @ForAll Random random
+) {
+  boolean canAfford = budget.canAfford(bill);
+
+  List<Item> shuffledItems = new ArrayList<>(bill.items());
+  Collections.shuffle(shuffledItems, random);
+  Bill changedBill = Bill.of(shuffledItems.toArray(new Item[0]));
+
+  assertThat(budget.canAfford(changedBill)).isEqualTo(canAfford);
+}
+```
+
+This one also succeed at the first run, i.e. with 1000 tries.
+My guts, however, tell me to re-run it a few times. 
+Et voilà, the 11th run produces a failing example:
+
+```
+Affordability:order of items does not change result = 
+  org.opentest4j.AssertionFailedError:
+    expected: false
+    but was : true
+
+Shrunk Sample (129 steps)
+-------------------------
+  budget: {"totalLimit"=9142, "limits"=[{"amount"=2, "category"="d"}, {"amount"=9141, "category"="a"}]}
+  bill:
+    {
+      "items"=
+        [
+          {"singleCost"=1, "count"=1, "categories"=["a", "d"]}, 
+          {"singleCost"=10, "count"=26, "categories"=["a"]}, 
+          {"singleCost"=107, "count"=83, "categories"=["a"]}
+        ]
+    }
+  random: java.util.Random@3fba4d47
+```
+
+Running items through the can-afford-algorithm in the original order will fail,
+because the budget for "a" is already down to 8880 before the last item with
+a cost of 8881 (107*83) is tried to fit in. 
+If, however, the first item will be tried last, its cost will be taken from
+category "d"'s budget and all is affordable. 
+This is the actually desired behaviour - it's the most permissive one.
+The fix is, again, more involved than I had hoped:
+
+
 

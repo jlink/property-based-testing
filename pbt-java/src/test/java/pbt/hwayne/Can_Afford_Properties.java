@@ -10,6 +10,7 @@ import net.jqwik.api.statistics.*;
 
 import static org.assertj.core.api.Assertions.*;
 
+@PropertyDefaults(afterFailure = AfterFailureMode.PREVIOUS_SEED)
 class Can_Afford_Properties {
 
 	@Group
@@ -110,6 +111,39 @@ class Can_Afford_Properties {
 
 			Bill bill = Bill.of(Item.with(2, "a", "b"));
 			assertThat(budget.canAfford(bill)).isTrue();
+		}
+
+		@Property
+		void order_of_limits_does_not_change_result(
+			@ForAll("budgets") Budget budget,
+			@ForAll("bills") Bill bill,
+			@ForAll Random random
+		) {
+			boolean canAfford = budget.canAfford(bill);
+
+			List<Limit> shuffledLimits = new ArrayList<>(budget.limits());
+			Collections.shuffle(shuffledLimits, random);
+			Budget changedBudget = Budget.with(
+				budget.totalLimit(),
+				new HashSet<>(shuffledLimits)
+			);
+
+			assertThat(changedBudget.canAfford(bill)).isEqualTo(canAfford);
+		}
+
+		@Property
+		void order_of_items_does_not_change_result(
+			@ForAll("budgets") Budget budget,
+			@ForAll("bills") Bill bill,
+			@ForAll Random random
+		) {
+			boolean canAfford = budget.canAfford(bill);
+
+			List<Item> shuffledItems = new ArrayList<>(bill.items());
+			Collections.shuffle(shuffledItems, random);
+			Bill changedBill = Bill.of(shuffledItems.toArray(new Item[0]));
+
+			assertThat(budget.canAfford(changedBill)).isEqualTo(canAfford);
 		}
 
 	}
