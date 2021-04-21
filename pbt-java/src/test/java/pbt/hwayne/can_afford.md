@@ -25,6 +25,8 @@ with a combination of example tests and property-based testing.
   - [Step 5.3 - Maximum Permissiveness by Example](#step-53---maximum-permissiveness-by-example)
   - [Step 5.4 - Adding Properties to Detect Oversights](#step-54---adding-properties-to-detect-oversights)
 - [Wrap Up](#wrap-up)
+- [Update](#update)
+- [Update 2 - Property to Detect Potential Budget Split](#update-2---property-to-detect-potential-budget-split)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
