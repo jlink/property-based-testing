@@ -1125,5 +1125,11 @@ One open domain question: How many items can a bill have?
 14 seems too low, but with higher numbers, more optimisation or a better algorithm would be needed.
 Would I be aware of this limit without PBT? Maybe, maybe not.
 
+## Update
+
+Meanwhile Brian Marick has published 
+[his TDD process for the same challenge](https://www.crustofcode.com/hillel-budget/).
+Have a look and compare!
+
 
 
