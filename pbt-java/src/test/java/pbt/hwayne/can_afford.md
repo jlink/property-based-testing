@@ -1127,8 +1127,11 @@ Would I be aware of this limit without PBT? Maybe, maybe not.
 
 ## Update
 
-Meanwhile Brian Marick has published 
+Meanwhile, Brian Marick has published 
 [his TDD process for the same challenge](https://www.crustofcode.com/hillel-budget/).
+He's turning the combinatorics into a search problem; 
+that's obviously a good idea, because it can (on average) handle bills with many items in less time.
+
 Have a look and compare!
 
 
