@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.Tuple.*;
 import net.jqwik.api.constraints.*;
 import net.jqwik.api.statistics.*;
 
@@ -144,6 +145,63 @@ class Can_Afford_Properties {
 			Bill changedBill = Bill.of(shuffledItems.toArray(new Item[0]));
 
 			assertThat(budget.canAfford(changedBill)).isEqualTo(canAfford);
+		}
+
+		@Example
+		@Disabled("Fails b/c this splitting is not covered by implementation")
+		void merging_items_with_same_categories_does_not_change_result() {
+			Budget budget = Budget.with(
+				100,
+				setOf(Limit.of("a", 50), Limit.of("b", 50))
+			);
+			Bill bill = Bill.of(
+				Item.with(10, 3, "a", "b"),
+				Item.with(10, 3, "a", "b")
+			);
+			merging_items_with_same_categories_does_not_change_result(budget, bill);
+		}
+
+		@Property
+		@Disabled
+		void merging_items_with_same_categories_does_not_change_result(
+			@ForAll("budgets") Budget budget,
+			@ForAll("bills") Bill bill
+		) {
+			boolean canAfford = budget.canAfford(bill);
+
+			Map<Tuple2<Set<String>, Integer>, List<Item>> groupedItems = groupByCategoriesAndCost(bill.items());
+
+			boolean hasMergeableItems = groupedItems.values().stream().anyMatch(l -> l.size() > 1);
+			Statistics.collect(hasMergeableItems);
+
+			if (hasMergeableItems) {
+				List<Item> mergedItems = merge(groupedItems);
+				Bill changedBill = Bill.of(mergedItems.toArray(new Item[0]));
+				assertThat(budget.canAfford(changedBill)).isEqualTo(canAfford);
+			}
+		}
+
+		private List<Item> merge(Map<Tuple2<Set<String>, Integer>, List<Item>> groupedItems) {
+			List<Item> mergedItems = new ArrayList<>();
+			for (Map.Entry<Tuple2<Set<String>, Integer>, List<Item>> entry : groupedItems.entrySet()) {
+				int singleCost = entry.getKey().get2();
+				String[] categories = entry.getKey().get1().toArray(new String[0]);
+				int count = entry.getValue().stream().mapToInt(Item::count).sum();
+				Item item = Item.with(singleCost, count, categories);
+				mergedItems.add(item);
+			}
+			return mergedItems;
+		}
+
+		private Map<Tuple2<Set<String>, Integer>, List<Item>> groupByCategoriesAndCost(List<Item> items) {
+			Map<Tuple2<Set<String>, Integer>, List<Item>> groupedItems = new HashMap<>();
+			for (Item item : items) {
+				Tuple2<Set<String>, Integer> key = Tuple.of(item.categories(), item.singleCost());
+				List<Item> value = groupedItems.getOrDefault(key, new ArrayList<>());
+				value.add(item);
+				groupedItems.put(key, value);
+			}
+			return groupedItems;
 		}
 
 	}

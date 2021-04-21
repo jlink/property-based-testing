@@ -1135,4 +1135,33 @@ that's obviously a good idea, because it can (on average) handle bills with many
 Have a look and compare!
 
 
+## Update 2 - Property to Detect Potential Budget Split
+
+While reading Brian's post above I realized that I had missed an unclear requirement:
+Should an item of more than one category potentially be split up across budgets?
+
+I think the following property should detect that my implementation will never
+spread an item across budget limits:
+
+```java
+@Property
+void merging_items_with_same_categories_does_not_change_result(
+  @ForAll("budgets") Budget budget,
+  @ForAll("bills") Bill bill
+) {
+  boolean canAfford = budget.canAfford(bill);
+
+  Map<Tuple2<Set<String>, Integer>, List<Item>> groupedItems = groupByCategoriesAndCost(bill.items());
+  List<Item> mergedItems = merge(groupedItems);
+
+  Bill changedBill = Bill.of(mergedItems.toArray(new Item[0]));
+  assertThat(budget.canAfford(changedBill)).isEqualTo(canAfford);
+}
+```
+
+It's a pity that running the property - even many times - does not discover
+that the current implementation will never split items, even though I can prove it in a test.
+The reason is that the generator is too unlikely to produce a scenario in which
+merging items will lead to an unaffordable bill. One more goal for example tests!
+
 
