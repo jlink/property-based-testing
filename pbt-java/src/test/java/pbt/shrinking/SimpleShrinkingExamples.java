@@ -1,14 +1,17 @@
 package pbt.shrinking;
 
-import net.jqwik.api.*;
-import net.jqwik.api.constraints.Positive;
+import java.util.*;
 
+import net.jqwik.api.*;
+import net.jqwik.api.constraints.*;
+
+@PropertyDefaults(afterFailure = AfterFailureMode.RANDOM_SEED)
 class SimpleShrinkingExamples {
 
-	@Property(shrinking = ShrinkingMode.FULL)
-	@Report(Reporting.FALSIFIED)
+
+	//@Report(Reporting.FALSIFIED)
+	@Property
 	boolean rootOfSquareShouldBeOriginalValue(@Positive @ForAll int anInt) {
-		Assume.that(anInt != Integer.MAX_VALUE);
 		int square = anInt * anInt;
 		return Math.sqrt(square) == anInt;
 	}
@@ -21,6 +24,18 @@ class SimpleShrinkingExamples {
 	@Provide
 	Arbitrary<String> numberStrings() {
 		return Arbitraries.integers().between(100, 10000).map(String::valueOf);
+	}
+
+	@Report(Reporting.FALSIFIED)
+	@Property
+	boolean shrinkListOfStrings(@ForAll List<@LowerChars String> list) {
+		return list.stream().noneMatch(s -> s.contains("e"));
+	}
+
+	@Property
+	boolean failAndShrinkToGenericListOfTwo(@ForAll List<?> original) {
+		Set<?> set = new HashSet<>(original);
+		return set.size() == original.size();
 	}
 
 }

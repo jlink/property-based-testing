@@ -29,7 +29,7 @@ class ListReverseProperties {
 	}
 
 	@Property
-	boolean reverseMakesFirstElementLast(@ForAll List<Integer> original) {
+	boolean reverseSwapsFirstAndLast(@ForAll List<Integer> original) {
 		Assume.that(original.size() > 2);
 		Integer lastReversed = reverse(original).get(original.size() - 1);
 		return original.get(0).equals(lastReversed);
@@ -49,13 +49,13 @@ class ListReverseProperties {
 	// Using wildcards and type variables in properties
 
 	@Property
-		// @Report(Reporting.GENERATED)
+	// @Report(Reporting.GENERATED)
 	boolean reverseWithWildcardType(@ForAll List<?> original) {
 		return reverse(reverse(original)).equals(original);
 	}
 
 	@Property
-		// @Report(Reporting.GENERATED)
+	// @Report(Reporting.GENERATED)
 	<T extends Comparable<T>> boolean reverseWithTypeVariable(@ForAll List<T> original) {
 		return reverse(reverse(original)).equals(original);
 	}

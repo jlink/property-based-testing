@@ -30,9 +30,10 @@ test {
 	useJUnitPlatform()
 
 	//	include '**/*Properties.class'
-	//	include '**/*Examples.class'
 	//	include '**/*Test.class'
 	//	include '**/*Tests.class'
+	//	include '**/*Examples.class'
+	//	include '**/*Example.class'
 
 	// events = ["passed", "failed", "skipped"]
 	// testLogging.showStandardStreams = true
