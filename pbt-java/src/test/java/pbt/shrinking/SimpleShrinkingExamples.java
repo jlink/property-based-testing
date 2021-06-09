@@ -16,8 +16,8 @@ class SimpleShrinkingExamples {
 		return Math.sqrt(square) == anInt;
 	}
 
-	@Property(shrinking = ShrinkingMode.FULL)
-	boolean shouldShrinkTo101(@ForAll("numberStrings") String aNumberString) {
+	@Property
+	boolean shrinkTo101(@ForAll("numberStrings") String aNumberString) {
 		return Integer.parseInt(aNumberString) % 2 == 0;
 	}
 
@@ -33,7 +33,7 @@ class SimpleShrinkingExamples {
 	}
 
 	@Property
-	boolean failAndShrinkToGenericListOfTwo(@ForAll List<?> original) {
+	boolean shrinkToGenericListOfTwo(@ForAll List<?> original) {
 		Set<?> set = new HashSet<>(original);
 		return set.size() == original.size();
 	}
