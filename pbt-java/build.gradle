@@ -9,9 +9,9 @@ repositories {
 
 ext {
 	junitJupiterVersion = '5.7.2'
-	jqwikVersion = '1.5.2'
+	jqwikVersion = '1.5.3'
 	assertJVersion = '3.19.0'
-	mockitoVersion = '3.11.0'
+	mockitoVersion = '3.11.2'
 	junitQuickcheckVersion = '0.9.5'
 	quicktheoriesVersion = '0.26'
 }
@@ -63,5 +63,5 @@ dependencies {
 }
 
 wrapper {
-	gradleVersion = '7.0.2'
+	gradleVersion = '7.1.1'
 }
