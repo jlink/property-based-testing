@@ -9,10 +9,10 @@ repositories {
 
 ext {
 	junitJupiterVersion = '5.7.2'
-	jqwikVersion = '1.5.3'
-	assertJVersion = '3.19.0'
+	jqwikVersion = '1.5.4'
+	assertJVersion = '3.20.2'
 	mockitoVersion = '3.11.2'
-	junitQuickcheckVersion = '0.9.5'
+	junitQuickcheckVersion = '1.0'
 	quicktheoriesVersion = '0.26'
 }
 
@@ -51,14 +51,14 @@ dependencies {
 
 	testImplementation("com.pholser:junit-quickcheck-generators:${junitQuickcheckVersion}")
 	testImplementation("org.junit.vintage:junit-vintage-engine:${junitJupiterVersion}")
-	testImplementation("junit:junit:4.13.1")
+	testImplementation("junit:junit:4.13.2")
 
 	testImplementation("org.quicktheories:quicktheories:${quicktheoriesVersion}")
 
 	// For some examples
 	testImplementation 'com.squareup.okhttp3:okhttp:3.11.0'
-	testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
-	testImplementation 'org.apache.commons:commons-collections4:4.3'
+	testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
+	testImplementation 'org.apache.commons:commons-collections4:4.4'
 	// testImplementation 'net.jqwik:jqwik-testcontainers:0.5.0'
 }
 
