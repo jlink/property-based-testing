@@ -8,10 +8,10 @@ repositories {
 }
 
 ext {
-	junitJupiterVersion = '5.8.0'
-	jqwikVersion = '1.5.6'
-	assertJVersion = '3.20.2'
-	mockitoVersion = '3.11.2'
+	junitJupiterVersion = '5.8.1'
+	jqwikVersion = '1.6.0'
+	assertJVersion = '3.21.0'
+	mockitoVersion = '4.0.0'
 	junitQuickcheckVersion = '1.0'
 	quicktheoriesVersion = '0.26'
 }
@@ -63,5 +63,5 @@ dependencies {
 }
 
 wrapper {
-	gradleVersion = '7.1.1'
+	gradleVersion = '7.3'
 }
