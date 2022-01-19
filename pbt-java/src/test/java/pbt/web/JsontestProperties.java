@@ -51,6 +51,13 @@ class JsontestProperties implements AutoCloseable {
 		}
 	}
 
+	@Example
+	void test() throws JsonProcessingException {
+		String hallo = new ObjectMapper().writeValueAsString("Ha\"l\"lo");
+
+		System.out.println(hallo);
+	}
+
 	@Property(tries = 10)
 	@Label("objects can be validated")
 	void validateObjects(@ForAll @JsonObject String json) throws IOException {

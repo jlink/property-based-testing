@@ -3,7 +3,8 @@ package pbt.web;
 import java.util.*;
 import java.util.stream.*;
 
-import com.fasterxml.jackson.core.util.*;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.*;
@@ -104,8 +105,15 @@ public class JsonArbitraryProvider implements ArbitraryProvider {
 						  .alpha()
 						  .numeric()
 						  .withChars('.', ' ', ':', '"')
-						  .map(s -> new String(BufferRecyclers.quoteAsJsonText(s)))
-						  .map(s -> String.format("\"%s\"", s));
+						  .map(this::toJsonString);
+	}
+
+	private String toJsonString(String toQuote) {
+		try {
+			return new ObjectMapper().writeValueAsString(toQuote);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Arbitrary<String> jsonNumber() {
