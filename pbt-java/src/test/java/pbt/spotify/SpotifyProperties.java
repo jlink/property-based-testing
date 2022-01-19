@@ -26,7 +26,7 @@ class SpotifyProperties {
 				  .collect(users.stream().mapToInt(user -> user.liked.size()).max().orElse(0));
 	}
 
-	@Property(edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED, shrinking = ShrinkingMode.FULL)
+	@Property(edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.SAMPLE_FIRST, shrinking = ShrinkingMode.FULL)
 	@StatisticsReport(format = NumberRangeHistogram.class)
 	void followingMaximumOneUser(@ForAll Spotify spotify) {
 		assertThat(spotify.users).allMatch(user -> user.following.size() <= 1);

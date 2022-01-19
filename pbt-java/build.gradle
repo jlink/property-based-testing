@@ -4,12 +4,12 @@ plugins {
 
 repositories {
 	mavenCentral()
-	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+	maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
 }
 
 ext {
 	junitJupiterVersion = '5.8.2'
-	jqwikVersion = '1.6.3'
+	jqwikVersion = '1.6.4-SNAPSHOT'
 	assertJVersion = '3.22.0'
 	mockitoVersion = '4.2.0'
 	junitQuickcheckVersion = '1.0'
