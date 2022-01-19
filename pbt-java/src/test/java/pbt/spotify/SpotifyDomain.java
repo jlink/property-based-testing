@@ -4,36 +4,37 @@ import java.util.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.arbitraries.*;
+import net.jqwik.api.domains.*;
 
-class SpotifyArbitraries {
+class SpotifyDomain extends DomainContextBase {
 
-	Arbitrary<Spotify> spotify() {
-		return aSetOfArtists()
-					   .flatMap(artists -> {
-						   return aSetOfAlbums(artists).flatMap(albums -> {
-							   return aSetOfSongs(albums).flatMap(songs -> {
-								   return aSetOfUsers(songs).map(users -> {
-									   return new Spotify(artists, albums, songs, users);
-								   });
-							   });
-						   });
-					   });
+	@Provide
+	Arbitrary<Spotify> spotify(@ForAll Set<Artist> artists) {
+		return aSetOfAlbums(artists).flatMap(albums -> {
+			return aSetOfSongs(albums).flatMap(songs -> {
+				return aSetOfUsers(songs).map(users -> {
+					return new Spotify(artists, albums, songs, users);
+				});
+			});
+		});
 	}
 
+	@Provide
+	Arbitrary<Set<Artist>> aSetOfArtists(@ForAll Arbitrary<Artist> anArtist) {
+		return anArtist.set().uniqueElements(a -> a.name);
+	}
+
+	@Provide
 	private Arbitrary<Artist> anArtist() {
 		return names().map(Artist::new);
-	}
-
-	private SetArbitrary<Artist> aSetOfArtists() {
-		return anArtist().set().uniqueElements(a -> a.name);
 	}
 
 	private Arbitrary<Song> aSong(Set<Album> albums) {
 		Arbitrary<String> songName = names();
 		Arbitrary<Album> album = Arbitraries.of(albums);
-		Arbitrary<Set<Artist>> artists = album.flatMap(a -> {
-			return Arbitraries.of(a.artists).set().ofMinSize(1);
-		});
+		Arbitrary<Set<Artist>> artists = album.flatMap(
+			a -> Arbitraries.of(a.artists).set().ofMinSize(1)
+		);
 		return Combinators.combine(songName, album, artists)
 						  .as((n, al, as) -> new Song(n, as, al));
 	}
@@ -59,8 +60,6 @@ class SpotifyArbitraries {
 
 	private Arbitrary<Set<User>> addFollowingsToUsers(final SetArbitrary<User> aSetOfUsers) {
 		return aSetOfUsers.flatMapEach((allUsers, user) -> {
-			// Necessary to remove old state during shrinking
-			user.following.clear();
 			return Arbitraries.of(allUsers).set().map(followees -> {
 				followees.forEach(followee -> {
 					try {
@@ -76,15 +75,15 @@ class SpotifyArbitraries {
 		Arbitrary<Set<Song>> liked = Arbitraries.of(songs).set();
 		Arbitrary<String> userName = names();
 		return Combinators
-					   .combine(userName, liked)
-					   .as((name, likedSongs) ->
-						   {
-							   User user = new User(name);
-							   for (Song likedSong : likedSongs) {
-								   user.like(likedSong);
-							   }
-							   return user;
-						   });
+			.combine(userName, liked)
+			.as((name, likedSongs) ->
+				{
+					User user = new User(name);
+					for (Song likedSong : likedSongs) {
+						user.like(likedSong);
+					}
+					return user;
+				});
 	}
 
 	private Arbitrary<String> names() {

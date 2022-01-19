@@ -2,16 +2,18 @@ package pbt.spotify;
 
 import java.util.*;
 
-import org.assertj.core.api.*;
-
 import net.jqwik.api.*;
+import net.jqwik.api.domains.*;
 import net.jqwik.api.statistics.*;
 
+import static org.assertj.core.api.Assertions.*;
+
+@Domain(SpotifyDomain.class)
 class SpotifyProperties {
 
 	@Property(edgeCases = EdgeCasesMode.MIXIN)
 	@StatisticsReport(format = NumberRangeHistogram.class)
-	void statistics(@ForAll("spotify") Spotify spotify) {
+	void statistics(@ForAll Spotify spotify) {
 		Statistics.label("artists").collect(spotify.artists.size());
 		Statistics.label("albums").collect(spotify.albums.size());
 		Statistics.label("songs").collect(spotify.songs.size());
@@ -24,14 +26,15 @@ class SpotifyProperties {
 				  .collect(users.stream().mapToInt(user -> user.liked.size()).max().orElse(0));
 	}
 
-	@Property(edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED)
+	@Property(edgeCases = EdgeCasesMode.MIXIN, afterFailure = AfterFailureMode.RANDOM_SEED, shrinking = ShrinkingMode.FULL)
 	@StatisticsReport(format = NumberRangeHistogram.class)
-	void followingMaximumOneUser(@ForAll("spotify") Spotify spotify) {
-		Assertions.assertThat(spotify.users).allMatch(user -> user.following.size() <= 1);
+	void followingMaximumOneUser(@ForAll Spotify spotify) {
+		assertThat(spotify.users).allMatch(user -> user.following.size() <= 1);
 	}
 
-	@Provide
-	Arbitrary<Spotify> spotify() {
-		return new SpotifyArbitraries().spotify();
+	@Property(tries = 10, edgeCases = EdgeCasesMode.FIRST)
+	@Report(Reporting.GENERATED)
+	void show(@ForAll Spotify spotify) {
 	}
+
 }
