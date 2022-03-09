@@ -9,7 +9,7 @@ repositories {
 
 ext {
 	junitJupiterVersion = '5.8.2'
-	jqwikVersion = '1.6.4-SNAPSHOT'
+	jqwikVersion = '1.6.5'
 	assertJVersion = '3.22.0'
 	mockitoVersion = '4.2.0'
 	junitQuickcheckVersion = '1.0'
