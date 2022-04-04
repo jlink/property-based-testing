@@ -6,20 +6,28 @@ class PersonGeneratorExamples {
 
 	@Property(tries = 50)
 	@Report(Reporting.GENERATED)
-	boolean anyValidPersonHasAFullName(@ForAll("validPerson") Person aPerson) {
+	boolean anyValidPersonHasAFullName(@ForAll("validPeople") Person aPerson) {
 		return aPerson.fullName().length() >= 5;
 	}
 
 	@Provide
-	Arbitrary<Person> validPerson() {
-		Arbitrary<String> firstName = Arbitraries.strings() //
-				.withCharRange('a', 'z') //
-				.ofMinLength(2).ofMaxLength(10)
-				.map(this::capitalize);
-		Arbitrary<String> lastName = Arbitraries.strings() //
-				.withCharRange('a', 'z') //
-				.ofMinLength(2).ofMaxLength(20);
+	Arbitrary<Person> validPeople() {
+		Arbitrary<String> firstName = firstNames();
+		Arbitrary<String> lastName = lastNames();
 		return Combinators.combine(firstName, lastName).as(Person::new);
+	}
+
+	private Arbitrary<String> lastNames() {
+		return Arbitraries.strings()
+						  .withCharRange('a', 'z')
+						  .ofMinLength(2).ofMaxLength(20);
+	}
+
+	private Arbitrary<String> firstNames() {
+		return Arbitraries.strings()
+					  .withCharRange('a', 'z')
+					  .ofMinLength(2).ofMaxLength(10)
+					  .map(this::capitalize);
 	}
 
 	private String capitalize(String str) {
