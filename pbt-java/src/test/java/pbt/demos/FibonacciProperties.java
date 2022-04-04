@@ -84,8 +84,4 @@ class FibonacciProperties {
 		else return fib(n - 1) + fib(n - 2);
 	}
 
-	static boolean fibEven(int n) {
-		return false;
-	}
-
 }
