@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.*;
 class FibonacciProperties {
 
 	@Example
-	void fib5() {
+	void fib7() {
 		assertThat(fib(7)).isEqualTo(13);
 	}
 

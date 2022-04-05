@@ -10,7 +10,7 @@ class ExhaustiveGenerationExamples {
 	@Property
 	void allChessSquares(
 			@ForAll @CharRange(from = 'a', to = 'h') char column,
-			@ForAll @CharRange(from = '1', to = '8')char row
+			@ForAll @CharRange(from = '1', to = '8') char row
 	) {
 		String square = column + "" + row;
 		System.out.println(square);
